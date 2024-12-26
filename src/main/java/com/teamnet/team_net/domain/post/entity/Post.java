@@ -1,5 +1,6 @@
 package com.teamnet.team_net.domain.post.entity;
 
+import com.teamnet.team_net.common.entity.BaseTimeEntity;
 import com.teamnet.team_net.domain.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
@@ -12,7 +13,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
-public class Post {
+public class Post extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

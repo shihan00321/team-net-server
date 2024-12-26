@@ -1,5 +1,6 @@
 package com.teamnet.team_net.domain.teammember.entity;
 
+import com.teamnet.team_net.common.entity.BaseTimeEntity;
 import com.teamnet.team_net.domain.member.entity.Member;
 import com.teamnet.team_net.domain.team.entity.Team;
 import com.teamnet.team_net.domain.teammember.enums.TeamRole;
@@ -11,7 +12,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
-public class TeamMember {
+public class TeamMember extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
