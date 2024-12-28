@@ -1,6 +1,6 @@
 package com.teamnet.team_net.domain.post.entity;
 
-import com.teamnet.team_net.common.entity.BaseTimeEntity;
+import com.teamnet.team_net.global.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 

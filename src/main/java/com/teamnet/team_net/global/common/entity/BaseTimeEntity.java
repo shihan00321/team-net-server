@@ -1,4 +1,4 @@
-package com.teamnet.team_net.common.entity;
+package com.teamnet.team_net.global.common.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
