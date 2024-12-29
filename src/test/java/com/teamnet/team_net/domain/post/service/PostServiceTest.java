@@ -88,4 +88,40 @@ class PostServiceTest {
         assertNotNull(savedPost);
         assertEquals("테스트 제목", savedPost.getTitle());
     }
+
+    @Test
+    @DisplayName("게시글 수정 테스트")
+    void 게시글_수정_테스트() {
+        PostRequest.PostSaveDto savedPost = PostRequest.PostSaveDto.builder()
+                .title("테스트 제목")
+                .title("테스트 내용")
+                .build();
+        Long savedId = postService.save(savedPost);
+
+        PostRequest.PostUpdateDto updateRequest = PostRequest.PostUpdateDto.builder()
+                .title("수정된 제목")
+                .content("테스트 내용")
+                .build();
+        Long updatedId = postService.update(savedId, updateRequest);
+        PostResponse.PostResponseDto response = postService.findOne(updatedId);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getId()).isEqualTo(updatedId);
+        assertThat(response.getTitle()).isEqualTo("수정된 제목");
+        assertThat(response.getContent()).isEqualTo("테스트 내용");
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 게시글 업데이트 시 예외")
+    void 게시글_업데이트_예외() {
+        Long nonExistentId = 999L;
+        PostRequest.PostUpdateDto updateDto = PostRequest.PostUpdateDto.builder()
+                .title("수정된 제목")
+                .content("수정된 내용")
+                .build();
+
+        // When & Then
+        assertThrows(IllegalArgumentException.class,
+                () -> postService.update(nonExistentId, updateDto));
+    }
 }
