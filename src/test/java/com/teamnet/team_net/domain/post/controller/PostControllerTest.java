@@ -143,4 +143,16 @@ class PostControllerTest {
                 .andExpect(content().string(updatedId.toString()))
                 .andDo(print());
     }
+
+    @Test
+    @DisplayName("게시글 삭제 기능 테스트")
+    void 게시글_삭제_테스트() throws Exception {
+        Long deleteId = 1L;
+        when(postService.delete(deleteId)).thenReturn(deleteId);
+        mvc.perform(delete("/api/posts/{postId}", deleteId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string("1"))
+                .andDo(print());
+    }
 }

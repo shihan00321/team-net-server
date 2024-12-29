@@ -121,7 +121,28 @@ class PostServiceTest {
                 .build();
 
         // When & Then
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(IllegalStateException.class,
                 () -> postService.update(nonExistentId, updateDto));
+    }
+
+    @Test
+    @DisplayName("게시글 삭제 성공")
+    void 게시글_삭제_성공() {
+        Post post = Post.builder()
+                .title("테스트 제목")
+                .content("테스트 내용")
+                .build();
+        Post savedPost = postRepository.save(post);
+        Long deletedId = postService.delete(savedPost.getId());
+        assertThat(deletedId).isEqualTo(savedPost.getId());
+        assertThat(postRepository.findById(savedPost.getId())).isEmpty();
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 게시글 삭제 시 예외")
+    void 게시글_삭제_예외() {
+        Long nonExistentId = 999L;
+        assertThrows(IllegalStateException.class,
+                () -> postService.delete(nonExistentId));
     }
 }
