@@ -7,6 +7,9 @@ import com.teamnet.team_net.domain.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class PostService {
@@ -17,5 +20,15 @@ public class PostService {
                 .orElseThrow(IllegalStateException::new);
 
         return PostMapper.toPostResponseDto(post);
+    }
+
+    public List<PostResponse.PostResponseDto> findAll() {
+        return postRepository.findAll().stream()
+                .map(post -> PostResponse.PostResponseDto.builder()
+                        .id(post.getId())
+                        .title(post.getTitle())
+                        .content(post.getContent())
+                        .build())
+                .collect(Collectors.toList());
     }
 }
