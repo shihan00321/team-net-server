@@ -36,4 +36,9 @@ public class PostController {
     public ResponseEntity<Long> update(@PathVariable("postId") Long postId, @Valid @RequestBody PostRequest.PostUpdateDto postUpdateDto) {
         return ResponseEntity.ok(postService.update(postId, postUpdateDto));
     }
+
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<Long> delete(@PathVariable("postId") Long postId) {
+        return ResponseEntity.ok(postService.delete(postId));
+    }
 }

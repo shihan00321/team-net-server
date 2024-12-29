@@ -51,4 +51,12 @@ public class PostService {
         post.update(postUpdateDto.getTitle(), postUpdateDto.getContent());
         return postId;
     }
+
+    @Transactional
+    public Long delete(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(IllegalStateException::new);
+        postRepository.delete(post);
+        return postId;
+    }
 }
