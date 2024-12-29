@@ -34,6 +34,6 @@ public class PostController {
 
     @PatchMapping("/{postId}")
     public ResponseEntity<Long> update(@PathVariable("postId") Long postId, @Valid @RequestBody PostRequest.PostUpdateDto postUpdateDto) {
-        return new ResponseEntity<>(postService.update(postId, postUpdateDto), HttpStatus.OK);
+        return ResponseEntity.ok(postService.update(postId, postUpdateDto));
     }
 }

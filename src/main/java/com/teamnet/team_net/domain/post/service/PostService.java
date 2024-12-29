@@ -7,11 +7,13 @@ import com.teamnet.team_net.domain.post.mapper.PostMapper;
 import com.teamnet.team_net.domain.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class PostService {
     private final PostRepository postRepository;
@@ -33,6 +35,7 @@ public class PostService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public Long save(PostRequest.PostSaveDto postSaveDto) {
         Post savedPost = postRepository.save(Post.builder()
                 .title(postSaveDto.getTitle())
@@ -41,9 +44,10 @@ public class PostService {
         return savedPost.getId();
     }
 
+    @Transactional
     public Long update(Long postId, PostRequest.PostUpdateDto postUpdateDto) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
+                .orElseThrow(IllegalStateException::new);
         post.update(postUpdateDto.getTitle(), postUpdateDto.getContent());
         return postId;
     }
