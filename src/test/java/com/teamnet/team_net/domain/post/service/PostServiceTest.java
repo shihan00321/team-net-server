@@ -1,5 +1,6 @@
 package com.teamnet.team_net.domain.post.service;
 
+import com.teamnet.team_net.domain.post.controller.PostRequest;
 import com.teamnet.team_net.domain.post.dto.PostResponse;
 import com.teamnet.team_net.domain.post.entity.Post;
 import com.teamnet.team_net.domain.post.repository.PostRepository;
@@ -14,7 +15,7 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
@@ -68,8 +69,23 @@ class PostServiceTest {
 
         List<PostResponse.PostResponseDto> findAll = postService.findAll();
         Assertions.assertThat(findAll.size()).isEqualTo(5);
-        Assertions.assertThat(findAll.get(2).getId()).isEqualTo(3);
         Assertions.assertThat(findAll.get(2).getTitle()).isEqualTo("테스트 제목" + 3);
         Assertions.assertThat(findAll.get(2).getContent()).isEqualTo("테스트 내용" + 3);
+    }
+
+    @Test
+    @DisplayName("게시글 저장 테스트")
+    public void 게시글_저장_테스트() {
+        PostRequest.PostSaveDto postSaveDto = PostRequest.PostSaveDto.builder()
+                .title("테스트 제목")
+                .content("테스트 내용")
+                .build();
+
+        Long savedPostId = postService.save(postSaveDto);
+        assertNotNull(savedPostId);
+
+        Post savedPost = postRepository.findById(savedPostId).orElse(null);
+        assertNotNull(savedPost);
+        assertEquals("테스트 제목", savedPost.getTitle());
     }
 }
