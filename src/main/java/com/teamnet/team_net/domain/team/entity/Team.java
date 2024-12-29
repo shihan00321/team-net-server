@@ -1,6 +1,6 @@
 package com.teamnet.team_net.domain.team.entity;
 
-import com.teamnet.team_net.common.entity.BaseTimeEntity;
+import com.teamnet.team_net.global.common.entity.BaseTimeEntity;
 import com.teamnet.team_net.domain.team.enums.TeamActiveStatus;
 import jakarta.persistence.*;
 import lombok.*;

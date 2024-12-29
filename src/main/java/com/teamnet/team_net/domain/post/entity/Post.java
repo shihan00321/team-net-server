@@ -1,6 +1,6 @@
 package com.teamnet.team_net.domain.post.entity;
 
-import com.teamnet.team_net.common.entity.BaseTimeEntity;
+import com.teamnet.team_net.global.common.entity.BaseTimeEntity;
 import com.teamnet.team_net.domain.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
@@ -27,4 +27,9 @@ public class Post extends BaseTimeEntity {
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostImage> postImages = new ArrayList<>();
+
+    public void update(String title, String content) {
+        this.title = title;
+        this.content = content;
+    }
 }

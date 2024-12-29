@@ -1,6 +1,6 @@
 package com.teamnet.team_net.domain.teammember.entity;
 
-import com.teamnet.team_net.common.entity.BaseTimeEntity;
+import com.teamnet.team_net.global.common.entity.BaseTimeEntity;
 import com.teamnet.team_net.domain.member.entity.Member;
 import com.teamnet.team_net.domain.team.entity.Team;
 import com.teamnet.team_net.domain.teammember.enums.TeamRole;
