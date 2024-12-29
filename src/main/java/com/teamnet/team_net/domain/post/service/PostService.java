@@ -40,4 +40,11 @@ public class PostService {
                 .build());
         return savedPost.getId();
     }
+
+    public Long update(Long postId, PostRequest.PostUpdateDto postUpdateDto) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
+        post.update(postUpdateDto.getTitle(), postUpdateDto.getContent());
+        return postId;
+    }
 }
