@@ -17,9 +17,9 @@ import java.util.stream.IntStream;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -121,6 +121,26 @@ class PostControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto)))
                 .andExpect(status().isBadRequest())
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("게시글 수정 테스트")
+    public void 게시글_수정_테스트() throws Exception {
+        // Given: 수정할 게시글 DTO
+        PostRequest.PostUpdateDto updateDto = PostRequest.PostUpdateDto.builder()
+                .title("수정된 제목")
+                .content("수정된 내용")
+                .build();
+        Long updatedId = 1L;
+
+        when(postService.update(eq(updatedId), any(PostRequest.PostUpdateDto.class))).thenReturn(updatedId);
+
+        mvc.perform(patch("/api/posts/{postId}", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateDto)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(updatedId.toString()))
                 .andDo(print());
     }
 }
