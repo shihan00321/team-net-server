@@ -1,5 +1,6 @@
 package com.teamnet.team_net.domain.post.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.teamnet.team_net.domain.post.dto.PostResponse;
 import com.teamnet.team_net.domain.post.service.PostService;
 import org.junit.jupiter.api.DisplayName;
@@ -11,22 +12,23 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(PostController.class)
 class PostControllerTest {
 
     @Autowired private MockMvc mvc;
     @MockBean private PostService postService;
+    @Autowired private ObjectMapper objectMapper;
 
     @Test
     @DisplayName("게시글 조회 테스트")
@@ -70,6 +72,55 @@ class PostControllerTest {
                 .andExpect(jsonPath("$[1].id").value(2L))
                 .andExpect(jsonPath("$[1].title").value("테스트 제목2"))
                 .andExpect(jsonPath("$[1].content").value("테스트 내용2"))
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("게시글 저장 테스트")
+    void 게시글_저장_성공() throws Exception {
+        PostRequest.PostSaveDto request = PostRequest.PostSaveDto.builder()
+                .title("테스트 제목")
+                .content("테스트 내용")
+                .build();
+        Long requestId = 1L;
+        when(postService.save(any(PostRequest.PostSaveDto.class))).thenReturn(requestId);
+
+        mvc.perform(post("/api/posts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(content().string("1"))
+                .andDo(print());
+    }
+    @Test
+    @DisplayName("제목이 빈 값일 경우 예외")
+    void 제목_빈값_예외() throws Exception {
+        // given
+        PostRequest.PostSaveDto requestDto = PostRequest.PostSaveDto.builder()
+                .title("")
+                .content("테스트 내용")
+                .build();
+
+        // when & then
+        mvc.perform(post("/api/posts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDto)))
+                .andExpect(status().isBadRequest())
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("내용이 빈 값일 경우 예외")
+    void 내용_빈값_예외() throws Exception {
+        PostRequest.PostSaveDto requestDto = PostRequest.PostSaveDto.builder()
+                .title("테스트 제목")
+                .content("")
+                .build();
+
+        mvc.perform(post("/api/posts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDto)))
+                .andExpect(status().isBadRequest())
                 .andDo(print());
     }
 }
