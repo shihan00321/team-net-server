@@ -2,13 +2,11 @@ package com.teamnet.team_net.domain.post.controller;
 
 import com.teamnet.team_net.domain.post.dto.PostResponse;
 import com.teamnet.team_net.domain.post.service.PostService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -27,5 +25,10 @@ public class PostController {
     @GetMapping("/{postId}")
     public ResponseEntity<PostResponse.PostResponseDto> findOne(@PathVariable("postId") Long postId) {
         return new ResponseEntity<>(postService.findOne(postId), HttpStatus.OK);
+    }
+
+    @PostMapping
+    public ResponseEntity<Long> save(@Valid @RequestBody PostRequest.PostSaveDto postSaveDto) {
+        return ResponseEntity.ok(postService.save(postSaveDto));
     }
 }

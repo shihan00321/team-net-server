@@ -1,5 +1,6 @@
 package com.teamnet.team_net.domain.post.service;
 
+import com.teamnet.team_net.domain.post.controller.PostRequest;
 import com.teamnet.team_net.domain.post.dto.PostResponse;
 import com.teamnet.team_net.domain.post.entity.Post;
 import com.teamnet.team_net.domain.post.mapper.PostMapper;
@@ -30,5 +31,13 @@ public class PostService {
                         .content(post.getContent())
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    public Long save(PostRequest.PostSaveDto postSaveDto) {
+        Post savedPost = postRepository.save(Post.builder()
+                .title(postSaveDto.getTitle())
+                .content(postSaveDto.getContent())
+                .build());
+        return savedPost.getId();
     }
 }
