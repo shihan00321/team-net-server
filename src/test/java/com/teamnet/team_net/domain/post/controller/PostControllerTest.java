@@ -3,12 +3,16 @@ package com.teamnet.team_net.domain.post.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.teamnet.team_net.domain.post.dto.PostResponse;
 import com.teamnet.team_net.domain.post.service.PostService;
+import com.teamnet.team_net.global.config.SecurityConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.ArrayList;
@@ -19,19 +23,26 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(PostController.class)
+@WebMvcTest(controllers = PostController.class, excludeFilters = {
+        @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = SecurityConfig.class)
+})
 class PostControllerTest {
 
-    @Autowired private MockMvc mvc;
-    @MockBean private PostService postService;
-    @Autowired private ObjectMapper objectMapper;
+    @Autowired
+    private MockMvc mvc;
+    @MockBean
+    private PostService postService;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Test
     @DisplayName("게시글 조회 테스트")
+    @WithMockUser(roles = "USER")
     void 게시글_조회_테스트() throws Exception {
         Long postId = 1L;
         PostResponse.PostResponseDto responseDto = PostResponse.PostResponseDto.builder()
@@ -53,6 +64,7 @@ class PostControllerTest {
 
     @Test
     @DisplayName("게시글 모두 조회 테스트")
+    @WithMockUser(roles = "USER")
     void 게시글_모두_조회() throws Exception {
         List<PostResponse.PostResponseDto> posts = new ArrayList<>();
         IntStream.rangeClosed(1, 5).forEach(i -> posts.add(
@@ -77,6 +89,7 @@ class PostControllerTest {
 
     @Test
     @DisplayName("게시글 저장 테스트")
+    @WithMockUser(roles = "USER")
     void 게시글_저장_성공() throws Exception {
         PostRequest.PostSaveDto request = PostRequest.PostSaveDto.builder()
                 .title("테스트 제목")
@@ -87,13 +100,16 @@ class PostControllerTest {
 
         mvc.perform(post("/api/posts")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(request))
+                        .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(content().string("1"))
                 .andDo(print());
     }
+
     @Test
     @DisplayName("제목이 빈 값일 경우 예외")
+    @WithMockUser(roles = "USER")
     void 제목_빈값_예외() throws Exception {
         // given
         PostRequest.PostSaveDto requestDto = PostRequest.PostSaveDto.builder()
@@ -104,13 +120,15 @@ class PostControllerTest {
         // when & then
         mvc.perform(post("/api/posts")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDto)))
+                        .content(objectMapper.writeValueAsString(requestDto))
+                        .with(csrf()))
                 .andExpect(status().isBadRequest())
                 .andDo(print());
     }
 
     @Test
     @DisplayName("내용이 빈 값일 경우 예외")
+    @WithMockUser(roles = "USER")
     void 내용_빈값_예외() throws Exception {
         PostRequest.PostSaveDto requestDto = PostRequest.PostSaveDto.builder()
                 .title("테스트 제목")
@@ -119,13 +137,15 @@ class PostControllerTest {
 
         mvc.perform(post("/api/posts")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDto)))
+                        .content(objectMapper.writeValueAsString(requestDto))
+                        .with(csrf()))
                 .andExpect(status().isBadRequest())
                 .andDo(print());
     }
 
     @Test
     @DisplayName("게시글 수정 테스트")
+    @WithMockUser(roles = "USER")
     public void 게시글_수정_테스트() throws Exception {
         // Given: 수정할 게시글 DTO
         PostRequest.PostUpdateDto updateDto = PostRequest.PostUpdateDto.builder()
@@ -138,7 +158,8 @@ class PostControllerTest {
 
         mvc.perform(patch("/api/posts/{postId}", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateDto)))
+                        .content(objectMapper.writeValueAsString(updateDto))
+                        .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(content().string(updatedId.toString()))
                 .andDo(print());
@@ -146,11 +167,13 @@ class PostControllerTest {
 
     @Test
     @DisplayName("게시글 삭제 기능 테스트")
+    @WithMockUser(roles = "USER")
     void 게시글_삭제_테스트() throws Exception {
         Long deleteId = 1L;
         when(postService.delete(deleteId)).thenReturn(deleteId);
         mvc.perform(delete("/api/posts/{postId}", deleteId)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(content().string("1"))
                 .andDo(print());
