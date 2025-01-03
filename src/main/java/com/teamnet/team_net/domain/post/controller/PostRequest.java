@@ -7,7 +7,6 @@ import lombok.Getter;
 public class PostRequest {
 
     @Getter
-    @Builder
     public static class PostSaveDto {
         @NotBlank(message = "제목은 비어있을 수 없습니다.")
         String title;
@@ -16,7 +15,6 @@ public class PostRequest {
     }
 
     @Getter
-    @Builder
     public static class PostUpdateDto {
         @NotBlank(message = "제목은 비어있을 수 없습니다.")
         String title;
