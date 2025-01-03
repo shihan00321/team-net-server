@@ -18,12 +18,11 @@ spring:
       hibernate:
         format_sql: true
 
-#  security:
-#    oauth2:
-#      client:
-#        registration:
-#          google:
-#            client-id: test
-#            client-secret: test
-#            scope: profile, email
-
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: test
+            client-secret: test
+            scope: profile, email
