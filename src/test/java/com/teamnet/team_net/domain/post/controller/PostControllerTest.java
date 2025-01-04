@@ -16,7 +16,9 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.IntStream;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -111,11 +113,9 @@ class PostControllerTest {
     @DisplayName("제목이 빈 값일 경우 예외")
     @WithMockUser(roles = "USER")
     void 제목_빈값_예외() throws Exception {
-        // given
-        PostRequest.PostSaveDto requestDto = PostRequest.PostSaveDto.builder()
-                .title("")
-                .content("테스트 내용")
-                .build();
+        Map<String, Object> requestDto = new HashMap<>();
+        requestDto.put("title", "");
+        requestDto.put("content", "테스트 내용");
 
         // when & then
         mvc.perform(post("/api/posts")
