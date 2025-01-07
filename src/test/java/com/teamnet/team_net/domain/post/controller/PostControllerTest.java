@@ -1,17 +1,23 @@
 package com.teamnet.team_net.domain.post.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.teamnet.team_net.domain.member.entity.Member;
 import com.teamnet.team_net.domain.post.dto.PostResponse;
 import com.teamnet.team_net.domain.post.service.PostService;
 import com.teamnet.team_net.global.config.SecurityConfig;
+import com.teamnet.team_net.global.config.auth.dto.SessionMember;
+import jakarta.servlet.http.HttpSession;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -41,6 +47,19 @@ class PostControllerTest {
     private PostService postService;
     @Autowired
     private ObjectMapper objectMapper;
+    @Mock
+    private HttpSession httpSession;
+    private SessionMember sessionMember;
+
+    @BeforeEach
+    void setUp() {
+        sessionMember = new SessionMember(Member.builder()
+                .id(1L)
+                .nickname("hbb")
+                .build());
+        when(httpSession.getAttribute("member")).thenReturn(sessionMember);
+    }
+
 
     @Test
     @DisplayName("게시글 조회 테스트")
@@ -97,15 +116,32 @@ class PostControllerTest {
                 .title("테스트 제목")
                 .content("테스트 내용")
                 .build();
-        Long requestId = 1L;
-        when(postService.save(any(PostRequest.PostSaveDto.class))).thenReturn(requestId);
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("member", sessionMember);
+
+        given(postService.save(eq(sessionMember.getId()), any(PostRequest.PostSaveDto.class))).willReturn(sessionMember.getId());
 
         mvc.perform(post("/api/posts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
+                        .session(session)
                         .with(csrf()))
                 .andExpect(status().isOk())
-                .andExpect(content().string("1"))
+                .andExpect(content().string(String.valueOf(sessionMember.getId())))
+                .andDo(print());
+    }
+
+    @Test
+    @WithMockUser
+    void save_validation_fail() throws Exception {
+        PostRequest.PostSaveDto requestDto = new PostRequest.PostSaveDto("", "");  // 유효성 검사 실패용 데이터
+
+        mvc.perform(post("/api/posts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDto))
+                        .sessionAttr("member", sessionMember)
+                        .with(csrf()))
+                .andExpect(status().isBadRequest())
                 .andDo(print());
     }
 
@@ -153,10 +189,15 @@ class PostControllerTest {
                 .content("수정된 내용")
                 .build();
         Long updatedId = 1L;
+        Long memberId = 1L;
 
-        when(postService.update(eq(updatedId), any(PostRequest.PostUpdateDto.class))).thenReturn(updatedId);
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("member", sessionMember);
+
+        when(postService.update(eq(memberId), eq(updatedId), any(PostRequest.PostUpdateDto.class))).thenReturn(updatedId);
 
         mvc.perform(patch("/api/posts/{postId}", 1L)
+                        .session(session)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateDto))
                         .with(csrf()))
@@ -170,9 +211,16 @@ class PostControllerTest {
     @WithMockUser(roles = "USER")
     void 게시글_삭제_테스트() throws Exception {
         Long deleteId = 1L;
-        when(postService.delete(deleteId)).thenReturn(deleteId);
+        Long memberId = 1L;
+        // MockHttpSession 생성 및 사용자 정보 설정
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("member", sessionMember);
+
+        when(postService.delete(memberId, deleteId)).thenReturn(deleteId);
+
         mvc.perform(delete("/api/posts/{postId}", deleteId)
                         .contentType(MediaType.APPLICATION_JSON)
+                        .session(session)
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(content().string("1"))

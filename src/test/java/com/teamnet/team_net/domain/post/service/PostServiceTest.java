@@ -1,5 +1,9 @@
 package com.teamnet.team_net.domain.post.service;
 
+import com.teamnet.team_net.domain.member.entity.Member;
+import com.teamnet.team_net.domain.member.enums.DeletionStatus;
+import com.teamnet.team_net.domain.member.enums.Role;
+import com.teamnet.team_net.domain.member.repository.MemberRepository;
 import com.teamnet.team_net.domain.post.controller.PostRequest;
 import com.teamnet.team_net.domain.post.dto.PostResponse;
 import com.teamnet.team_net.domain.post.entity.Post;
@@ -25,6 +29,9 @@ class PostServiceTest {
 
     @Autowired
     private PostRepository postRepository;
+
+    @Autowired
+    private MemberRepository memberRepository;
 
     @Test
     @DisplayName("게시글 단건 조회 성공 테스트")
@@ -76,12 +83,23 @@ class PostServiceTest {
     @Test
     @DisplayName("게시글 저장 테스트")
     public void 게시글_저장_테스트() {
+        Member member = Member.builder()
+                .id(1L)
+                .email("xxx@xxx.com")
+                .nickname("hbb")
+                .name("hbb")
+                .role(Role.USER)
+                .status(DeletionStatus.NOT_DELETE)
+                .build();
+
+        Member savedMember = memberRepository.save(member);
+
         PostRequest.PostSaveDto postSaveDto = PostRequest.PostSaveDto.builder()
                 .title("테스트 제목")
                 .content("테스트 내용")
                 .build();
 
-        Long savedPostId = postService.save(postSaveDto);
+        Long savedPostId = postService.save(savedMember.getId(), postSaveDto);
         assertNotNull(savedPostId);
 
         Post savedPost = postRepository.findById(savedPostId).orElse(null);
@@ -92,17 +110,30 @@ class PostServiceTest {
     @Test
     @DisplayName("게시글 수정 테스트")
     void 게시글_수정_테스트() {
+        Member member = Member.builder()
+                .id(1L)
+                .email("xxx@xxx.com")
+                .nickname("hbb")
+                .name("hbb")
+                .role(Role.USER)
+                .status(DeletionStatus.NOT_DELETE)
+                .build();
+
+        Member savedMember = memberRepository.save(member);
+
         PostRequest.PostSaveDto savedPost = PostRequest.PostSaveDto.builder()
                 .title("테스트 제목")
-                .title("테스트 내용")
+                .content("테스트 내용")
                 .build();
-        Long savedId = postService.save(savedPost);
+
+        Long savedId = postService.save(savedMember.getId(), savedPost);
 
         PostRequest.PostUpdateDto updateRequest = PostRequest.PostUpdateDto.builder()
                 .title("수정된 제목")
                 .content("테스트 내용")
                 .build();
-        Long updatedId = postService.update(savedId, updateRequest);
+
+        Long updatedId = postService.update(savedMember.getId(), savedId, updateRequest);
         PostResponse.PostResponseDto response = postService.findOne(updatedId);
 
         assertThat(response).isNotNull();
@@ -114,6 +145,7 @@ class PostServiceTest {
     @Test
     @DisplayName("존재하지 않는 게시글 업데이트 시 예외")
     void 게시글_업데이트_예외() {
+        Long memberId = 1L;
         Long nonExistentId = 999L;
         PostRequest.PostUpdateDto updateDto = PostRequest.PostUpdateDto.builder()
                 .title("수정된 제목")
@@ -122,18 +154,31 @@ class PostServiceTest {
 
         // When & Then
         assertThrows(IllegalStateException.class,
-                () -> postService.update(nonExistentId, updateDto));
+                () -> postService.update(memberId, nonExistentId, updateDto));
     }
 
     @Test
     @DisplayName("게시글 삭제 성공")
     void 게시글_삭제_성공() {
+        Member member = Member.builder()
+                .id(1L)
+                .email("xxx@xxx.com")
+                .nickname("hbb")
+                .name("hbb")
+                .role(Role.USER)
+                .status(DeletionStatus.NOT_DELETE)
+                .build();
+
+        Member savedMember = memberRepository.save(member);
+
         Post post = Post.builder()
                 .title("테스트 제목")
                 .content("테스트 내용")
+                .member(member)
                 .build();
+
         Post savedPost = postRepository.save(post);
-        Long deletedId = postService.delete(savedPost.getId());
+        Long deletedId = postService.delete(savedMember.getId(), savedPost.getId());
         assertThat(deletedId).isEqualTo(savedPost.getId());
         assertThat(postRepository.findById(savedPost.getId())).isEmpty();
     }
@@ -141,8 +186,9 @@ class PostServiceTest {
     @Test
     @DisplayName("존재하지 않는 게시글 삭제 시 예외")
     void 게시글_삭제_예외() {
+        Long memberId = 1L;
         Long nonExistentId = 999L;
         assertThrows(IllegalStateException.class,
-                () -> postService.delete(nonExistentId));
+                () -> postService.delete(memberId, nonExistentId));
     }
 }
