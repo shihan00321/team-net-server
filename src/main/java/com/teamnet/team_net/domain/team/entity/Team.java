@@ -12,8 +12,10 @@ import lombok.*;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class Team extends BaseTimeEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "team_id")
     private Long id;
 
+    @Column(length = 20)
     private String name;
 
     @Enumerated(EnumType.STRING)

@@ -15,8 +15,10 @@ import java.util.List;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class Comment extends BaseTimeEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "comment_id")
     private Long id;
 
+    @Column(length = 100)
     private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)

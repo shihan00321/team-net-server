@@ -14,9 +14,13 @@ import lombok.*;
 public class Member extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "member_id")
     private Long id;
+    @Column(length = 20)
     private String name;
+    @Column(length = 20)
     private String nickname;
+    @Column(length = 50)
     private String email;
     private String profileImage;
     @Enumerated(EnumType.STRING)

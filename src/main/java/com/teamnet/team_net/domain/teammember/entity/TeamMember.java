@@ -15,6 +15,7 @@ import lombok.*;
 public class TeamMember extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "team_member_id")
     private Long id;
 
     @Enumerated(EnumType.STRING)
