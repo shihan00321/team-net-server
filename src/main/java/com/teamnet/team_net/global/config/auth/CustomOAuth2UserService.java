@@ -12,7 +12,6 @@ import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserServ
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
-import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
@@ -38,11 +37,13 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
         Member member = saveOrUpdate(oAuthAttributes);
         httpSession.setAttribute("member", new SessionMember(member));
-
-        return new DefaultOAuth2User(
+        return new CustomOAuth2User(
                 Collections.singleton(new SimpleGrantedAuthority(member.getRoleKey())),
                 oAuthAttributes.getAttributes(),
-                oAuthAttributes.getNameAttributeKey());
+                oAuthAttributes.getNameAttributeKey(),
+                member.getId(),
+                member.getNickname()
+        );
     }
 
     private Member saveOrUpdate(OAuthAttributes attributes) {
