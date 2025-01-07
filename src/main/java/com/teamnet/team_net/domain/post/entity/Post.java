@@ -1,7 +1,7 @@
 package com.teamnet.team_net.domain.post.entity;
 
-import com.teamnet.team_net.global.common.entity.BaseTimeEntity;
 import com.teamnet.team_net.domain.member.entity.Member;
+import com.teamnet.team_net.global.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,7 +13,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
-public class Post extends BaseTimeEntity {
+public class Post extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "post_id")
