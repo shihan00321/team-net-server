@@ -19,6 +19,7 @@ public class TeamMember extends BaseTimeEntity {
     private Long id;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private TeamRole role;
 
     @ManyToOne(fetch = FetchType.LAZY)

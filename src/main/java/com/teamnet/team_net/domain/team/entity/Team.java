@@ -15,9 +15,10 @@ public class Team extends BaseTimeEntity {
     @Column(name = "team_id")
     private Long id;
 
-    @Column(length = 20)
+    @Column(length = 20, nullable = false)
     private String name;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private TeamActiveStatus status;
 }

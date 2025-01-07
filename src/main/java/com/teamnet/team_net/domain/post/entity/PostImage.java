@@ -15,6 +15,7 @@ public class PostImage extends BaseTimeEntity {
     @Column(name = "post_image_id")
     private Long id;
 
+    @Column(nullable = false)
     private String url;
 
     @ManyToOne(fetch = FetchType.LAZY)
