@@ -4,11 +4,11 @@ import com.teamnet.team_net.domain.member.controller.MemberRequest;
 import com.teamnet.team_net.domain.member.entity.Member;
 import com.teamnet.team_net.domain.member.enums.Role;
 import com.teamnet.team_net.domain.member.repository.MemberRepository;
+import com.teamnet.team_net.global.config.auth.CustomOAuth2User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
-import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -34,32 +33,36 @@ public class MemberService {
                 .orElseThrow(IllegalStateException::new);
         member.addNickname(memberInfoDto.getNickname());
         member.updateRole();
-        updateSecurity(request, response);
+        updateSecurity(request, response, member);
         return memberId;
     }
 
-    private void updateSecurity(HttpServletRequest request, HttpServletResponse response) {
+    private void updateSecurity(HttpServletRequest request, HttpServletResponse response, Member member) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication instanceof OAuth2AuthenticationToken) {
             OAuth2AuthenticationToken authToken = (OAuth2AuthenticationToken) authentication;
+            CustomOAuth2User existingPrincipal = (CustomOAuth2User) authToken.getPrincipal();
 
-            List<GrantedAuthority> authorities = Collections.singletonList(
-                    new SimpleGrantedAuthority(Role.USER.getKey())
+            CustomOAuth2User updatedPrincipal = new CustomOAuth2User(
+                    Collections.singleton(new SimpleGrantedAuthority(Role.USER.getKey())),
+                    existingPrincipal.getAttributes(),
+                    existingPrincipal.getNameAttributeKey(),
+                    existingPrincipal.getId(),
+                    member.getNickname()
             );
 
             OAuth2AuthenticationToken updatedAuthToken = new OAuth2AuthenticationToken(
-                    authToken.getPrincipal(),
-                    authorities,
+                    updatedPrincipal,
+                    updatedPrincipal.getAuthorities(),
                     authToken.getAuthorizedClientRegistrationId()
             );
 
             SecurityContext context = SecurityContextHolder.getContext();
             context.setAuthentication(updatedAuthToken);
 
-            // SecurityContextRepository를 통해 변경사항 저장
             securityContextRepository.saveContext(context, request, response);
+
         }
     }
-
 }
