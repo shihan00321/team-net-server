@@ -5,6 +5,8 @@ import com.teamnet.team_net.domain.member.entity.Member;
 import com.teamnet.team_net.domain.member.enums.Role;
 import com.teamnet.team_net.domain.member.repository.MemberRepository;
 import com.teamnet.team_net.global.config.auth.CustomOAuth2User;
+import com.teamnet.team_net.global.exception.handler.MemberHandler;
+import com.teamnet.team_net.global.response.code.status.ErrorStatus;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +32,7 @@ public class MemberService {
     @Transactional
     public Long saveAdditionalMemberInfo(HttpServletRequest request, HttpServletResponse response, MemberRequest.AdditionalMemberInfoDto memberInfoDto, Long memberId) {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(IllegalStateException::new);
+                .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
         member.addNickname(memberInfoDto.getNickname());
         member.updateRole();
         updateSecurity(request, response, member);
@@ -62,7 +64,6 @@ public class MemberService {
             context.setAuthentication(updatedAuthToken);
 
             securityContextRepository.saveContext(context, request, response);
-
         }
     }
 }
