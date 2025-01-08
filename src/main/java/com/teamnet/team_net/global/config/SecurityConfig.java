@@ -37,7 +37,8 @@ public class SecurityConfig {
                 .successHandler(oAuth2LoginSuccessHandler));
 
         http.authorizeHttpRequests((auth) -> auth
-                .requestMatchers("/api/members/test").hasAuthority(Role.USER.getKey())
+                .requestMatchers("/api/members/additional").hasAuthority(Role.GUEST.getKey())
+                .requestMatchers("/api/posts/**").hasAuthority(Role.USER.getKey())
                 .requestMatchers("/", "/oauth2/**", "/login/**").permitAll()
                 .anyRequest().authenticated());
 
