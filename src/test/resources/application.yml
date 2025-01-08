@@ -5,6 +5,11 @@ spring:
     username: sa
     password:
 
+  session:
+    store-type: jdbc
+    jdbc:
+      initialize-schema: always
+
   jpa:
     hibernate:
       ddl-auto: create
@@ -12,3 +17,12 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: test
+            client-secret: test
+            scope: profile, email

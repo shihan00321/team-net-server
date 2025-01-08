@@ -2,6 +2,8 @@ package com.teamnet.team_net.domain.post.controller;
 
 import com.teamnet.team_net.domain.post.dto.PostResponse;
 import com.teamnet.team_net.domain.post.service.PostService;
+import com.teamnet.team_net.global.config.auth.LoginMember;
+import com.teamnet.team_net.global.config.auth.dto.SessionMember;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -28,17 +30,17 @@ public class PostController {
     }
 
     @PostMapping
-    public ResponseEntity<Long> save(@Valid @RequestBody PostRequest.PostSaveDto postSaveDto) {
-        return ResponseEntity.ok(postService.save(postSaveDto));
+    public ResponseEntity<Long> save(@LoginMember SessionMember sessionMember, @Valid @RequestBody PostRequest.PostSaveDto postSaveDto) {
+        return ResponseEntity.ok(postService.save(sessionMember.getId(), postSaveDto));
     }
 
     @PatchMapping("/{postId}")
-    public ResponseEntity<Long> update(@PathVariable("postId") Long postId, @Valid @RequestBody PostRequest.PostUpdateDto postUpdateDto) {
-        return ResponseEntity.ok(postService.update(postId, postUpdateDto));
+    public ResponseEntity<Long> update(@LoginMember SessionMember sessionMember, @PathVariable("postId") Long postId, @Valid @RequestBody PostRequest.PostUpdateDto postUpdateDto) {
+        return ResponseEntity.ok(postService.update(sessionMember.getId(), postId, postUpdateDto));
     }
 
     @DeleteMapping("/{postId}")
-    public ResponseEntity<Long> delete(@PathVariable("postId") Long postId) {
-        return ResponseEntity.ok(postService.delete(postId));
+    public ResponseEntity<Long> delete(@LoginMember SessionMember sessionMember, @PathVariable("postId") Long postId) {
+        return ResponseEntity.ok(postService.delete(sessionMember.getId(), postId));
     }
 }

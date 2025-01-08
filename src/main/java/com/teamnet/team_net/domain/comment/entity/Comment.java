@@ -1,5 +1,6 @@
 package com.teamnet.team_net.domain.comment.entity;
 
+import com.teamnet.team_net.global.common.entity.BaseEntity;
 import com.teamnet.team_net.global.common.entity.BaseTimeEntity;
 import com.teamnet.team_net.domain.post.entity.Post;
 import jakarta.persistence.*;
@@ -13,10 +14,12 @@ import java.util.List;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
-public class Comment extends BaseTimeEntity {
+public class Comment extends BaseEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "comment_id")
     private Long id;
 
+    @Column(length = 100, nullable = false)
     private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)
