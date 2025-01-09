@@ -45,5 +45,12 @@ public abstract class BaseExceptionHandler extends ResponseEntityExceptionHandle
                 .body(ApiResponse.onFailure(e.getCode(), "필수 파라미터가 누락되었습니다.", null));
     }
 
-
+    // handleHttpRequestMethodNotSupported 405 Method 예외
+    @Override
+    protected ResponseEntity<Object> handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        ErrorReasonDTO e = ErrorStatus._METHOD_NOT_ALLOWED.getReasonHttpStatus();
+        return ResponseEntity
+                .status(e.getHttpStatus())
+                .body(ApiResponse.onFailure(e.getCode(), e.getMessage(), null));
+    }
 }
