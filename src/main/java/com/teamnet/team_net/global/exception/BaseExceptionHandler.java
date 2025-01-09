@@ -37,4 +37,13 @@ public abstract class BaseExceptionHandler extends ResponseEntityExceptionHandle
                 .body(ApiResponse.onFailure(e.getCode(), e.getMessage(), fieldErrors));
     }
 
+    @Override
+    protected ResponseEntity<Object> handleMissingServletRequestParameter(MissingServletRequestParameterException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        ErrorReasonDTO e = ErrorStatus._BAD_REQUEST.getReasonHttpStatus();
+        return ResponseEntity
+                .status(e.getHttpStatus())
+                .body(ApiResponse.onFailure(e.getCode(), "필수 파라미터가 누락되었습니다.", null));
+    }
+
+
 }
