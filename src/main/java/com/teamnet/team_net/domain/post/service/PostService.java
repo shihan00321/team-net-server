@@ -9,6 +9,9 @@ import com.teamnet.team_net.domain.post.mapper.PostMapper;
 import com.teamnet.team_net.domain.post.repository.PostRepository;
 import com.teamnet.team_net.global.config.auth.LoginMember;
 import com.teamnet.team_net.global.config.auth.dto.SessionMember;
+import com.teamnet.team_net.global.exception.handler.MemberHandler;
+import com.teamnet.team_net.global.exception.handler.PostHandler;
+import com.teamnet.team_net.global.response.code.status.ErrorStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +28,7 @@ public class PostService {
 
     public PostResponse.PostResponseDto findOne(Long id) {
         Post post = postRepository.findById(id)
-                .orElseThrow(IllegalStateException::new);
+                .orElseThrow(() -> new PostHandler(ErrorStatus.POST_NOT_FOUND));
 
         return PostMapper.toPostResponseDto(post);
     }
@@ -43,7 +46,7 @@ public class PostService {
     @Transactional
     public Long save(Long memberId, PostRequest.PostSaveDto postSaveDto) {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(IllegalStateException::new);
+                .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
 
         Post savedPost = postRepository.save(Post.builder()
                 .title(postSaveDto.getTitle())
@@ -56,10 +59,10 @@ public class PostService {
     @Transactional
     public Long update(Long memberId, Long postId, PostRequest.PostUpdateDto postUpdateDto) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(IllegalStateException::new);
+                .orElseThrow(() -> new PostHandler(ErrorStatus.POST_NOT_FOUND));
 
         if (!post.getMember().getId().equals(memberId)) {
-            throw new IllegalArgumentException("해당 게시글을 삭제할 권한이 없습니다.");
+            throw new MemberHandler(ErrorStatus.POST_UNAUTHORIZED);
         }
         post.update(postUpdateDto.getTitle(), postUpdateDto.getContent());
         return postId;
@@ -68,10 +71,10 @@ public class PostService {
     @Transactional
     public Long delete(Long memberId, Long postId) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(IllegalStateException::new);
+                .orElseThrow(() -> new PostHandler(ErrorStatus.POST_NOT_FOUND));
 
         if (!post.getMember().getId().equals(memberId)) {
-            throw new IllegalArgumentException("해당 게시글을 삭제할 권한이 없습니다.");
+            throw new MemberHandler(ErrorStatus.POST_UNAUTHORIZED);
         }
 
         postRepository.delete(post);
