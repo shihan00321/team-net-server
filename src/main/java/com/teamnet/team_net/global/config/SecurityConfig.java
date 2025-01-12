@@ -42,7 +42,7 @@ public class SecurityConfig {
 
         http.authorizeHttpRequests((auth) -> auth
                 .requestMatchers("/api/members/additional").hasAuthority(Role.GUEST.getKey())
-                .requestMatchers("/api/posts/**").hasAuthority(Role.USER.getKey())
+                .requestMatchers("/api/posts/**", "/api/teams/**").hasAuthority(Role.USER.getKey())
                 .requestMatchers("/", "/oauth2/**", "/login/**").permitAll()
                 .anyRequest().authenticated());
 
