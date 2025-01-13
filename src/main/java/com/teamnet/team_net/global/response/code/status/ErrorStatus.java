@@ -26,7 +26,8 @@ public enum ErrorStatus implements BaseErrorCode {
     POST_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "POST4003", "게시글에 대한 권한이 없습니다."),
 
     // 팀 관련 에러
-    TEAM_NOT_FOUND(HttpStatus.NOT_FOUND, "TEAM4001", "해당 팀을 찾을 수 없습니다.");
+    TEAM_NOT_FOUND(HttpStatus.NOT_FOUND, "TEAM4001", "해당 팀을 찾을 수 없습니다."),
+    TEAM_INVITATION_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "TEAM4003", "팀 초대는 관리자만 가능합니다.");
 
     private final HttpStatus httpStatus;
     private final String code;
