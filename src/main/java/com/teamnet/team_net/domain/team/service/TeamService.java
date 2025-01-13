@@ -70,8 +70,8 @@ public class TeamService {
         Member targetMember = memberRepository.findByEmail(inviteMemberDto.getEmail())
                 .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
 
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        Member member = teamMemberRepository.findMemberWithRole(memberId, TeamRole.ADMIN)
+                .orElseThrow(() -> new TeamHandler(ErrorStatus.TEAM_INVITATION_UNAUTHORIZED));
 
         notificationRepository.save(Notification.builder()
                 .title("팀 초대 메시지")
