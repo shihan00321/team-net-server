@@ -27,4 +27,24 @@ public class TeamController {
     public ApiResponse<List<TeamResponse.TeamResponseDto>> myTeam(@LoginMember SessionMember sessionMember) {
         return ApiResponse.onSuccess(teamService.findMyTeams(sessionMember.getId()));
     }
+
+    @PostMapping("/{teamId}/invite")
+    public ApiResponse<Long> inviteMember(@LoginMember SessionMember sessionMember,
+                                          @RequestBody TeamRequest.InviteMemberDto inviteMemberDto,
+                                          @PathVariable Long teamId) {
+        teamService.invite(sessionMember.getId(), teamId, inviteMemberDto);
+
+        return ApiResponse.onSuccess(null);
+    }
+
+    @PostMapping("/{teamId}/accept")
+    public ApiResponse<String> acceptInvitation(@LoginMember SessionMember sessionMember, @PathVariable Long teamId) {
+        teamService.accept(sessionMember.getId(), teamId);
+        return ApiResponse.onSuccess("Invitation accepted");
+    }
+
+    @PostMapping("/{teamId}/reject")
+    public ApiResponse<String> rejectInvitation(@LoginMember SessionMember sessionMember, @PathVariable Long teamId) {
+        return ApiResponse.onSuccess("Invitation rejected");
+    }
 }

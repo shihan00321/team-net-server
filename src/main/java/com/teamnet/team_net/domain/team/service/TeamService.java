@@ -2,6 +2,9 @@ package com.teamnet.team_net.domain.team.service;
 
 import com.teamnet.team_net.domain.member.entity.Member;
 import com.teamnet.team_net.domain.member.repository.MemberRepository;
+import com.teamnet.team_net.domain.notification.entity.Notification;
+import com.teamnet.team_net.domain.notification.enums.NotificationType;
+import com.teamnet.team_net.domain.notification.repository.NotificationRepository;
 import com.teamnet.team_net.domain.team.controller.TeamRequest;
 import com.teamnet.team_net.domain.team.dto.TeamResponse;
 import com.teamnet.team_net.domain.team.entity.Team;
@@ -11,6 +14,7 @@ import com.teamnet.team_net.domain.teammember.entity.TeamMember;
 import com.teamnet.team_net.domain.teammember.enums.TeamRole;
 import com.teamnet.team_net.domain.teammember.repository.TeamMemberRepository;
 import com.teamnet.team_net.global.exception.handler.MemberHandler;
+import com.teamnet.team_net.global.exception.handler.TeamHandler;
 import com.teamnet.team_net.global.response.code.status.ErrorStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,6 +31,7 @@ public class TeamService {
     private final TeamRepository teamRepository;
     private final MemberRepository memberRepository;
     private final TeamMemberRepository teamMemberRepository;
+    private final NotificationRepository notificationRepository;
 
     @Transactional
     public Long createTeam(Long memberId, TeamRequest.CreateTeamDto request) {
@@ -58,5 +63,38 @@ public class TeamService {
                 .teamImage(null)
                 .createdAt(team.getCreatedAt())
                 .build()).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void invite(Long memberId, Long teamId, TeamRequest.InviteMemberDto inviteMemberDto) {
+        Member targetMember = memberRepository.findByEmail(inviteMemberDto.getEmail())
+                .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+
+        notificationRepository.save(Notification.builder()
+                .title("팀 초대 메시지")
+                .message(member.getNickname() + "님이 팀에 초대하였습니다.")
+                .member(targetMember)
+                .referenceId(teamId)
+                .type(NotificationType.TEAM_INVITATION)
+                .isRead(false)
+                .build());
+    }
+
+    @Transactional
+    public void accept(Long memberId, Long teamId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new TeamHandler(ErrorStatus.TEAM_NOT_FOUND));
+
+        teamMemberRepository.save(TeamMember.builder()
+                .member(member)
+                .team(team)
+                .role(TeamRole.MEMBER)
+                .build());
     }
 }
