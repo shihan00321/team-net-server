@@ -3,6 +3,7 @@ package com.teamnet.team_net.domain.team.service;
 import com.teamnet.team_net.domain.member.entity.Member;
 import com.teamnet.team_net.domain.member.repository.MemberRepository;
 import com.teamnet.team_net.domain.team.controller.TeamRequest;
+import com.teamnet.team_net.domain.team.dto.TeamResponse;
 import com.teamnet.team_net.domain.team.entity.Team;
 import com.teamnet.team_net.domain.team.enums.TeamActiveStatus;
 import com.teamnet.team_net.domain.team.repository.TeamRepository;
@@ -14,6 +15,9 @@ import com.teamnet.team_net.global.response.code.status.ErrorStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -41,5 +45,18 @@ public class TeamService {
                 .build());
 
         return team.getId();
+    }
+
+    public List<TeamResponse.TeamResponseDto> findMyTeams(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+
+        List<Team> myTeam = teamMemberRepository.findMyTeam(memberId, TeamActiveStatus.ACTIVE);
+        return myTeam.stream().map(team -> TeamResponse.TeamResponseDto.builder()
+                .id(team.getId())
+                .name(team.getName())
+                .teamImage(null)
+                .createdAt(team.getCreatedAt())
+                .build()).collect(Collectors.toList());
     }
 }
