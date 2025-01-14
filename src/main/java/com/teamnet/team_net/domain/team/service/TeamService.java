@@ -5,6 +5,7 @@ import com.teamnet.team_net.domain.member.repository.MemberRepository;
 import com.teamnet.team_net.domain.notification.entity.Notification;
 import com.teamnet.team_net.domain.notification.enums.NotificationType;
 import com.teamnet.team_net.domain.notification.repository.NotificationRepository;
+import com.teamnet.team_net.domain.notification.service.NotificationService;
 import com.teamnet.team_net.domain.team.controller.TeamRequest;
 import com.teamnet.team_net.domain.team.dto.TeamResponse;
 import com.teamnet.team_net.domain.team.entity.Team;
@@ -31,7 +32,7 @@ public class TeamService {
     private final TeamRepository teamRepository;
     private final MemberRepository memberRepository;
     private final TeamMemberRepository teamMemberRepository;
-    private final NotificationRepository notificationRepository;
+    private final NotificationService notificationService;
 
     @Transactional
     public Long createTeam(Long memberId, TeamRequest.CreateTeamDto request) {
@@ -73,14 +74,7 @@ public class TeamService {
         Member member = teamMemberRepository.findMemberWithRole(memberId, TeamRole.ADMIN)
                 .orElseThrow(() -> new TeamHandler(ErrorStatus.TEAM_INVITATION_UNAUTHORIZED));
 
-        notificationRepository.save(Notification.builder()
-                .title("팀 초대 메시지")
-                .message(member.getNickname() + "님이 팀에 초대하였습니다.")
-                .member(targetMember)
-                .referenceId(teamId)
-                .type(NotificationType.TEAM_INVITATION)
-                .isRead(false)
-                .build());
+        notificationService.send(member, targetMember, teamId);
     }
 
     @Transactional
