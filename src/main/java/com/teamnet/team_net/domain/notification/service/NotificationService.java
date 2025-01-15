@@ -23,7 +23,8 @@ import java.io.IOException;
 public class NotificationService {
 
     private static final Long DEFAULT_TIMEOUT = 60L * 1000 * 60; // 1시간
-    private final static String ALARM_NAME = "alarm";
+    private static final String NOTIFICATION_NAME = "notification";
+    private static final String CONNECT = "connect";
     private final NotificationRepository notificationRepository;
     private final EmitterRepository emitterRepository;
 
@@ -34,7 +35,7 @@ public class NotificationService {
         sseEmitter.onTimeout(() -> emitterRepository.deleteById(memberId));
 
         try {
-            sseEmitter.send(SseEmitter.event().id("").name(ALARM_NAME).data("connect completed"));
+            sseEmitter.send(SseEmitter.event().name(CONNECT).data("connect completed"));
         } catch (IOException e) {
             emitterRepository.deleteById(memberId);
             throw new NotificationHandler(ErrorStatus.NOTIFICATION_CONNECT_ERROR);
@@ -53,18 +54,18 @@ public class NotificationService {
                 .isRead(false)
                 .build());
 
-        emitterRepository.get(member.getId())
+        NotificationResponse.NotificationResponseDto response = NotificationResponse.NotificationResponseDto.builder()
+                .id(notification.getId())
+                .title(notification.getTitle())
+                .message(notification.getMessage())
+                .createdAt(notification.getCreatedAt())
+                .build();
+        emitterRepository.get(targetMember.getId())
                 .ifPresentOrElse(sseEmitter -> {
                     try {
                         sseEmitter.send(SseEmitter.event()
-                                .id("")
-                                .name(ALARM_NAME)
-                                .data(NotificationResponse.NotificationResponseDto.builder()
-                                        .id(notification.getId())
-                                        .title(notification.getTitle())
-                                        .message(notification.getMessage())
-                                        .createdAt(notification.getCreatedAt())
-                                        .build()));
+                                .name(NOTIFICATION_NAME)
+                                .data(response));
                     } catch (IOException e) {
                         emitterRepository.deleteById(member.getId());
                         throw new NotificationHandler(ErrorStatus.NOTIFICATION_CONNECT_ERROR);
