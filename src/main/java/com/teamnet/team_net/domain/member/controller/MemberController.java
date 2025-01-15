@@ -11,7 +11,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -33,7 +32,7 @@ public class MemberController {
         return ApiResponse.onSuccess(memberService.saveAdditionalMemberInfo(request, response, memberInfoDto, sessionMember.getId()));
     }
 
-    @GetMapping("/alarm")
+    @GetMapping("/notification")
     public ApiResponse<List<NotificationResponse.NotificationResponseDto>> alarm(@LoginMember SessionMember sessionMember) {
         return ApiResponse.onSuccess(memberService.findNotificationList(sessionMember.getId()));
     }
