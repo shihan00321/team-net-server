@@ -19,4 +19,6 @@ public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
 
     @Query("select m from TeamMember tm join tm.member m where tm.member.id = :memberId and tm.role = :role")
     Optional<Member> findMemberWithRole(@Param("memberId") Long memberId, @Param("role") TeamRole role);
+
+    Optional<TeamMember> findByMemberIdAndTeamId(@Param("memberId") Long memberId, @Param("teamId") Long teamId);
 }
