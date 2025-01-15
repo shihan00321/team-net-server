@@ -2,9 +2,6 @@ package com.teamnet.team_net.domain.team.service;
 
 import com.teamnet.team_net.domain.member.entity.Member;
 import com.teamnet.team_net.domain.member.repository.MemberRepository;
-import com.teamnet.team_net.domain.notification.entity.Notification;
-import com.teamnet.team_net.domain.notification.enums.NotificationType;
-import com.teamnet.team_net.domain.notification.repository.NotificationRepository;
 import com.teamnet.team_net.domain.notification.service.NotificationService;
 import com.teamnet.team_net.domain.post.dto.PostResponse;
 import com.teamnet.team_net.domain.post.entity.Post;
@@ -75,10 +72,10 @@ public class TeamService {
         Member targetMember = memberRepository.findByEmail(inviteMemberDto.getEmail())
                 .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
 
-        Member member = teamMemberRepository.findMemberWithRole(memberId, TeamRole.ADMIN)
-                .orElseThrow(() -> new TeamHandler(ErrorStatus.TEAM_INVITATION_UNAUTHORIZED));
+        TeamMember teamMember = teamMemberRepository.findMemberWithRole(memberId, TeamRole.ADMIN)
+                .orElseThrow(() -> new TeamHandler(ErrorStatus.TEAM_MEMBER_UNAUTHORIZED));
 
-        notificationService.send(member, targetMember, teamId);
+        notificationService.send(teamMember.getMember(), targetMember, teamId);
     }
 
     @Transactional
@@ -107,5 +104,14 @@ public class TeamService {
                         .content(teamPost.getContent())
                         .build()).collect(Collectors.toList());
 
+    }
+
+    @Transactional
+    public Long deleteTeam(Long memberId, Long teamId) {
+        TeamMember member = teamMemberRepository.findMemberWithRole(memberId, TeamRole.ADMIN)
+                .orElseThrow(() -> new TeamHandler(ErrorStatus.TEAM_MEMBER_UNAUTHORIZED));
+        Team team = member.getTeam();
+        team.updateStatus(TeamActiveStatus.INACTIVE);
+        return teamId;
     }
 }

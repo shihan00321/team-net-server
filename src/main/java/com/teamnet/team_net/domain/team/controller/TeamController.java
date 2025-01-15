@@ -43,6 +43,11 @@ public class TeamController {
         return ApiResponse.onSuccess(null);
     }
 
+    @PatchMapping("/{teamId}")
+    public ApiResponse<Long> deleteTeam(@LoginMember SessionMember sessionMember, @PathVariable("teamId") Long teamId) {
+        return ApiResponse.onSuccess(teamService.deleteTeam(sessionMember.getId(), teamId));
+    }
+
     @PostMapping("/{teamId}/accept")
     public ApiResponse<String> acceptInvitation(@LoginMember SessionMember sessionMember, @PathVariable Long teamId) {
         teamService.accept(sessionMember.getId(), teamId);

@@ -17,8 +17,8 @@ public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
     @Query("select distinct t from TeamMember tm join tm.team t where tm.member.id = :memberId and t.status = :status")
     List<Team> findMyTeam(@Param("memberId") Long memberId, @Param("status") TeamActiveStatus status);
 
-    @Query("select m from TeamMember tm join tm.member m where tm.member.id = :memberId and tm.role = :role")
-    Optional<Member> findMemberWithRole(@Param("memberId") Long memberId, @Param("role") TeamRole role);
+    @Query("select tm from TeamMember tm join tm.member m where tm.member.id = :memberId and tm.role = :role")
+    Optional<TeamMember> findMemberWithRole(@Param("memberId") Long memberId, @Param("role") TeamRole role);
 
     Optional<TeamMember> findByMemberIdAndTeamId(@Param("memberId") Long memberId, @Param("teamId") Long teamId);
 }
