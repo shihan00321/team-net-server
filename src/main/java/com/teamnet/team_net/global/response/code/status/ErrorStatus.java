@@ -27,6 +27,7 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // 팀 관련 에러
     TEAM_NOT_FOUND(HttpStatus.NOT_FOUND, "TEAM4001", "해당 팀을 찾을 수 없습니다."),
+    TEAM_MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "TEAM4002", "해당 팀의 멤버가 아닙니다."),
     TEAM_INVITATION_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "TEAM4003", "팀 초대는 관리자만 가능합니다."),
 
     // 알림 관련 에러
