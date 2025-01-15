@@ -1,5 +1,6 @@
 package com.teamnet.team_net.domain.team.controller;
 
+import com.teamnet.team_net.domain.post.dto.PostResponse;
 import com.teamnet.team_net.domain.team.dto.TeamResponse;
 import com.teamnet.team_net.domain.team.service.TeamService;
 import com.teamnet.team_net.global.config.auth.LoginMember;
@@ -26,6 +27,11 @@ public class TeamController {
     @GetMapping
     public ApiResponse<List<TeamResponse.TeamResponseDto>> myTeam(@LoginMember SessionMember sessionMember) {
         return ApiResponse.onSuccess(teamService.findMyTeams(sessionMember.getId()));
+    }
+
+    @GetMapping("/{teamId}")
+    public ApiResponse<List<PostResponse.PostResponseDto>> findTeamPosts(@LoginMember SessionMember sessionMember, @PathVariable("teamId") Long teamId) {
+        return ApiResponse.onSuccess(teamService.findTeamPosts(sessionMember.getId(), teamId));
     }
 
     @PostMapping("/{teamId}/invite")

@@ -6,6 +6,9 @@ import com.teamnet.team_net.domain.notification.entity.Notification;
 import com.teamnet.team_net.domain.notification.enums.NotificationType;
 import com.teamnet.team_net.domain.notification.repository.NotificationRepository;
 import com.teamnet.team_net.domain.notification.service.NotificationService;
+import com.teamnet.team_net.domain.post.dto.PostResponse;
+import com.teamnet.team_net.domain.post.entity.Post;
+import com.teamnet.team_net.domain.post.repository.PostRepository;
 import com.teamnet.team_net.domain.team.controller.TeamRequest;
 import com.teamnet.team_net.domain.team.dto.TeamResponse;
 import com.teamnet.team_net.domain.team.entity.Team;
@@ -32,6 +35,7 @@ public class TeamService {
     private final TeamRepository teamRepository;
     private final MemberRepository memberRepository;
     private final TeamMemberRepository teamMemberRepository;
+    private final PostRepository postRepository;
     private final NotificationService notificationService;
 
     @Transactional
@@ -90,5 +94,18 @@ public class TeamService {
                 .team(team)
                 .role(TeamRole.MEMBER)
                 .build());
+    }
+
+    public List<PostResponse.PostResponseDto> findTeamPosts(Long memberId, Long teamId) {
+        TeamMember teamMember = teamMemberRepository.findByMemberIdAndTeamId(memberId, teamId)
+                .orElseThrow(() -> new TeamHandler(ErrorStatus.TEAM_NOT_FOUND));
+        List<Post> teamPosts = postRepository.findAllByTeamId(teamId);
+        return teamPosts.stream()
+                .map(teamPost -> PostResponse.PostResponseDto.builder()
+                        .id(teamPost.getId())
+                        .title(teamPost.getTitle())
+                        .content(teamPost.getContent())
+                        .build()).collect(Collectors.toList());
+
     }
 }
