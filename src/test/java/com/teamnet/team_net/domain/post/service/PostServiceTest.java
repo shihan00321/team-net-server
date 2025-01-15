@@ -8,6 +8,13 @@ import com.teamnet.team_net.domain.post.controller.PostRequest;
 import com.teamnet.team_net.domain.post.dto.PostResponse;
 import com.teamnet.team_net.domain.post.entity.Post;
 import com.teamnet.team_net.domain.post.repository.PostRepository;
+import com.teamnet.team_net.domain.team.entity.Team;
+import com.teamnet.team_net.domain.team.enums.TeamActiveStatus;
+import com.teamnet.team_net.domain.team.repository.TeamRepository;
+import com.teamnet.team_net.domain.teammember.entity.TeamMember;
+import com.teamnet.team_net.domain.teammember.enums.TeamRole;
+import com.teamnet.team_net.domain.teammember.repository.TeamMemberRepository;
+import com.teamnet.team_net.global.exception.handler.PostHandler;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,13 +40,37 @@ class PostServiceTest {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
+    private TeamRepository teamRepository;
+
+    @Autowired
+    private TeamMemberRepository teamMemberRepository;
+
     @Test
     @DisplayName("게시글 단건 조회 성공 테스트")
     void 게시글_단건_조회_성공() {
-        // given
+        Member member = memberRepository.save(
+                Member.builder()
+                        .email("xxx@xxx.com")
+                        .nickname("hbb")
+                        .name("hbb")
+                        .role(Role.USER)
+                        .status(DeletionStatus.NOT_DELETE)
+                        .build()
+        );
+
+        Team team = teamRepository.save(
+                Team.builder()
+                        .name("team")
+                        .status(TeamActiveStatus.ACTIVE)
+                        .build()
+        );
+
         Post savedPost = postRepository.save(Post.builder()
                 .title("테스트 제목")
                 .content("테스트 내용")
+                .member(member)
+                .team(team)
                 .build());
 
         // when
@@ -59,22 +90,42 @@ class PostServiceTest {
         Long nonExistentId = 999L;
 
         // when & then
-        assertThrows(IllegalStateException.class,
+        assertThrows(PostHandler.class,
                 () -> postService.findOne(nonExistentId));
     }
 
     @Test
     @DisplayName("게시글 모두 조회")
     void 게시글_모두_조회() {
+        Team team = Team.builder()
+                .id(1L)
+                .name("team")
+                .status(TeamActiveStatus.ACTIVE)
+                .build();
+
+        Member member = Member.builder()
+                .id(1L)
+                .name("name")
+                .email("email")
+                .role(Role.USER)
+                .nickname("nickname")
+                .status(DeletionStatus.NOT_DELETE)
+                .build();
+
+        memberRepository.save(member);
+        teamRepository.save(team);
+
         List<Post> posts = IntStream.range(1, 6)
                 .mapToObj(i -> Post.builder()
                         .title("테스트 제목" + i)
                         .content("테스트 내용" + i)
+                        .member(member)
+                        .team(team)
                         .build())
                 .toList();
         postRepository.saveAll(posts);
 
-        List<PostResponse.PostResponseDto> findAll = postService.findAll();
+        List<PostResponse.PostResponseDto> findAll = postService.findAllByTeamId(team.getId());
         Assertions.assertThat(findAll.size()).isEqualTo(5);
         Assertions.assertThat(findAll.get(2).getTitle()).isEqualTo("테스트 제목" + 3);
         Assertions.assertThat(findAll.get(2).getContent()).isEqualTo("테스트 내용" + 3);
@@ -83,23 +134,37 @@ class PostServiceTest {
     @Test
     @DisplayName("게시글 저장 테스트")
     public void 게시글_저장_테스트() {
-        Member member = Member.builder()
-                .id(1L)
-                .email("xxx@xxx.com")
-                .nickname("hbb")
-                .name("hbb")
-                .role(Role.USER)
-                .status(DeletionStatus.NOT_DELETE)
-                .build();
+        Member member = memberRepository.save(
+                Member.builder()
+                        .email("xxx@xxx.com")
+                        .nickname("hbb")
+                        .name("hbb")
+                        .role(Role.USER)
+                        .status(DeletionStatus.NOT_DELETE)
+                        .build()
+        );
 
-        Member savedMember = memberRepository.save(member);
+        Team team = teamRepository.save(
+                Team.builder()
+                        .name("team")
+                        .status(TeamActiveStatus.ACTIVE)
+                        .build()
+        );
+
+        teamMemberRepository.save(
+                TeamMember.builder()
+                        .member(member)
+                        .team(team)
+                        .role(TeamRole.ADMIN)
+                        .build()
+        );
 
         PostRequest.PostSaveDto postSaveDto = PostRequest.PostSaveDto.builder()
                 .title("테스트 제목")
                 .content("테스트 내용")
                 .build();
 
-        Long savedPostId = postService.save(savedMember.getId(), postSaveDto);
+        Long savedPostId = postService.save(member.getId(), team.getId(), postSaveDto);
         assertNotNull(savedPostId);
 
         Post savedPost = postRepository.findById(savedPostId).orElse(null);
@@ -110,23 +175,37 @@ class PostServiceTest {
     @Test
     @DisplayName("게시글 수정 테스트")
     void 게시글_수정_테스트() {
-        Member member = Member.builder()
-                .id(1L)
-                .email("xxx@xxx.com")
-                .nickname("hbb")
-                .name("hbb")
-                .role(Role.USER)
-                .status(DeletionStatus.NOT_DELETE)
-                .build();
+        Member savedMember = memberRepository.save(
+                Member.builder()
+                        .email("xxx@xxx.com")
+                        .nickname("hbb")
+                        .name("hbb")
+                        .role(Role.USER)
+                        .status(DeletionStatus.NOT_DELETE)
+                        .build()
+        );
 
-        Member savedMember = memberRepository.save(member);
+        Team team = teamRepository.save(
+                Team.builder()
+                        .name("team")
+                        .status(TeamActiveStatus.ACTIVE)
+                        .build()
+        );
+
+        teamMemberRepository.save(
+                TeamMember.builder()
+                        .member(savedMember)
+                        .team(team)
+                        .role(TeamRole.ADMIN)
+                        .build()
+        );
 
         PostRequest.PostSaveDto savedPost = PostRequest.PostSaveDto.builder()
                 .title("테스트 제목")
                 .content("테스트 내용")
                 .build();
 
-        Long savedId = postService.save(savedMember.getId(), savedPost);
+        Long savedId = postService.save(savedMember.getId(), team.getId(), savedPost);
 
         PostRequest.PostUpdateDto updateRequest = PostRequest.PostUpdateDto.builder()
                 .title("수정된 제목")
@@ -153,42 +232,63 @@ class PostServiceTest {
                 .build();
 
         // When & Then
-        assertThrows(IllegalStateException.class,
+        assertThrows(PostHandler.class,
                 () -> postService.update(memberId, nonExistentId, updateDto));
     }
 
     @Test
     @DisplayName("게시글 삭제 성공")
     void 게시글_삭제_성공() {
-        Member member = Member.builder()
-                .id(1L)
-                .email("xxx@xxx.com")
-                .nickname("hbb")
-                .name("hbb")
-                .role(Role.USER)
-                .status(DeletionStatus.NOT_DELETE)
-                .build();
+        // Given
+        Member member = memberRepository.save(
+                Member.builder()
+                        .email("xxx@xxx.com")
+                        .nickname("hbb")
+                        .name("hbb")
+                        .role(Role.USER)
+                        .status(DeletionStatus.NOT_DELETE)
+                        .build()
+        );
 
-        Member savedMember = memberRepository.save(member);
+        Team team = teamRepository.save(
+                Team.builder()
+                        .name("team")
+                        .status(TeamActiveStatus.ACTIVE)
+                        .build()
+        );
 
-        Post post = Post.builder()
-                .title("테스트 제목")
-                .content("테스트 내용")
-                .member(member)
-                .build();
+        teamMemberRepository.save(
+                TeamMember.builder()
+                        .member(member)
+                        .team(team)
+                        .role(TeamRole.ADMIN)
+                        .build()
+        );
 
-        Post savedPost = postRepository.save(post);
-        Long deletedId = postService.delete(savedMember.getId(), savedPost.getId());
-        assertThat(deletedId).isEqualTo(savedPost.getId());
-        assertThat(postRepository.findById(savedPost.getId())).isEmpty();
+        Post post = postRepository.save(
+                Post.builder()
+                        .title("테스트 제목")
+                        .content("테스트 내용")
+                        .member(member)
+                        .team(team)
+                        .build()
+        );
+
+        // When
+        Long deletedId = postService.delete(member.getId(), post.getId());
+
+        // Then
+        assertThat(deletedId).isEqualTo(post.getId());
+        assertThat(postRepository.findById(post.getId())).isEmpty();
     }
+
 
     @Test
     @DisplayName("존재하지 않는 게시글 삭제 시 예외")
     void 게시글_삭제_예외() {
         Long memberId = 1L;
         Long nonExistentId = 999L;
-        assertThrows(IllegalStateException.class,
+        assertThrows(PostHandler.class,
                 () -> postService.delete(memberId, nonExistentId));
     }
 }
