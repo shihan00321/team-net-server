@@ -66,6 +66,7 @@ class PostControllerTest {
     @WithMockUser(roles = "USER")
     void 게시글_조회_테스트() throws Exception {
         Long postId = 1L;
+        Long teamId = 1L;
         PostResponse.PostResponseDto responseDto = PostResponse.PostResponseDto.builder()
                 .id(postId)
                 .title("테스트 제목")
@@ -74,12 +75,13 @@ class PostControllerTest {
 
         when(postService.findOne(postId)).thenReturn(responseDto);
 
-        mvc.perform(get("/api/posts/{postId}", postId)
+        mvc.perform(get("/api/teams/{teamId}/posts/{postId}", teamId, postId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.title").value("테스트 제목"))
-                .andExpect(jsonPath("$.content").value("테스트 내용"))
+                .andExpect(jsonPath("$.isSuccess").value(true))
+                .andExpect(jsonPath("$.result.id").value(1L))
+                .andExpect(jsonPath("$.result.title").value("테스트 제목"))
+                .andExpect(jsonPath("$.result.content").value("테스트 내용"))
                 .andDo(print());  // 테스트 결과를 콘솔에 출력
     }
 
@@ -95,16 +97,18 @@ class PostControllerTest {
                         .content("테스트 내용" + i)
                         .build())
         );
+        Long teamId = 1L;
 
-        when(postService.findAll()).thenReturn(posts);
+        when(postService.findAllByTeamId(teamId)).thenReturn(posts);
 
-        mvc.perform(get("/api/posts")
+        mvc.perform(get("/api/teams/{teamId}/posts", teamId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(5)))
-                .andExpect(jsonPath("$[1].id").value(2L))
-                .andExpect(jsonPath("$[1].title").value("테스트 제목2"))
-                .andExpect(jsonPath("$[1].content").value("테스트 내용2"))
+                .andExpect(jsonPath("$.isSuccess").value(true))
+                .andExpect(jsonPath("$.result", hasSize(5)))
+                .andExpect(jsonPath("$.result[1].id").value(2L))
+                .andExpect(jsonPath("$.result[1].title").value("테스트 제목2"))
+                .andExpect(jsonPath("$.result[1].content").value("테스트 내용2"))
                 .andDo(print());
     }
 
@@ -119,15 +123,19 @@ class PostControllerTest {
         MockHttpSession session = new MockHttpSession();
         session.setAttribute("member", sessionMember);
 
-        given(postService.save(eq(sessionMember.getId()), any(PostRequest.PostSaveDto.class))).willReturn(sessionMember.getId());
+        Long teamId = 1L;
+        Long postId = 1L;
 
-        mvc.perform(post("/api/posts")
+        given(postService.save(eq(sessionMember.getId()), eq(teamId), any(PostRequest.PostSaveDto.class))).willReturn(sessionMember.getId());
+
+        mvc.perform(post("/api/teams/{teamId}/posts", teamId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
                         .session(session)
                         .with(csrf()))
                 .andExpect(status().isOk())
-                .andExpect(content().string(String.valueOf(sessionMember.getId())))
+                .andExpect(jsonPath("$.isSuccess").value(true))
+                .andExpect(jsonPath("$.result").value(postId))
                 .andDo(print());
     }
 
@@ -135,8 +143,9 @@ class PostControllerTest {
     @WithMockUser
     void save_validation_fail() throws Exception {
         PostRequest.PostSaveDto requestDto = new PostRequest.PostSaveDto("", "");  // 유효성 검사 실패용 데이터
+        Long teamId = 1L;
 
-        mvc.perform(post("/api/posts")
+        mvc.perform(post("/api/teams/{teamId}/posts", teamId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto))
                         .sessionAttr("member", sessionMember)
@@ -152,9 +161,10 @@ class PostControllerTest {
         Map<String, Object> requestDto = new HashMap<>();
         requestDto.put("title", "");
         requestDto.put("content", "테스트 내용");
+        Long teamId = 1L;
 
         // when & then
-        mvc.perform(post("/api/posts")
+        mvc.perform(post("/api/teams/{teamId}/posts", teamId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto))
                         .with(csrf()))
@@ -170,8 +180,9 @@ class PostControllerTest {
                 .title("테스트 제목")
                 .content("")
                 .build();
+        Long teamId = 1L;
 
-        mvc.perform(post("/api/posts")
+        mvc.perform(post("/api/teams/{teamId}/posts", teamId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto))
                         .with(csrf()))
@@ -190,19 +201,20 @@ class PostControllerTest {
                 .build();
         Long updatedId = 1L;
         Long memberId = 1L;
+        Long postId = 1L;
 
         MockHttpSession session = new MockHttpSession();
         session.setAttribute("member", sessionMember);
 
         when(postService.update(eq(memberId), eq(updatedId), any(PostRequest.PostUpdateDto.class))).thenReturn(updatedId);
 
-        mvc.perform(patch("/api/posts/{postId}", 1L)
+        mvc.perform(patch("/api/teams/{teamId}/posts/{postId}", 1L, postId)
                         .session(session)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateDto))
                         .with(csrf()))
                 .andExpect(status().isOk())
-                .andExpect(content().string(updatedId.toString()))
+                .andExpect(jsonPath("$.result").value(postId))
                 .andDo(print());
     }
 
@@ -218,12 +230,12 @@ class PostControllerTest {
 
         when(postService.delete(memberId, deleteId)).thenReturn(deleteId);
 
-        mvc.perform(delete("/api/posts/{postId}", deleteId)
+        mvc.perform(delete("/api/teams/{teamId}/posts/{postId}", 1L, deleteId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .session(session)
                         .with(csrf()))
                 .andExpect(status().isOk())
-                .andExpect(content().string("1"))
+                .andExpect(jsonPath("$.result").value(deleteId))
                 .andDo(print());
     }
 }
