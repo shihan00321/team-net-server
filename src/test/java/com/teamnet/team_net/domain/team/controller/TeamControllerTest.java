@@ -7,6 +7,7 @@ import com.teamnet.team_net.domain.team.dto.TeamResponse;
 import com.teamnet.team_net.domain.team.service.TeamService;
 import com.teamnet.team_net.global.config.SecurityConfig;
 import com.teamnet.team_net.global.config.auth.dto.SessionMember;
+import com.teamnet.team_net.global.exception.handler.TeamHandler;
 import jakarta.servlet.http.HttpSession;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -87,6 +88,28 @@ class TeamControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.isSuccess").value(true))
                 .andExpect(jsonPath("$.result").value(teamId))
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("팀 생성 성공 Validation 예외 테스트")
+    @WithMockUser(roles = "USER")
+    void createTeamException() throws Exception {
+        TeamRequest.CreateTeamDto teamRequestDto = TeamRequest.CreateTeamDto.builder()
+                .name("")
+                .build();
+
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("member", sessionMember);
+
+        given(teamService.createTeam(eq(sessionMember.getId()), any(TeamRequest.CreateTeamDto.class))).willThrow(TeamHandler.class);
+
+        mvc.perform(post("/api/teams")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(teamRequestDto))
+                        .session(session)
+                        .with(csrf()))
+                .andExpect(status().isBadRequest())
                 .andDo(print());
     }
 
