@@ -4,6 +4,8 @@ import com.teamnet.team_net.domain.member.controller.MemberRequest;
 import com.teamnet.team_net.domain.member.entity.Member;
 import com.teamnet.team_net.domain.member.enums.Role;
 import com.teamnet.team_net.domain.member.repository.MemberRepository;
+import com.teamnet.team_net.domain.notification.dto.NotificationResponse;
+import com.teamnet.team_net.domain.notification.repository.NotificationRepository;
 import com.teamnet.team_net.global.config.auth.CustomOAuth2User;
 import com.teamnet.team_net.global.exception.handler.MemberHandler;
 import com.teamnet.team_net.global.response.code.status.ErrorStatus;
@@ -20,6 +22,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -28,6 +32,7 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final SecurityContextRepository securityContextRepository;
+    private final NotificationRepository notificationRepository;
 
     @Transactional
     public Long saveAdditionalMemberInfo(HttpServletRequest request, HttpServletResponse response, MemberRequest.AdditionalMemberInfoDto memberInfoDto, Long memberId) {
@@ -37,6 +42,17 @@ public class MemberService {
         member.updateRole();
         updateSecurity(request, response, member);
         return memberId;
+    }
+
+    public List<NotificationResponse.NotificationResponseDto> findNotificationList(Long memberId) {
+        return notificationRepository.findNotifications(memberId)
+                .stream().map(notification -> NotificationResponse.NotificationResponseDto
+                        .builder()
+                        .id(notification.getId())
+                        .title(notification.getTitle())
+                        .message(notification.getMessage())
+                        .createdAt(notification.getCreatedAt())
+                        .build()).collect(Collectors.toList());
     }
 
     private void updateSecurity(HttpServletRequest request, HttpServletResponse response, Member member) {

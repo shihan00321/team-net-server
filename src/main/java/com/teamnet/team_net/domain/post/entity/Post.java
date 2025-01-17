@@ -1,6 +1,7 @@
 package com.teamnet.team_net.domain.post.entity;
 
 import com.teamnet.team_net.domain.member.entity.Member;
+import com.teamnet.team_net.domain.team.entity.Team;
 import com.teamnet.team_net.global.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -20,8 +21,12 @@ public class Post extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
+    @JoinColumn(name = "member_id", nullable = false)
     private Member member;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "team_id", nullable = false)
+    private Team team;
 
     @Column(length = 50, nullable = false)
     private String title;

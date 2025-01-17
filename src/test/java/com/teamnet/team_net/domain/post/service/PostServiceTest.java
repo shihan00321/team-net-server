@@ -8,7 +8,14 @@ import com.teamnet.team_net.domain.post.controller.PostRequest;
 import com.teamnet.team_net.domain.post.dto.PostResponse;
 import com.teamnet.team_net.domain.post.entity.Post;
 import com.teamnet.team_net.domain.post.repository.PostRepository;
-import org.assertj.core.api.Assertions;
+import com.teamnet.team_net.domain.team.entity.Team;
+import com.teamnet.team_net.domain.team.enums.TeamActiveStatus;
+import com.teamnet.team_net.domain.team.repository.TeamRepository;
+import com.teamnet.team_net.domain.teammember.entity.TeamMember;
+import com.teamnet.team_net.domain.teammember.enums.TeamRole;
+import com.teamnet.team_net.domain.teammember.repository.TeamMemberRepository;
+import com.teamnet.team_net.global.exception.handler.PostHandler;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,179 +23,204 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @Transactional
 class PostServiceTest {
+    private static final String TEST_EMAIL = "xxx@xxx.com";
+    private static final String TEST_NICKNAME = "hbb";
+    private static final String TEST_TITLE = "테스트 제목";
+    private static final String TEST_CONTENT = "테스트 내용";
+    private static final String UPDATED_TITLE = "수정된 제목";
+    private static final Long NON_EXISTENT_ID = 999L;
+
     @Autowired
     private PostService postService;
-
     @Autowired
     private PostRepository postRepository;
-
     @Autowired
     private MemberRepository memberRepository;
+    @Autowired
+    private TeamRepository teamRepository;
+    @Autowired
+    private TeamMemberRepository teamMemberRepository;
+
+    private Member testMember;
+    private Team testTeam;
+
+    @BeforeEach
+    void setUp() {
+        testMember = createAndSaveMember();
+        testTeam = createAndSaveTeam();
+        createAndSaveTeamMember(testMember, testTeam);
+    }
 
     @Test
     @DisplayName("게시글 단건 조회 성공 테스트")
-    void 게시글_단건_조회_성공() {
+    void findOne() {
         // given
-        Post savedPost = postRepository.save(Post.builder()
-                .title("테스트 제목")
-                .content("테스트 내용")
-                .build());
+        Post savedPost = createAndSavePost(testMember, testTeam);
 
         // when
         PostResponse.PostResponseDto foundPost = postService.findOne(savedPost.getId());
 
         // then
         assertThat(foundPost).isNotNull();
+        assertThat(foundPost.getTitle()).isEqualTo(TEST_TITLE);
+        assertThat(foundPost.getContent()).isEqualTo(TEST_CONTENT);
         assertThat(foundPost.getId()).isEqualTo(savedPost.getId());
-        assertThat(foundPost.getTitle()).isEqualTo("테스트 제목");
-        assertThat(foundPost.getContent()).isEqualTo("테스트 내용");
     }
 
     @Test
     @DisplayName("존재하지 않는 게시글 조회시 예외 발생 테스트")
-    void 게시글_단건_조회_예외() {
-        // given
-        Long nonExistentId = 999L;
-
-        // when & then
-        assertThrows(IllegalStateException.class,
-                () -> postService.findOne(nonExistentId));
+    void findOne_exception() {
+        assertThrows(PostHandler.class,
+                () -> postService.findOne(NON_EXISTENT_ID));
     }
 
     @Test
     @DisplayName("게시글 모두 조회")
-    void 게시글_모두_조회() {
+    void findAllByTeamId() {
+        // given
         List<Post> posts = IntStream.range(1, 6)
                 .mapToObj(i -> Post.builder()
-                        .title("테스트 제목" + i)
-                        .content("테스트 내용" + i)
+                        .title(TEST_TITLE + i)
+                        .content(TEST_CONTENT + i)
+                        .member(testMember)
+                        .team(testTeam)
                         .build())
-                .toList();
+                .collect(Collectors.toList());
         postRepository.saveAll(posts);
 
-        List<PostResponse.PostResponseDto> findAll = postService.findAll();
-        Assertions.assertThat(findAll.size()).isEqualTo(5);
-        Assertions.assertThat(findAll.get(2).getTitle()).isEqualTo("테스트 제목" + 3);
-        Assertions.assertThat(findAll.get(2).getContent()).isEqualTo("테스트 내용" + 3);
+        // when
+        List<PostResponse.PostResponseDto> findAll = postService.findAllByTeamId(testTeam.getId());
+
+        // then
+        assertThat(findAll).hasSize(5);
+        assertThat(findAll.get(2).getTitle()).isEqualTo(TEST_TITLE + "3");
+        assertThat(findAll.get(2).getContent()).isEqualTo(TEST_CONTENT + "3");
     }
 
     @Test
     @DisplayName("게시글 저장 테스트")
-    public void 게시글_저장_테스트() {
-        Member member = Member.builder()
-                .id(1L)
-                .email("xxx@xxx.com")
-                .nickname("hbb")
-                .name("hbb")
-                .role(Role.USER)
-                .status(DeletionStatus.NOT_DELETE)
-                .build();
+    void save() {
+        // given
+        PostRequest.PostSaveDto postSaveDto = createPostSaveDto();
 
-        Member savedMember = memberRepository.save(member);
+        // when
+        Long savedPostId = postService.save(testMember.getId(), testTeam.getId(), postSaveDto);
 
-        PostRequest.PostSaveDto postSaveDto = PostRequest.PostSaveDto.builder()
-                .title("테스트 제목")
-                .content("테스트 내용")
-                .build();
-
-        Long savedPostId = postService.save(savedMember.getId(), postSaveDto);
-        assertNotNull(savedPostId);
-
-        Post savedPost = postRepository.findById(savedPostId).orElse(null);
-        assertNotNull(savedPost);
-        assertEquals("테스트 제목", savedPost.getTitle());
+        // then
+        Post savedPost = postRepository.findById(savedPostId)
+                .orElseThrow(() -> new AssertionError("저장된 게시글을 찾을 수 없습니다."));
+        assertThat(savedPost.getTitle()).isEqualTo(TEST_TITLE);
+        assertThat(savedPost.getContent()).isEqualTo(TEST_CONTENT);
     }
 
     @Test
     @DisplayName("게시글 수정 테스트")
-    void 게시글_수정_테스트() {
-        Member member = Member.builder()
-                .id(1L)
-                .email("xxx@xxx.com")
-                .nickname("hbb")
-                .name("hbb")
-                .role(Role.USER)
-                .status(DeletionStatus.NOT_DELETE)
-                .build();
+    void update() {
+        // given
+        Post savedPost = createAndSavePost(testMember, testTeam);
+        PostRequest.PostUpdateDto updateRequest = createPostUpdateDto();
 
-        Member savedMember = memberRepository.save(member);
-
-        PostRequest.PostSaveDto savedPost = PostRequest.PostSaveDto.builder()
-                .title("테스트 제목")
-                .content("테스트 내용")
-                .build();
-
-        Long savedId = postService.save(savedMember.getId(), savedPost);
-
-        PostRequest.PostUpdateDto updateRequest = PostRequest.PostUpdateDto.builder()
-                .title("수정된 제목")
-                .content("테스트 내용")
-                .build();
-
-        Long updatedId = postService.update(savedMember.getId(), savedId, updateRequest);
+        // when
+        Long updatedId = postService.update(testMember.getId(), savedPost.getId(), updateRequest);
         PostResponse.PostResponseDto response = postService.findOne(updatedId);
 
+        // then
         assertThat(response).isNotNull();
+        assertThat(response.getTitle()).isEqualTo(UPDATED_TITLE);
+        assertThat(response.getContent()).isEqualTo(TEST_CONTENT);
         assertThat(response.getId()).isEqualTo(updatedId);
-        assertThat(response.getTitle()).isEqualTo("수정된 제목");
-        assertThat(response.getContent()).isEqualTo("테스트 내용");
     }
 
     @Test
     @DisplayName("존재하지 않는 게시글 업데이트 시 예외")
-    void 게시글_업데이트_예외() {
-        Long memberId = 1L;
-        Long nonExistentId = 999L;
-        PostRequest.PostUpdateDto updateDto = PostRequest.PostUpdateDto.builder()
-                .title("수정된 제목")
-                .content("수정된 내용")
-                .build();
+    void update_exception() {
+        // given
+        PostRequest.PostUpdateDto updateDto = createPostUpdateDto();
 
-        // When & Then
-        assertThrows(IllegalStateException.class,
-                () -> postService.update(memberId, nonExistentId, updateDto));
+        // when & then
+        assertThrows(PostHandler.class,
+                () -> postService.update(testMember.getId(), NON_EXISTENT_ID, updateDto));
     }
 
     @Test
     @DisplayName("게시글 삭제 성공")
-    void 게시글_삭제_성공() {
-        Member member = Member.builder()
-                .id(1L)
-                .email("xxx@xxx.com")
-                .nickname("hbb")
-                .name("hbb")
-                .role(Role.USER)
-                .status(DeletionStatus.NOT_DELETE)
-                .build();
+    void delete_success() {
+        // given
+        Post post = createAndSavePost(testMember, testTeam);
 
-        Member savedMember = memberRepository.save(member);
+        // when
+        Long deletedId = postService.delete(testMember.getId(), post.getId());
 
-        Post post = Post.builder()
-                .title("테스트 제목")
-                .content("테스트 내용")
-                .member(member)
-                .build();
-
-        Post savedPost = postRepository.save(post);
-        Long deletedId = postService.delete(savedMember.getId(), savedPost.getId());
-        assertThat(deletedId).isEqualTo(savedPost.getId());
-        assertThat(postRepository.findById(savedPost.getId())).isEmpty();
+        // then
+        assertThat(deletedId).isEqualTo(post.getId());
+        assertThat(postRepository.findById(post.getId())).isEmpty();
     }
 
     @Test
     @DisplayName("존재하지 않는 게시글 삭제 시 예외")
-    void 게시글_삭제_예외() {
-        Long memberId = 1L;
-        Long nonExistentId = 999L;
-        assertThrows(IllegalStateException.class,
-                () -> postService.delete(memberId, nonExistentId));
+    void delete_exception() {
+        assertThrows(PostHandler.class,
+                () -> postService.delete(testMember.getId(), NON_EXISTENT_ID));
+    }
+
+    private Member createAndSaveMember() {
+        Member member = Member.builder()
+                .email(TEST_EMAIL)
+                .nickname(TEST_NICKNAME)
+                .name(TEST_NICKNAME)
+                .role(Role.USER)
+                .status(DeletionStatus.NOT_DELETE)
+                .build();
+        return memberRepository.save(member);
+    }
+
+    private Team createAndSaveTeam() {
+        Team team = Team.builder()
+                .name("team")
+                .status(TeamActiveStatus.ACTIVE)
+                .build();
+        return teamRepository.save(team);
+    }
+
+    private void createAndSaveTeamMember(Member member, Team team) {
+        TeamMember teamMember = TeamMember.builder()
+                .member(member)
+                .team(team)
+                .role(TeamRole.ADMIN)
+                .build();
+        teamMemberRepository.save(teamMember);
+    }
+
+    private Post createAndSavePost(Member member, Team team) {
+        Post post = Post.builder()
+                .title(TEST_TITLE)
+                .content(TEST_CONTENT)
+                .member(member)
+                .team(team)
+                .build();
+        return postRepository.save(post);
+    }
+
+    private PostRequest.PostSaveDto createPostSaveDto() {
+        return PostRequest.PostSaveDto.builder()
+                .title(TEST_TITLE)
+                .content(TEST_CONTENT)
+                .build();
+    }
+
+    private PostRequest.PostUpdateDto createPostUpdateDto() {
+        return PostRequest.PostUpdateDto.builder()
+                .title(UPDATED_TITLE)
+                .content(TEST_CONTENT)
+                .build();
     }
 }

@@ -21,4 +21,8 @@ public class Team extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TeamActiveStatus status;
+
+    public void updateStatus(TeamActiveStatus status) {
+        this.status = status;
+    }
 }

@@ -20,11 +20,10 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -40,6 +39,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = SecurityConfig.class)
 })
 class PostControllerTest {
+    private static final Long TEST_TEAM_ID = 1L;
+    private static final Long TEST_POST_ID = 1L;
+    private static final String BASE_URL = "/api/teams/{teamId}/posts";
+    private static final String TEST_TITLE = "테스트 제목";
+    private static final String TEST_CONTENT = "테스트 내용";
 
     @Autowired
     private MockMvc mvc;
@@ -50,6 +54,7 @@ class PostControllerTest {
     @Mock
     private HttpSession httpSession;
     private SessionMember sessionMember;
+    private MockHttpSession mockSession;
 
     @BeforeEach
     void setUp() {
@@ -57,124 +62,73 @@ class PostControllerTest {
                 .id(1L)
                 .nickname("hbb")
                 .build());
+        mockSession = new MockHttpSession();
+        mockSession.setAttribute("member", sessionMember);
         when(httpSession.getAttribute("member")).thenReturn(sessionMember);
     }
-
 
     @Test
     @DisplayName("게시글 조회 테스트")
     @WithMockUser(roles = "USER")
-    void 게시글_조회_테스트() throws Exception {
-        Long postId = 1L;
-        PostResponse.PostResponseDto responseDto = PostResponse.PostResponseDto.builder()
-                .id(postId)
-                .title("테스트 제목")
-                .content("테스트 내용")
-                .build();
+    void findOne() throws Exception {
+        PostResponse.PostResponseDto responseDto = createPostResponseDto(TEST_POST_ID, TEST_TITLE, TEST_CONTENT);
+        when(postService.findOne(TEST_POST_ID)).thenReturn(responseDto);
 
-        when(postService.findOne(postId)).thenReturn(responseDto);
-
-        mvc.perform(get("/api/posts/{postId}", postId)
-                        .contentType(MediaType.APPLICATION_JSON))
+        performGetRequest(BASE_URL + "/{postId}", TEST_TEAM_ID, TEST_POST_ID)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.title").value("테스트 제목"))
-                .andExpect(jsonPath("$.content").value("테스트 내용"))
-                .andDo(print());  // 테스트 결과를 콘솔에 출력
+                .andExpect(jsonPath("$.isSuccess").value(true))
+                .andExpect(jsonPath("$.result.id").value(TEST_POST_ID))
+                .andExpect(jsonPath("$.result.title").value(TEST_TITLE))
+                .andExpect(jsonPath("$.result.content").value(TEST_CONTENT))
+                .andDo(print());
     }
 
     @Test
     @DisplayName("게시글 모두 조회 테스트")
     @WithMockUser(roles = "USER")
-    void 게시글_모두_조회() throws Exception {
-        List<PostResponse.PostResponseDto> posts = new ArrayList<>();
-        IntStream.rangeClosed(1, 5).forEach(i -> posts.add(
-                PostResponse.PostResponseDto.builder()
-                        .id((long) i)
-                        .title("테스트 제목" + i)
-                        .content("테스트 내용" + i)
-                        .build())
-        );
+    void findAll() throws Exception {
+        List<PostResponse.PostResponseDto> posts = IntStream.rangeClosed(1, 5)
+                .mapToObj(i -> createPostResponseDto((long) i, TEST_TITLE + i, TEST_CONTENT + i))
+                .collect(Collectors.toList());
 
-        when(postService.findAll()).thenReturn(posts);
+        when(postService.findAllByTeamId(TEST_TEAM_ID)).thenReturn(posts);
 
-        mvc.perform(get("/api/posts")
-                        .contentType(MediaType.APPLICATION_JSON))
+        performGetRequest(BASE_URL, TEST_TEAM_ID)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(5)))
-                .andExpect(jsonPath("$[1].id").value(2L))
-                .andExpect(jsonPath("$[1].title").value("테스트 제목2"))
-                .andExpect(jsonPath("$[1].content").value("테스트 내용2"))
+                .andExpect(jsonPath("$.isSuccess").value(true))
+                .andExpect(jsonPath("$.result", hasSize(5)))
+                .andExpect(jsonPath("$.result[1].id").value(2L))
+                .andExpect(jsonPath("$.result[1].title").value(TEST_TITLE + "2"))
+                .andExpect(jsonPath("$.result[1].content").value(TEST_CONTENT + "2"))
                 .andDo(print());
     }
 
     @Test
     @DisplayName("게시글 저장 테스트")
     @WithMockUser(roles = "USER")
-    void 게시글_저장_성공() throws Exception {
-        PostRequest.PostSaveDto request = PostRequest.PostSaveDto.builder()
-                .title("테스트 제목")
-                .content("테스트 내용")
-                .build();
-        MockHttpSession session = new MockHttpSession();
-        session.setAttribute("member", sessionMember);
+    void save() throws Exception {
+        PostRequest.PostSaveDto request = createPostSaveDto(TEST_TITLE, TEST_CONTENT);
+        given(postService.save(eq(sessionMember.getId()), eq(TEST_TEAM_ID), any(PostRequest.PostSaveDto.class)))
+                .willReturn(sessionMember.getId());
 
-        given(postService.save(eq(sessionMember.getId()), any(PostRequest.PostSaveDto.class))).willReturn(sessionMember.getId());
-
-        mvc.perform(post("/api/posts")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))
-                        .session(session)
-                        .with(csrf()))
+        performPostRequest(request, TEST_TEAM_ID)
                 .andExpect(status().isOk())
-                .andExpect(content().string(String.valueOf(sessionMember.getId())))
+                .andExpect(jsonPath("$.isSuccess").value(true))
+                .andExpect(jsonPath("$.result").value(TEST_POST_ID))
                 .andDo(print());
     }
 
     @Test
-    @WithMockUser
-    void save_validation_fail() throws Exception {
-        PostRequest.PostSaveDto requestDto = new PostRequest.PostSaveDto("", "");  // 유효성 검사 실패용 데이터
-
-        mvc.perform(post("/api/posts")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDto))
-                        .sessionAttr("member", sessionMember)
-                        .with(csrf()))
+    @DisplayName("유효성 검증 실패 테스트")
+    @WithMockUser(roles = "USER")
+    void validation_test() throws Exception {
+        // 제목 빈 값 테스트
+        performPostRequest(createPostSaveDto("", TEST_CONTENT), TEST_TEAM_ID)
                 .andExpect(status().isBadRequest())
                 .andDo(print());
-    }
 
-    @Test
-    @DisplayName("제목이 빈 값일 경우 예외")
-    @WithMockUser(roles = "USER")
-    void 제목_빈값_예외() throws Exception {
-        Map<String, Object> requestDto = new HashMap<>();
-        requestDto.put("title", "");
-        requestDto.put("content", "테스트 내용");
-
-        // when & then
-        mvc.perform(post("/api/posts")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDto))
-                        .with(csrf()))
-                .andExpect(status().isBadRequest())
-                .andDo(print());
-    }
-
-    @Test
-    @DisplayName("내용이 빈 값일 경우 예외")
-    @WithMockUser(roles = "USER")
-    void 내용_빈값_예외() throws Exception {
-        PostRequest.PostSaveDto requestDto = PostRequest.PostSaveDto.builder()
-                .title("테스트 제목")
-                .content("")
-                .build();
-
-        mvc.perform(post("/api/posts")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDto))
-                        .with(csrf()))
+        // 내용 빈 값 테스트
+        performPostRequest(createPostSaveDto(TEST_TITLE, ""), TEST_TEAM_ID)
                 .andExpect(status().isBadRequest())
                 .andDo(print());
     }
@@ -182,48 +136,65 @@ class PostControllerTest {
     @Test
     @DisplayName("게시글 수정 테스트")
     @WithMockUser(roles = "USER")
-    public void 게시글_수정_테스트() throws Exception {
-        // Given: 수정할 게시글 DTO
+    void update() throws Exception {
         PostRequest.PostUpdateDto updateDto = PostRequest.PostUpdateDto.builder()
                 .title("수정된 제목")
                 .content("수정된 내용")
                 .build();
-        Long updatedId = 1L;
-        Long memberId = 1L;
 
-        MockHttpSession session = new MockHttpSession();
-        session.setAttribute("member", sessionMember);
+        when(postService.update(eq(sessionMember.getId()), eq(TEST_POST_ID), any(PostRequest.PostUpdateDto.class)))
+                .thenReturn(TEST_POST_ID);
 
-        when(postService.update(eq(memberId), eq(updatedId), any(PostRequest.PostUpdateDto.class))).thenReturn(updatedId);
-
-        mvc.perform(patch("/api/posts/{postId}", 1L)
-                        .session(session)
+        mvc.perform(patch(BASE_URL + "/{postId}", TEST_TEAM_ID, TEST_POST_ID)
+                        .session(mockSession)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateDto))
                         .with(csrf()))
                 .andExpect(status().isOk())
-                .andExpect(content().string(updatedId.toString()))
+                .andExpect(jsonPath("$.result").value(TEST_POST_ID))
                 .andDo(print());
     }
 
     @Test
-    @DisplayName("게시글 삭제 기능 테스트")
+    @DisplayName("게시글 삭제 테스트")
     @WithMockUser(roles = "USER")
-    void 게시글_삭제_테스트() throws Exception {
-        Long deleteId = 1L;
-        Long memberId = 1L;
-        // MockHttpSession 생성 및 사용자 정보 설정
-        MockHttpSession session = new MockHttpSession();
-        session.setAttribute("member", sessionMember);
+    void delete_test() throws Exception {
+        when(postService.delete(sessionMember.getId(), TEST_POST_ID)).thenReturn(TEST_POST_ID);
 
-        when(postService.delete(memberId, deleteId)).thenReturn(deleteId);
-
-        mvc.perform(delete("/api/posts/{postId}", deleteId)
+        mvc.perform(delete(BASE_URL + "/{postId}", TEST_TEAM_ID, TEST_POST_ID)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .session(session)
+                        .session(mockSession)
                         .with(csrf()))
                 .andExpect(status().isOk())
-                .andExpect(content().string("1"))
+                .andExpect(jsonPath("$.result").value(TEST_POST_ID))
                 .andDo(print());
+    }
+
+    private PostResponse.PostResponseDto createPostResponseDto(Long id, String title, String content) {
+        return PostResponse.PostResponseDto.builder()
+                .id(id)
+                .title(title)
+                .content(content)
+                .build();
+    }
+
+    private PostRequest.PostSaveDto createPostSaveDto(String title, String content) {
+        return PostRequest.PostSaveDto.builder()
+                .title(title)
+                .content(content)
+                .build();
+    }
+
+    private ResultActions performGetRequest(String url, Object... urlVariables) throws Exception {
+        return mvc.perform(get(url, urlVariables)
+                .contentType(MediaType.APPLICATION_JSON));
+    }
+
+    private ResultActions performPostRequest(Object content, Object... urlVariables) throws Exception {
+        return mvc.perform(post(PostControllerTest.BASE_URL, urlVariables)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(content))
+                .session(mockSession)
+                .with(csrf()));
     }
 }

@@ -23,7 +23,15 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // 게시글 관련 에러
     POST_NOT_FOUND(HttpStatus.BAD_REQUEST, "POST4001", "게시글을 찾을 수 없습니다."),
-    POST_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "POST4003", "게시글에 대한 권한이 없습니다.");
+    POST_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "POST4003", "게시글에 대한 권한이 없습니다."),
+
+    // 팀 관련 에러
+    TEAM_NOT_FOUND(HttpStatus.NOT_FOUND, "TEAM4001", "해당 팀을 찾을 수 없습니다."),
+    TEAM_MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "TEAM4002", "해당 팀의 멤버가 아닙니다."),
+    TEAM_MEMBER_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "TEAM4003", "해당 팀에 대한 권한이 없습니다."),
+
+    // 알림 관련 에러
+    NOTIFICATION_CONNECT_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "NOTI4001", "알림 연결 중 에러가 발생했습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;
