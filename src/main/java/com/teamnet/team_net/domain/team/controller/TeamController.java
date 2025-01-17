@@ -35,11 +35,10 @@ public class TeamController {
     }
 
     @PostMapping("/{teamId}/invite")
-    public ApiResponse<Long> inviteMember(@LoginMember SessionMember sessionMember,
+    public ApiResponse<Void> inviteMember(@LoginMember SessionMember sessionMember,
                                           @RequestBody TeamRequest.InviteMemberDto inviteMemberDto,
                                           @PathVariable Long teamId) {
         teamService.invite(sessionMember.getId(), teamId, inviteMemberDto);
-
         return ApiResponse.onSuccess(null);
     }
 
