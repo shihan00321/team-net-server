@@ -17,4 +17,10 @@ public class CommentController {
     public ApiResponse<Long> createComment(@LoginMember SessionMember sessionMember, @PathVariable("teamId") Long teamId, @PathVariable("postId") Long postId, @RequestBody CommentRequest.CreateCommentDto request) {
         return ApiResponse.onSuccess(commentService.createComment(sessionMember.getId(), teamId, postId, request));
     }
+
+    @DeleteMapping("/{commentId}")
+    public ApiResponse<Long> deleteComment(@LoginMember SessionMember sessionMember, @PathVariable("teamId") Long teamId, @PathVariable("postId") Long postId, @PathVariable("commentId") Long commentId) {
+        return ApiResponse.onSuccess(commentService.deleteComment(sessionMember.getId(), commentId));
+    }
+
 }
