@@ -18,6 +18,11 @@ public class CommentController {
         return ApiResponse.onSuccess(commentService.createComment(sessionMember.getId(), teamId, postId, request));
     }
 
+    @PatchMapping("/{commentId}")
+    public ApiResponse<Long> updateComment(@LoginMember SessionMember sessionMember, @PathVariable("teamId") Long teamId, @PathVariable("postId") Long postId, @PathVariable("commentId") Long commentId, @RequestBody CommentRequest.CreateCommentDto request) {
+        return ApiResponse.onSuccess(commentService.updateComment(sessionMember.getId(), commentId, request));
+    }
+
     @DeleteMapping("/{commentId}")
     public ApiResponse<Long> deleteComment(@LoginMember SessionMember sessionMember, @PathVariable("teamId") Long teamId, @PathVariable("postId") Long postId, @PathVariable("commentId") Long commentId) {
         return ApiResponse.onSuccess(commentService.deleteComment(sessionMember.getId(), commentId));

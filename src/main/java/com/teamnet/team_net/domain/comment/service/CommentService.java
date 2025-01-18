@@ -51,6 +51,19 @@ public class CommentService {
     }
 
     @Transactional
+    public Long updateComment(Long memberId, Long commentId, CommentRequest.CreateCommentDto request) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new CommentHandler(ErrorStatus.COMMENT_NOT_FOUND));
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        if (!Objects.equals(member.getNickname(), comment.getCreatedBy())) {
+            throw new MemberHandler(ErrorStatus.POST_UNAUTHORIZED);
+        }
+        comment.update(request.getContent());
+        return comment.getId();
+    }
+
+    @Transactional
     public Long deleteComment(Long memberId, Long commentId) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new CommentHandler(ErrorStatus.COMMENT_NOT_FOUND));
