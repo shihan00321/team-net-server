@@ -4,18 +4,21 @@ spring:
     url: ${LOCAL_MYSQL_URL}
     username: ${LOCAL_MYSQL_USERNAME}
     password: ${LOCAL_MYSQL_PASSWORD}
+
   jpa:
     hibernate:
       ddl-auto: validate
     properties:
       hibernate:
+        default_batch_fetch_size: 100
         format_sql: true
     open-in-view: false
+    show-sql: true
+
   session:
     store-type: jdbc
     jdbc:
       initialize-schema: always
-
 
   security:
     oauth2:

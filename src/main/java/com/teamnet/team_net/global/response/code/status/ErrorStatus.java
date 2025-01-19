@@ -31,7 +31,11 @@ public enum ErrorStatus implements BaseErrorCode {
     TEAM_MEMBER_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "TEAM4003", "해당 팀에 대한 권한이 없습니다."),
 
     // 알림 관련 에러
-    NOTIFICATION_CONNECT_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "NOTI4001", "알림 연결 중 에러가 발생했습니다.");
+    NOTIFICATION_CONNECT_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "NOTI4001", "알림 연결 중 에러가 발생했습니다."),
+
+    // 댓글 관련 에러
+    COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "COMMENT4001", "해당 댓글을 찾을 수 없습니다."),
+    COMMENT_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "COMMENT4002", "해당 댓글에 대한 권한이 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

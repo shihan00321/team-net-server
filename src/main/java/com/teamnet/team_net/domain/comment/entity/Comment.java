@@ -23,9 +23,11 @@ public class Comment extends BaseEntity {
     private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id")
+    @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 
+    // 일반 댓글 parent = null
+    // 대댓글 parent = 원본 댓글
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
     private Comment parent;
@@ -33,4 +35,8 @@ public class Comment extends BaseEntity {
     @Builder.Default
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> children = new ArrayList<>();
+
+    public void update(String content) {
+        this.content = content;
+    }
 }
