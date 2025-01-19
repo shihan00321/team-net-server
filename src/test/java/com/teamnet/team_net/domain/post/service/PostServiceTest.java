@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -206,6 +207,7 @@ class PostServiceTest {
                 .content(TEST_CONTENT)
                 .member(member)
                 .team(team)
+                .comments(new ArrayList<>())
                 .build();
         return postRepository.save(post);
     }
