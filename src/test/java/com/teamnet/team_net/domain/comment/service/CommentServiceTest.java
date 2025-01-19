@@ -178,4 +178,61 @@ class CommentServiceTest {
 
         assertThat(commentRepository.findById(deletedCommentId)).isEmpty();
     }
+
+    @Test
+    @DisplayName("권한 없는 사용자의 댓글 수정 시 예외 발생")
+    void updateCommentUnauthorized() {
+        Comment comment = commentRepository.save(Comment.builder()
+                .content("원본 댓글")
+                .post(post)
+                .build());
+
+        Member unauthorizedMember = memberRepository.save(Member.builder()
+                .name("unauthorizedMember")
+                .status(DeletionStatus.NOT_DELETE)
+                .email("bbb.bbb.com")
+                .role(Role.USER)
+                .nickname("unauthorizedMember")
+                .build());
+
+        CommentRequest.CreateCommentDto request = CommentRequest.CreateCommentDto.builder()
+                .content("수정된 댓글")
+                .build();
+
+        assertThrows(MemberHandler.class, () ->
+                commentService.updateComment(unauthorizedMember.getId(), comment.getId(), request)
+        );
+    }
+
+    @Test
+    @DisplayName("팀 멤버가 아닌 사용자의 댓글 생성 시 예외 발생")
+    void createCommentUnauthorized() {
+        Member nonTeamMember = memberRepository.save(Member.builder()
+                .name("nonMemberName")
+                .status(DeletionStatus.NOT_DELETE)
+                .email("bbb.bbb.com")
+                .role(Role.USER)
+                .nickname("nonTeamMember")
+                .build());
+
+        CommentRequest.CreateCommentDto request = CommentRequest.CreateCommentDto.builder()
+                .content("테스트 댓글")
+                .build();
+
+        assertThrows(TeamHandler.class, () ->
+                commentService.createComment(nonTeamMember.getId(), team.getId(), post.getId(), request)
+        );
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 게시글에 댓글 생성 시 예외 발생")
+    void createCommentToNonExistentPost() {
+        CommentRequest.CreateCommentDto request = CommentRequest.CreateCommentDto.builder()
+                .content("테스트 댓글")
+                .build();
+
+        assertThrows(PostHandler.class, () ->
+                commentService.createComment(member.getId(), team.getId(), 999L, request)
+        );
+    }
 }
