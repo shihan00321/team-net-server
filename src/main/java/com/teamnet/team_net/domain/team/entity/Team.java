@@ -1,6 +1,9 @@
 package com.teamnet.team_net.domain.team.entity;
 
+import com.teamnet.team_net.domain.member.entity.Member;
 import com.teamnet.team_net.domain.team.enums.TeamActiveStatus;
+import com.teamnet.team_net.domain.teammember.entity.TeamMember;
+import com.teamnet.team_net.domain.teammember.enums.TeamRole;
 import com.teamnet.team_net.global.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -22,7 +25,7 @@ public class Team extends BaseEntity {
     @Column(nullable = false)
     private TeamActiveStatus status;
 
-    public void updateStatus(TeamActiveStatus status) {
-        this.status = status;
+    public void delete() {
+        this.status = TeamActiveStatus.INACTIVE;
     }
 }
