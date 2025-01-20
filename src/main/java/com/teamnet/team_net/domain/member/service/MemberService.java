@@ -1,10 +1,8 @@
 package com.teamnet.team_net.domain.member.service;
 
 import com.teamnet.team_net.domain.member.controller.MemberRequest;
-import com.teamnet.team_net.domain.member.dto.MemberResponse;
 import com.teamnet.team_net.domain.member.dto.MemberResponse.UpdateMemberResponseDto;
 import com.teamnet.team_net.domain.member.entity.Member;
-import com.teamnet.team_net.domain.member.mapper.MemberMapper;
 import com.teamnet.team_net.domain.notification.dto.NotificationResponse.NotificationListResponseDto;
 import com.teamnet.team_net.domain.notification.entity.Notification;
 import com.teamnet.team_net.domain.notification.mapper.NotificationMapper;
@@ -16,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.teamnet.team_net.domain.member.mapper.MemberMapper.*;
+import static com.teamnet.team_net.domain.member.mapper.MemberMapper.toUpdateMemberResponseDto;
 
 @RequiredArgsConstructor
 @Service
