@@ -13,11 +13,10 @@ import java.util.Optional;
 
 public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
     @Query("select distinct t from TeamMember tm join tm.team t where tm.member.id = :memberId and t.status = :status")
-    List<Team> findMyTeam(@Param("memberId") Long memberId, @Param("status") TeamActiveStatus status);
-
-    @Query("select tm from TeamMember tm join tm.member m where tm.member.id = :memberId and tm.role = :role")
-    Optional<TeamMember> findMemberWithRole(@Param("memberId") Long memberId, @Param("role") TeamRole role);
+    List<Team> findTeamsByMemberIdAndStatus(@Param("memberId") Long memberId, @Param("status") TeamActiveStatus status);
 
     Optional<TeamMember> findByMemberIdAndTeamId(@Param("memberId") Long memberId, @Param("teamId") Long teamId);
     Boolean existsByMemberIdAndTeamId(@Param("memberId") Long memberId, @Param("teamId") Long teamId);
+
+    Optional<TeamMember> findByMemberIdAndTeamIdAndRole(@Param("memberId") Long memberId, @Param("teamId") Long teamId, @Param("role") TeamRole role);
 }
