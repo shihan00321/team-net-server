@@ -75,7 +75,7 @@ public class TeamService {
         TeamMember teamMember = teamMemberRepository.findMemberWithRole(memberId, TeamRole.ADMIN)
                 .orElseThrow(() -> new TeamHandler(ErrorStatus.TEAM_MEMBER_UNAUTHORIZED));
 
-        notificationService.send(teamMember.getMember(), targetMember, teamId);
+        notificationService.sendTeamInvitation(teamMember.getMember(), targetMember, teamId);
     }
 
     @Transactional
