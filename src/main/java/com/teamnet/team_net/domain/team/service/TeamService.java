@@ -1,28 +1,29 @@
 package com.teamnet.team_net.domain.team.service;
 
 import com.teamnet.team_net.domain.member.entity.Member;
-import com.teamnet.team_net.domain.member.repository.MemberRepository;
 import com.teamnet.team_net.domain.notification.service.NotificationService;
-import com.teamnet.team_net.domain.post.dto.PostResponse;
 import com.teamnet.team_net.domain.post.entity.Post;
+import com.teamnet.team_net.domain.post.mapper.PostMapper;
 import com.teamnet.team_net.domain.post.repository.PostRepository;
-import com.teamnet.team_net.domain.team.controller.TeamRequest;
-import com.teamnet.team_net.domain.team.dto.TeamResponse;
 import com.teamnet.team_net.domain.team.entity.Team;
 import com.teamnet.team_net.domain.team.enums.TeamActiveStatus;
 import com.teamnet.team_net.domain.team.repository.TeamRepository;
 import com.teamnet.team_net.domain.teammember.entity.TeamMember;
 import com.teamnet.team_net.domain.teammember.enums.TeamRole;
 import com.teamnet.team_net.domain.teammember.repository.TeamMemberRepository;
-import com.teamnet.team_net.global.exception.handler.MemberHandler;
-import com.teamnet.team_net.global.exception.handler.TeamHandler;
-import com.teamnet.team_net.global.response.code.status.ErrorStatus;
+import com.teamnet.team_net.global.utils.checker.EntityChecker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
+
+import static com.teamnet.team_net.domain.post.dto.PostResponse.PostListResponseDto;
+import static com.teamnet.team_net.domain.team.controller.TeamRequest.CreateTeamDto;
+import static com.teamnet.team_net.domain.team.controller.TeamRequest.InviteMemberDto;
+import static com.teamnet.team_net.domain.team.dto.TeamResponse.TeamListResponseDto;
+import static com.teamnet.team_net.domain.team.dto.TeamResponse.TeamResponseDto;
+import static com.teamnet.team_net.domain.team.mapper.TeamMapper.*;
 
 @RequiredArgsConstructor
 @Service
@@ -30,88 +31,56 @@ import java.util.stream.Collectors;
 public class TeamService {
 
     private final TeamRepository teamRepository;
-    private final MemberRepository memberRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final PostRepository postRepository;
     private final NotificationService notificationService;
+    private final EntityChecker entityChecker;
 
     @Transactional
-    public Long createTeam(Long memberId, TeamRequest.CreateTeamDto request) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
-        Team team = Team.builder()
-                .name(request.getName())
-                .status(TeamActiveStatus.ACTIVE)
-                .build();
+    public TeamResponseDto createTeam(Long memberId, CreateTeamDto request) {
+        Member member = entityChecker.findMemberById(memberId);
+        Team team = toTeam(request);
         teamRepository.save(team);
 
-        teamMemberRepository.save(TeamMember.builder()
-                .team(team)
-                .member(member)
-                .role(TeamRole.ADMIN)
-                .build());
+        TeamMember admin = TeamMember.createAdmin(team, member);
+        teamMemberRepository.save(admin);
 
-        return team.getId();
+        return toTeamResponseDto(team);
     }
 
-    public List<TeamResponse.TeamResponseDto> findMyTeams(Long memberId) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
-
-        List<Team> myTeam = teamMemberRepository.findMyTeam(memberId, TeamActiveStatus.ACTIVE);
-        return myTeam.stream().map(team -> TeamResponse.TeamResponseDto.builder()
-                .id(team.getId())
-                .name(team.getName())
-                .teamImage(null)
-                .createdAt(team.getCreatedAt())
-                .build()).collect(Collectors.toList());
+    public TeamListResponseDto findMyTeams(Long memberId) {
+        entityChecker.findMemberById(memberId);
+        List<Team> myTeam = teamMemberRepository.findTeamsByMemberIdAndStatus(memberId, TeamActiveStatus.ACTIVE);
+        return toTeamListResponseDto(myTeam);
     }
 
     @Transactional
-    public void invite(Long memberId, Long teamId, TeamRequest.InviteMemberDto inviteMemberDto) {
-        Member targetMember = memberRepository.findByEmail(inviteMemberDto.getEmail())
-                .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
-
-        TeamMember teamMember = teamMemberRepository.findMemberWithRole(memberId, TeamRole.ADMIN)
-                .orElseThrow(() -> new TeamHandler(ErrorStatus.TEAM_MEMBER_UNAUTHORIZED));
-
-        notificationService.sendTeamInvitation(teamMember.getMember(), targetMember, teamId);
+    public void invite(Long memberId, Long teamId, InviteMemberDto inviteMemberDto) {
+        Member targetMember = entityChecker.findMemberByEmail(inviteMemberDto.getEmail());
+        TeamMember admin = entityChecker.findTeamMemberByMemberIdAndTeamIdAndRole(memberId, teamId, TeamRole.ADMIN);
+        notificationService.sendTeamInvitation(admin.getMember(), targetMember, teamId);
     }
 
     @Transactional
     public void accept(Long memberId, Long teamId) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        Member member = entityChecker.findMemberById(memberId);
+        Team team = entityChecker.findTeamById(teamId);
 
-        Team team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new TeamHandler(ErrorStatus.TEAM_NOT_FOUND));
-
-        teamMemberRepository.save(TeamMember.builder()
-                .member(member)
-                .team(team)
-                .role(TeamRole.MEMBER)
-                .build());
+        TeamMember teamMember = TeamMember.createMember(team, member);
+        teamMemberRepository.save(teamMember);
     }
 
-    public List<PostResponse.PostResponseDto> findTeamPosts(Long memberId, Long teamId) {
-        TeamMember teamMember = teamMemberRepository.findByMemberIdAndTeamId(memberId, teamId)
-                .orElseThrow(() -> new TeamHandler(ErrorStatus.TEAM_NOT_FOUND));
+    public PostListResponseDto findTeamPosts(Long memberId, Long teamId) {
+        entityChecker.findTeamMemberByMemberIdAndTeamId(memberId, teamId);
         List<Post> teamPosts = postRepository.findAllByTeamId(teamId);
-        return teamPosts.stream()
-                .map(teamPost -> PostResponse.PostResponseDto.builder()
-                        .id(teamPost.getId())
-                        .title(teamPost.getTitle())
-                        .content(teamPost.getContent())
-                        .build()).collect(Collectors.toList());
-
+        return PostMapper.toPostListResponseDto(teamPosts);
     }
 
+    // todo
     @Transactional
-    public Long deleteTeam(Long memberId, Long teamId) {
-        TeamMember member = teamMemberRepository.findMemberWithRole(memberId, TeamRole.ADMIN)
-                .orElseThrow(() -> new TeamHandler(ErrorStatus.TEAM_MEMBER_UNAUTHORIZED));
+    public void deleteTeam(Long memberId, Long teamId) {
+        TeamMember member = entityChecker.findTeamMemberByMemberIdAndTeamIdAndRole(memberId, teamId, TeamRole.ADMIN);
         Team team = member.getTeam();
-        team.updateStatus(TeamActiveStatus.INACTIVE);
-        return teamId;
+        team.delete();
     }
 }

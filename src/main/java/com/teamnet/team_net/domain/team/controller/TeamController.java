@@ -1,7 +1,7 @@
 package com.teamnet.team_net.domain.team.controller;
 
-import com.teamnet.team_net.domain.post.dto.PostResponse;
-import com.teamnet.team_net.domain.team.dto.TeamResponse;
+import com.teamnet.team_net.domain.team.dto.TeamResponse.TeamListResponseDto;
+import com.teamnet.team_net.domain.team.dto.TeamResponse.TeamResponseDto;
 import com.teamnet.team_net.domain.team.service.TeamService;
 import com.teamnet.team_net.global.config.auth.LoginMember;
 import com.teamnet.team_net.global.config.auth.dto.SessionMember;
@@ -10,7 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import static com.teamnet.team_net.domain.post.dto.PostResponse.PostListResponseDto;
 
 @RequiredArgsConstructor
 @RestController
@@ -20,41 +20,52 @@ public class TeamController {
     private final TeamService teamService;
 
     @PostMapping
-    public ApiResponse<Long> createTeam(@LoginMember SessionMember sessionMember, @Valid @RequestBody TeamRequest.CreateTeamDto request) {
+    public ApiResponse<TeamResponseDto> createTeam(
+            @LoginMember SessionMember sessionMember,
+            @Valid @RequestBody TeamRequest.CreateTeamDto request) {
         return ApiResponse.onSuccess(teamService.createTeam(sessionMember.getId(), request));
     }
 
     @GetMapping
-    public ApiResponse<List<TeamResponse.TeamResponseDto>> myTeam(@LoginMember SessionMember sessionMember) {
+    public ApiResponse<TeamListResponseDto> myTeam(
+            @LoginMember SessionMember sessionMember) {
         return ApiResponse.onSuccess(teamService.findMyTeams(sessionMember.getId()));
     }
 
     @GetMapping("/{teamId}")
-    public ApiResponse<List<PostResponse.PostResponseDto>> findTeamPosts(@LoginMember SessionMember sessionMember, @PathVariable("teamId") Long teamId) {
+    public ApiResponse<PostListResponseDto> findTeamPosts(
+            @LoginMember SessionMember sessionMember,
+            @PathVariable("teamId") Long teamId) {
         return ApiResponse.onSuccess(teamService.findTeamPosts(sessionMember.getId(), teamId));
     }
 
     @PostMapping("/{teamId}/invite")
-    public ApiResponse<Void> inviteMember(@LoginMember SessionMember sessionMember,
-                                          @RequestBody TeamRequest.InviteMemberDto inviteMemberDto,
-                                          @PathVariable Long teamId) {
+    public ApiResponse<Void> inviteMember(
+            @LoginMember SessionMember sessionMember,
+            @RequestBody TeamRequest.InviteMemberDto inviteMemberDto,
+            @PathVariable Long teamId) {
         teamService.invite(sessionMember.getId(), teamId, inviteMemberDto);
         return ApiResponse.onSuccess(null);
     }
 
     @PatchMapping("/{teamId}")
-    public ApiResponse<Long> deleteTeam(@LoginMember SessionMember sessionMember, @PathVariable("teamId") Long teamId) {
-        return ApiResponse.onSuccess(teamService.deleteTeam(sessionMember.getId(), teamId));
+    public ApiResponse<Void> deleteTeam(
+            @LoginMember SessionMember sessionMember,
+            @PathVariable("teamId") Long teamId) {
+        teamService.deleteTeam(sessionMember.getId(), teamId);
+        return ApiResponse.onSuccess(null);
     }
 
     @PostMapping("/{teamId}/accept")
-    public ApiResponse<String> acceptInvitation(@LoginMember SessionMember sessionMember, @PathVariable Long teamId) {
+    public ApiResponse<String> acceptInvitation(
+            @LoginMember SessionMember sessionMember,
+            @PathVariable Long teamId) {
         teamService.accept(sessionMember.getId(), teamId);
         return ApiResponse.onSuccess("Invitation accepted");
     }
 
     @PostMapping("/{teamId}/reject")
-    public ApiResponse<String> rejectInvitation(@LoginMember SessionMember sessionMember, @PathVariable Long teamId) {
+    public ApiResponse<String> rejectInvitation() {
         return ApiResponse.onSuccess("Invitation rejected");
     }
 }
