@@ -39,7 +39,7 @@ public class PostService {
 
     @Transactional
     public PostResponseDto save(Long memberId, Long teamId, PostSaveDto postSaveDto) {
-        TeamMember teamMember = entityChecker.findByMemberIdAndTeamId(memberId, teamId);
+        TeamMember teamMember = entityChecker.findTeamMemberByMemberIdAndTeamId(memberId, teamId);
         Post savedPost = postRepository.save(toPost(postSaveDto, teamMember));
         return toPostResponseDto(savedPost);
     }
