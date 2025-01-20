@@ -1,5 +1,7 @@
 package com.teamnet.team_net.domain.member.controller;
 
+import com.teamnet.team_net.domain.member.dto.MemberResponse;
+import com.teamnet.team_net.domain.member.dto.MemberResponse.UpdateMemberResponseDto;
 import com.teamnet.team_net.domain.member.service.MemberService;
 import com.teamnet.team_net.domain.notification.dto.NotificationResponse;
 import com.teamnet.team_net.domain.notification.service.NotificationService;
@@ -16,6 +18,9 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
 
+import static com.teamnet.team_net.domain.member.controller.MemberRequest.*;
+import static com.teamnet.team_net.domain.notification.dto.NotificationResponse.*;
+
 @RequiredArgsConstructor
 @RequestMapping("/api/members")
 @RestController
@@ -25,20 +30,21 @@ public class MemberController {
     private final NotificationService notificationService;
 
     @PostMapping("/additional")
-    public ApiResponse<Long> saveAdditionalInfo(
-            @Valid @RequestBody MemberRequest.AdditionalMemberInfoDto memberInfoDto,
-            @LoginMember SessionMember sessionMember,
-            HttpServletRequest request, HttpServletResponse response) {
-        return ApiResponse.onSuccess(memberService.saveAdditionalMemberInfo(request, response, memberInfoDto, sessionMember.getId()));
+    public ApiResponse<UpdateMemberResponseDto> saveAdditionalInfo(
+            @Valid @RequestBody AdditionalMemberInfoDto memberInfoDto,
+            @LoginMember SessionMember sessionMember) {
+        return ApiResponse.onSuccess(memberService.saveAdditionalMemberInfo(memberInfoDto, sessionMember.getId()));
     }
 
     @GetMapping("/notification")
-    public ApiResponse<List<NotificationResponse.NotificationResponseDto>> alarm(@LoginMember SessionMember sessionMember) {
+    public ApiResponse<NotificationListResponseDto> alarm(
+            @LoginMember SessionMember sessionMember) {
         return ApiResponse.onSuccess(memberService.findNotificationList(sessionMember.getId()));
     }
 
     @GetMapping(value = "/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter subscribe(@LoginMember SessionMember sessionMember) {
+    public SseEmitter subscribe(
+            @LoginMember SessionMember sessionMember) {
         return notificationService.subscribe(sessionMember.getId());
     }
 }
