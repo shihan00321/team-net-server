@@ -1,9 +1,12 @@
 package com.teamnet.team_net.global.config;
 
 import com.teamnet.team_net.domain.member.enums.Role;
+import com.teamnet.team_net.domain.member.service.SecurityContextManager;
 import com.teamnet.team_net.global.config.auth.CustomAccessDeniedHandler;
 import com.teamnet.team_net.global.config.auth.CustomOAuth2UserService;
 import com.teamnet.team_net.global.config.auth.OAuth2LoginSuccessHandler;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -34,9 +37,9 @@ public class SecurityConfig {
                 .httpBasic(HttpBasicConfigurer::disable);
 
         http.oauth2Login((oauth2) -> oauth2
-                .userInfoEndpoint((userInfoEndpointConfig) ->
-                        userInfoEndpointConfig.userService(customOauth2UserService))
-                .successHandler(oAuth2LoginSuccessHandler))
+                        .userInfoEndpoint((userInfoEndpointConfig) ->
+                                userInfoEndpointConfig.userService(customOauth2UserService))
+                        .successHandler(oAuth2LoginSuccessHandler))
                 .exceptionHandling(handler -> handler
                         .accessDeniedHandler(customAccessDeniedHandler));
 
@@ -52,5 +55,14 @@ public class SecurityConfig {
     @Bean
     public SecurityContextRepository securityContextRepository() {
         return new HttpSessionSecurityContextRepository();
+    }
+
+    @Bean
+    public SecurityContextManager securityContextManager(
+            SecurityContextRepository securityContextRepository,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
+        return new SecurityContextManager(securityContextRepository, request, response);
     }
 }
