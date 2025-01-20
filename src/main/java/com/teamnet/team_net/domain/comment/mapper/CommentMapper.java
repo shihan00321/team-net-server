@@ -1,6 +1,5 @@
 package com.teamnet.team_net.domain.comment.mapper;
 
-import com.teamnet.team_net.domain.comment.controller.CommentRequest;
 import com.teamnet.team_net.domain.comment.controller.CommentRequest.CreateCommentDto;
 import com.teamnet.team_net.domain.comment.dto.CommentResponse;
 import com.teamnet.team_net.domain.comment.entity.Comment;

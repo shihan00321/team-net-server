@@ -1,7 +1,5 @@
 package com.teamnet.team_net.domain.teammember.repository;
 
-import com.teamnet.team_net.domain.member.entity.Member;
-import com.teamnet.team_net.domain.member.enums.Role;
 import com.teamnet.team_net.domain.team.entity.Team;
 import com.teamnet.team_net.domain.team.enums.TeamActiveStatus;
 import com.teamnet.team_net.domain.teammember.entity.TeamMember;

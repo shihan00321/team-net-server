@@ -1,6 +1,5 @@
 package com.teamnet.team_net.domain.comment.controller;
 
-import com.teamnet.team_net.domain.comment.dto.CommentResponse;
 import com.teamnet.team_net.domain.comment.dto.CommentResponse.CommentResponseDTO;
 import com.teamnet.team_net.domain.comment.service.CommentService;
 import com.teamnet.team_net.global.config.auth.LoginMember;
