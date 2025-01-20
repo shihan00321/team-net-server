@@ -76,7 +76,6 @@ public class TeamService {
         return PostMapper.toPostListResponseDto(teamPosts);
     }
 
-    // todo
     @Transactional
     public void deleteTeam(Long memberId, Long teamId) {
         TeamMember member = entityChecker.findTeamMemberByMemberIdAndTeamIdAndRole(memberId, teamId, TeamRole.ADMIN);
