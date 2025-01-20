@@ -67,7 +67,7 @@ public class EntityChecker {
     }
 
     public TeamMember findTeamMemberByMemberIdAndTeamIdAndRole(Long memberId, Long teamId, TeamRole role) {
-        return teamMemberRepository.findByMemberIdAndTeamIdAndRole(memberId, teamId, TeamRole.ADMIN)
+        return teamMemberRepository.findByMemberIdAndTeamIdAndRole(memberId, teamId, role)
                 .orElseThrow(() -> new TeamHandler(ErrorStatus.TEAM_MEMBER_UNAUTHORIZED));
     }
 }
