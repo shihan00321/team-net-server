@@ -2,11 +2,8 @@ package com.teamnet.team_net.domain.notification.service;
 
 import com.teamnet.team_net.domain.member.entity.Member;
 import com.teamnet.team_net.domain.notification.NotificationGenerator;
-import com.teamnet.team_net.domain.notification.dto.NotificationResponse;
 import com.teamnet.team_net.domain.notification.dto.NotificationResponse.NotificationResponseDto;
 import com.teamnet.team_net.domain.notification.entity.Notification;
-import com.teamnet.team_net.domain.notification.enums.NotificationType;
-import com.teamnet.team_net.domain.notification.mapper.NotificationMapper;
 import com.teamnet.team_net.domain.notification.repository.NotificationRepository;
 import com.teamnet.team_net.domain.sse.EmitterRepository;
 import com.teamnet.team_net.global.exception.handler.NotificationHandler;
@@ -19,7 +16,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
 
-import static com.teamnet.team_net.domain.notification.mapper.NotificationMapper.*;
+import static com.teamnet.team_net.domain.notification.mapper.NotificationMapper.toNotificationResponseDto;
 
 @Slf4j
 @RequiredArgsConstructor
