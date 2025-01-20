@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class TeamResponse {
 
@@ -14,5 +15,11 @@ public class TeamResponse {
         String name;
         String teamImage;
         LocalDateTime createdAt;
+    }
+
+    @Getter
+    @Builder
+    public static class TeamListResponseDto {
+        List<TeamResponseDto> teams;
     }
 }
