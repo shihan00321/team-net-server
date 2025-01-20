@@ -1,7 +1,6 @@
 package com.teamnet.team_net.domain.notification.service;
 
 import com.teamnet.team_net.domain.member.entity.Member;
-import com.teamnet.team_net.domain.notification.NotificationGenerator;
 import com.teamnet.team_net.domain.notification.dto.NotificationResponse.NotificationResponseDto;
 import com.teamnet.team_net.domain.notification.entity.Notification;
 import com.teamnet.team_net.domain.notification.repository.NotificationRepository;
@@ -30,7 +29,6 @@ public class NotificationService {
 
     private final NotificationRepository notificationRepository;
     private final EmitterRepository emitterRepository;
-    private final NotificationGenerator notificationGenerator;
 
     public SseEmitter subscribe(Long memberId) {
         SseEmitter sseEmitter = createEmitter(memberId);
@@ -41,7 +39,7 @@ public class NotificationService {
     @Transactional
     public void sendTeamInvitation(Member sender, Member recipient, Long teamId) {
         // 팩토리 사용
-        Notification notification = notificationGenerator.createTeamInvitation(sender, recipient, teamId);
+        Notification notification = Notification.createTeamInvitation(sender, recipient, teamId);
 
         // 저장
         notificationRepository.save(notification);

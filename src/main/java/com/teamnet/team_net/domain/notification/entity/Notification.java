@@ -37,4 +37,14 @@ public class Notification extends BaseEntity {
     @Column(nullable = false)
     private Boolean isRead;
 
+    public static Notification createTeamInvitation(Member sender, Member recipient, Long teamId) {
+        return Notification.builder()
+                .title("팀 초대 메시지")
+                .message(sender.getNickname() + "님이 팀에 초대하였습니다.")
+                .member(recipient)
+                .referenceId(teamId)
+                .type(NotificationType.TEAM_INVITATION)
+                .isRead(false)
+                .build();
+    }
 }
