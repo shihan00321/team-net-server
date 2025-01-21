@@ -1,6 +1,6 @@
 package com.teamnet.team_net.domain.member.controller;
 
-import com.teamnet.team_net.domain.member.dto.MemberResponse.UpdateMemberResponseDto;
+import com.teamnet.team_net.domain.member.service.dto.MemberResponse.UpdateMemberResponseDto;
 import com.teamnet.team_net.domain.member.service.MemberService;
 import com.teamnet.team_net.domain.notification.service.NotificationService;
 import com.teamnet.team_net.global.config.auth.LoginMember;
@@ -12,8 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import static com.teamnet.team_net.domain.member.controller.MemberRequest.AdditionalMemberInfoDto;
-import static com.teamnet.team_net.domain.notification.dto.NotificationResponse.NotificationListResponseDto;
+import static com.teamnet.team_net.domain.notification.service.dto.NotificationResponse.NotificationListResponseDto;
 
 @RequiredArgsConstructor
 @RequestMapping("/api/members")
@@ -25,9 +24,9 @@ public class MemberController {
 
     @PostMapping("/additional")
     public ApiResponse<UpdateMemberResponseDto> saveAdditionalInfo(
-            @Valid @RequestBody AdditionalMemberInfoDto memberInfoDto,
+            @Valid @RequestBody MemberRequest.AdditionalMemberInfoDTO memberInfoDto,
             @LoginMember SessionMember sessionMember) {
-        return ApiResponse.onSuccess(memberService.saveAdditionalMemberInfo(memberInfoDto, sessionMember.getId()));
+        return ApiResponse.onSuccess(memberService.saveAdditionalMemberInfo(memberInfoDto.toAdditionalMemberInfoServiceDTO(), sessionMember.getId()));
     }
 
     @GetMapping("/notification")
