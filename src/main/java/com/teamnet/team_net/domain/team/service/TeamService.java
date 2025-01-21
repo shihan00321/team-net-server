@@ -5,9 +5,12 @@ import com.teamnet.team_net.domain.notification.service.NotificationService;
 import com.teamnet.team_net.domain.post.entity.Post;
 import com.teamnet.team_net.domain.post.mapper.PostMapper;
 import com.teamnet.team_net.domain.post.repository.PostRepository;
+import com.teamnet.team_net.domain.post.service.dto.PostResponse;
 import com.teamnet.team_net.domain.team.entity.Team;
 import com.teamnet.team_net.domain.team.enums.TeamActiveStatus;
 import com.teamnet.team_net.domain.team.repository.TeamRepository;
+import com.teamnet.team_net.domain.team.service.dto.TeamResponse;
+import com.teamnet.team_net.domain.team.service.dto.TeamServiceDTO;
 import com.teamnet.team_net.domain.teammember.entity.TeamMember;
 import com.teamnet.team_net.domain.teammember.enums.TeamRole;
 import com.teamnet.team_net.domain.teammember.repository.TeamMemberRepository;
@@ -18,11 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.teamnet.team_net.domain.post.dto.PostResponse.PostListResponseDto;
-import static com.teamnet.team_net.domain.team.controller.TeamRequest.CreateTeamDto;
-import static com.teamnet.team_net.domain.team.controller.TeamRequest.InviteMemberDto;
-import static com.teamnet.team_net.domain.team.dto.TeamResponse.TeamListResponseDto;
-import static com.teamnet.team_net.domain.team.dto.TeamResponse.TeamResponseDto;
 import static com.teamnet.team_net.domain.team.mapper.TeamMapper.*;
 
 @RequiredArgsConstructor
@@ -37,7 +35,7 @@ public class TeamService {
     private final EntityChecker entityChecker;
 
     @Transactional
-    public TeamResponseDto createTeam(Long memberId, CreateTeamDto request) {
+    public TeamResponse.TeamResponseDto createTeam(Long memberId, TeamServiceDTO.CreateTeamServiceDTO request) {
         Member member = entityChecker.findMemberById(memberId);
         Team team = toTeam(request);
         teamRepository.save(team);
@@ -48,14 +46,14 @@ public class TeamService {
         return toTeamResponseDto(team);
     }
 
-    public TeamListResponseDto findMyTeams(Long memberId) {
+    public TeamResponse.TeamListResponseDto findMyTeams(Long memberId) {
         entityChecker.findMemberById(memberId);
         List<Team> myTeam = teamMemberRepository.findTeamsByMemberIdAndStatus(memberId, TeamActiveStatus.ACTIVE);
         return toTeamListResponseDto(myTeam);
     }
 
     @Transactional
-    public void invite(Long memberId, Long teamId, InviteMemberDto inviteMemberDto) {
+    public void invite(Long memberId, Long teamId, TeamServiceDTO.InviteMemberServiceDTO inviteMemberDto) {
         Member targetMember = entityChecker.findMemberByEmail(inviteMemberDto.getEmail());
         TeamMember admin = entityChecker.findTeamMemberByMemberIdAndTeamIdAndRole(memberId, teamId, TeamRole.ADMIN);
         notificationService.sendTeamInvitation(admin.getMember(), targetMember, teamId);
@@ -70,7 +68,7 @@ public class TeamService {
         teamMemberRepository.save(teamMember);
     }
 
-    public PostListResponseDto findTeamPosts(Long memberId, Long teamId) {
+    public PostResponse.PostListResponseDto findTeamPosts(Long memberId, Long teamId) {
         entityChecker.findTeamMemberByMemberIdAndTeamId(memberId, teamId);
         List<Post> teamPosts = postRepository.findAllByTeamId(teamId);
         return PostMapper.toPostListResponseDto(teamPosts);

@@ -1,9 +1,9 @@
 package com.teamnet.team_net.domain.notification.service;
 
 import com.teamnet.team_net.domain.member.entity.Member;
-import com.teamnet.team_net.domain.notification.dto.NotificationResponse.NotificationResponseDto;
 import com.teamnet.team_net.domain.notification.entity.Notification;
 import com.teamnet.team_net.domain.notification.repository.NotificationRepository;
+import com.teamnet.team_net.domain.notification.service.dto.NotificationResponse;
 import com.teamnet.team_net.domain.sse.EmitterRepository;
 import com.teamnet.team_net.global.exception.handler.NotificationHandler;
 import com.teamnet.team_net.global.response.code.status.ErrorStatus;
@@ -45,7 +45,7 @@ public class NotificationService {
         notificationRepository.save(notification);
 
         // 응답 DTO 변환
-        NotificationResponseDto response = toNotificationResponseDto(notification);
+        NotificationResponse.NotificationResponseDto response = toNotificationResponseDto(notification);
 
         // 알림 전송
         emitterRepository.get(recipient.getId())
@@ -76,7 +76,7 @@ public class NotificationService {
         return emitter;
     }
 
-    private void sendNotificationEvent(SseEmitter emitter, Long memberId, NotificationResponseDto response) {
+    private void sendNotificationEvent(SseEmitter emitter, Long memberId, NotificationResponse.NotificationResponseDto response) {
         try {
             emitter.send(SseEmitter.event()
                     .name(NOTIFICATION_NAME)

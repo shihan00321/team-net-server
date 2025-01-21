@@ -1,9 +1,11 @@
 package com.teamnet.team_net.domain.post.service;
 
-import com.teamnet.team_net.domain.post.dto.PostResponse.PostResponseDto;
+import com.teamnet.team_net.domain.post.controller.PostRequest;
 import com.teamnet.team_net.domain.post.entity.Post;
 import com.teamnet.team_net.domain.post.mapper.PostMapper;
 import com.teamnet.team_net.domain.post.repository.PostRepository;
+import com.teamnet.team_net.domain.post.service.dto.PostResponse;
+import com.teamnet.team_net.domain.post.service.dto.PostServiceDTO;
 import com.teamnet.team_net.domain.teammember.entity.TeamMember;
 import com.teamnet.team_net.global.utils.checker.AuthorizationFacade;
 import com.teamnet.team_net.global.utils.checker.EntityChecker;
@@ -13,9 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.teamnet.team_net.domain.post.controller.PostRequest.PostSaveDto;
-import static com.teamnet.team_net.domain.post.controller.PostRequest.PostUpdateDto;
-import static com.teamnet.team_net.domain.post.dto.PostResponse.PostListResponseDto;
 import static com.teamnet.team_net.domain.post.mapper.PostMapper.toPost;
 import static com.teamnet.team_net.domain.post.mapper.PostMapper.toPostResponseDto;
 
@@ -27,25 +26,25 @@ public class PostService {
     private final EntityChecker entityChecker;
     private final AuthorizationFacade authorizationFacade;
 
-    public PostResponseDto findOne(Long postId) {
+    public PostResponse.PostResponseDto findOne(Long postId) {
         Post post = entityChecker.findPostById(postId);
         return toPostResponseDto(post);
     }
 
-    public PostListResponseDto findAllByTeamId(Long teamId) {
+    public PostResponse.PostListResponseDto findAllByTeamId(Long teamId) {
         List<Post> posts = postRepository.findAllByTeamId(teamId);
         return PostMapper.toPostListResponseDto(posts);
     }
 
     @Transactional
-    public PostResponseDto save(Long memberId, Long teamId, PostSaveDto postSaveDto) {
+    public PostResponse.PostResponseDto save(Long memberId, Long teamId, PostServiceDTO.PostSaveServiceDTO postSaveDto) {
         TeamMember teamMember = entityChecker.findTeamMemberByMemberIdAndTeamId(memberId, teamId);
         Post savedPost = postRepository.save(toPost(postSaveDto, teamMember));
         return toPostResponseDto(savedPost);
     }
 
     @Transactional
-    public PostResponseDto update(Long memberId, Long postId, PostUpdateDto postUpdateDto) {
+    public PostResponse.PostResponseDto update(Long memberId, Long postId, PostServiceDTO.PostUpdateServiceDTO postUpdateDto) {
         Post post = entityChecker.findPostById(postId);
         authorizationFacade.validate("postAuthorizationChecker", memberId, post);
         post.update(postUpdateDto.getTitle(), postUpdateDto.getContent());

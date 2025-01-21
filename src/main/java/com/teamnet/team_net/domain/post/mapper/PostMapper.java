@@ -2,8 +2,9 @@ package com.teamnet.team_net.domain.post.mapper;
 
 import com.teamnet.team_net.domain.comment.mapper.CommentMapper;
 import com.teamnet.team_net.domain.post.controller.PostRequest;
-import com.teamnet.team_net.domain.post.dto.PostResponse;
 import com.teamnet.team_net.domain.post.entity.Post;
+import com.teamnet.team_net.domain.post.service.dto.PostResponse;
+import com.teamnet.team_net.domain.post.service.dto.PostServiceDTO;
 import com.teamnet.team_net.domain.teammember.entity.TeamMember;
 
 import java.util.Collections;
@@ -32,7 +33,7 @@ public abstract class PostMapper {
                 .build();
     }
 
-    public static Post toPost(PostRequest.PostSaveDto postSaveDto, TeamMember teamMember) {
+    public static Post toPost(PostServiceDTO.PostSaveServiceDTO postSaveDto, TeamMember teamMember) {
         return Post.builder()
                 .title(postSaveDto.getTitle())
                 .team(teamMember.getTeam())
