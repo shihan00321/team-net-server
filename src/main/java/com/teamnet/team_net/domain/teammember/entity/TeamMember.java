@@ -1,9 +1,9 @@
 package com.teamnet.team_net.domain.teammember.entity;
 
-import com.teamnet.team_net.global.common.entity.BaseTimeEntity;
 import com.teamnet.team_net.domain.member.entity.Member;
 import com.teamnet.team_net.domain.team.entity.Team;
 import com.teamnet.team_net.domain.teammember.enums.TeamRole;
+import com.teamnet.team_net.global.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -29,4 +29,21 @@ public class TeamMember extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_id")
     private Team team;
+
+
+    public static TeamMember createAdmin(Team team, Member member) {
+        return TeamMember.builder()
+                .team(team)
+                .member(member)
+                .role(TeamRole.ADMIN)
+                .build();
+    }
+
+    public static TeamMember createMember(Team team, Member member) {
+        return TeamMember.builder()
+                .team(team)
+                .member(member)
+                .role(TeamRole.MEMBER)
+                .build();
+    }
 }

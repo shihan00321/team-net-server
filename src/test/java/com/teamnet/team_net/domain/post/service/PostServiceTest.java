@@ -99,7 +99,8 @@ class PostServiceTest {
         postRepository.saveAll(posts);
 
         // when
-        List<PostResponse.PostResponseDto> findAll = postService.findAllByTeamId(testTeam.getId());
+        PostResponse.PostListResponseDto listResponseDto = postService.findAllByTeamId(testTeam.getId());
+        List<PostResponse.PostResponseDto> findAll = listResponseDto.getPosts();
 
         // then
         assertThat(findAll).hasSize(5);
@@ -114,10 +115,10 @@ class PostServiceTest {
         PostRequest.PostSaveDto postSaveDto = createPostSaveDto();
 
         // when
-        Long savedPostId = postService.save(testMember.getId(), testTeam.getId(), postSaveDto);
+        PostResponse.PostResponseDto responseDto = postService.save(testMember.getId(), testTeam.getId(), postSaveDto);
 
         // then
-        Post savedPost = postRepository.findById(savedPostId)
+        Post savedPost = postRepository.findById(responseDto.getId())
                 .orElseThrow(() -> new AssertionError("저장된 게시글을 찾을 수 없습니다."));
         assertThat(savedPost.getTitle()).isEqualTo(TEST_TITLE);
         assertThat(savedPost.getContent()).isEqualTo(TEST_CONTENT);
@@ -131,14 +132,14 @@ class PostServiceTest {
         PostRequest.PostUpdateDto updateRequest = createPostUpdateDto();
 
         // when
-        Long updatedId = postService.update(testMember.getId(), savedPost.getId(), updateRequest);
-        PostResponse.PostResponseDto response = postService.findOne(updatedId);
+        PostResponse.PostResponseDto update = postService.update(testMember.getId(), savedPost.getId(), updateRequest);
+        PostResponse.PostResponseDto response = postService.findOne(update.getId());
 
         // then
         assertThat(response).isNotNull();
         assertThat(response.getTitle()).isEqualTo(UPDATED_TITLE);
         assertThat(response.getContent()).isEqualTo(TEST_CONTENT);
-        assertThat(response.getId()).isEqualTo(updatedId);
+        assertThat(response.getId()).isEqualTo(update.getId());
     }
 
     @Test
@@ -159,10 +160,9 @@ class PostServiceTest {
         Post post = createAndSavePost(testMember, testTeam);
 
         // when
-        Long deletedId = postService.delete(testMember.getId(), post.getId());
+       postService.delete(testMember.getId(), post.getId());
 
         // then
-        assertThat(deletedId).isEqualTo(post.getId());
         assertThat(postRepository.findById(post.getId())).isEmpty();
     }
 

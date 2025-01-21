@@ -15,4 +15,11 @@ public class PostResponse {
         String content;
         List<CommentResponse.CommentResponseDTO> comments;
     }
+
+    @Getter
+    @Builder
+    public static class PostListResponseDto {
+        List<PostResponseDto> posts;
+    }
+
 }

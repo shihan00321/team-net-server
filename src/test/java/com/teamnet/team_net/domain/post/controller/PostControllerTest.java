@@ -90,16 +90,17 @@ class PostControllerTest {
         List<PostResponse.PostResponseDto> posts = IntStream.rangeClosed(1, 5)
                 .mapToObj(i -> createPostResponseDto((long) i, TEST_TITLE + i, TEST_CONTENT + i))
                 .collect(Collectors.toList());
+        PostResponse.PostListResponseDto response = PostResponse.PostListResponseDto.builder().posts(posts).build();
 
-        when(postService.findAllByTeamId(TEST_TEAM_ID)).thenReturn(posts);
+        when(postService.findAllByTeamId(TEST_TEAM_ID)).thenReturn(response);
 
         performGetRequest(BASE_URL, TEST_TEAM_ID)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.isSuccess").value(true))
-                .andExpect(jsonPath("$.result", hasSize(5)))
-                .andExpect(jsonPath("$.result[1].id").value(2L))
-                .andExpect(jsonPath("$.result[1].title").value(TEST_TITLE + "2"))
-                .andExpect(jsonPath("$.result[1].content").value(TEST_CONTENT + "2"))
+                .andExpect(jsonPath("$.result.posts", hasSize(5)))
+                .andExpect(jsonPath("$.result.posts[1].id").value(2L))
+                .andExpect(jsonPath("$.result.posts[1].title").value(TEST_TITLE + "2"))
+                .andExpect(jsonPath("$.result.posts[1].content").value(TEST_CONTENT + "2"))
                 .andDo(print());
     }
 
@@ -108,13 +109,15 @@ class PostControllerTest {
     @WithMockUser(roles = "USER")
     void save() throws Exception {
         PostRequest.PostSaveDto request = createPostSaveDto(TEST_TITLE, TEST_CONTENT);
+        PostResponse.PostResponseDto responseDto = createPostResponseDto(TEST_POST_ID, TEST_TITLE, TEST_CONTENT);
         given(postService.save(eq(sessionMember.getId()), eq(TEST_TEAM_ID), any(PostRequest.PostSaveDto.class)))
-                .willReturn(sessionMember.getId());
+                .willReturn(responseDto);
 
         performPostRequest(request, TEST_TEAM_ID)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.isSuccess").value(true))
-                .andExpect(jsonPath("$.result").value(TEST_POST_ID))
+                .andExpect(jsonPath("$.result.title").value(responseDto.getTitle()))
+                .andExpect(jsonPath("$.result.content").value(responseDto.getContent()))
                 .andDo(print());
     }
 
@@ -137,13 +140,14 @@ class PostControllerTest {
     @DisplayName("게시글 수정 테스트")
     @WithMockUser(roles = "USER")
     void update() throws Exception {
+        PostResponse.PostResponseDto responseDto = createPostResponseDto(TEST_POST_ID, TEST_TITLE, TEST_CONTENT);
         PostRequest.PostUpdateDto updateDto = PostRequest.PostUpdateDto.builder()
                 .title("수정된 제목")
                 .content("수정된 내용")
                 .build();
 
         when(postService.update(eq(sessionMember.getId()), eq(TEST_POST_ID), any(PostRequest.PostUpdateDto.class)))
-                .thenReturn(TEST_POST_ID);
+                .thenReturn(responseDto);
 
         mvc.perform(patch(BASE_URL + "/{postId}", TEST_TEAM_ID, TEST_POST_ID)
                         .session(mockSession)
@@ -151,7 +155,8 @@ class PostControllerTest {
                         .content(objectMapper.writeValueAsString(updateDto))
                         .with(csrf()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result").value(TEST_POST_ID))
+                .andExpect(jsonPath("$.result.title").value(responseDto.getTitle()))
+                .andExpect(jsonPath("$.result.content").value(responseDto.getContent()))
                 .andDo(print());
     }
 
@@ -159,14 +164,13 @@ class PostControllerTest {
     @DisplayName("게시글 삭제 테스트")
     @WithMockUser(roles = "USER")
     void delete_test() throws Exception {
-        when(postService.delete(sessionMember.getId(), TEST_POST_ID)).thenReturn(TEST_POST_ID);
+        doNothing().when(postService).delete(sessionMember.getId(), TEST_POST_ID);
 
         mvc.perform(delete(BASE_URL + "/{postId}", TEST_TEAM_ID, TEST_POST_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .session(mockSession)
                         .with(csrf()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result").value(TEST_POST_ID))
                 .andDo(print());
     }
 

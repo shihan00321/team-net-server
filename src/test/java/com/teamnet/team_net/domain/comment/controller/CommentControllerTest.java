@@ -1,6 +1,7 @@
 package com.teamnet.team_net.domain.comment.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.teamnet.team_net.domain.comment.dto.CommentResponse;
 import com.teamnet.team_net.domain.comment.service.CommentService;
 import com.teamnet.team_net.domain.member.entity.Member;
 import com.teamnet.team_net.global.config.SecurityConfig;
@@ -20,8 +21,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
+import java.util.ArrayList;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -68,23 +72,24 @@ class CommentControllerTest {
     @WithMockUser(roles = "USER")
     void create_test() throws Exception {
         CommentRequest.CreateCommentDto request = createCommentDto(TEST_CONTENT, null);
+        CommentResponse.CommentResponseDTO response = createCommentResponseDTO(request);
 
-        when(commentService.createComment(eq(sessionMember.getId()), eq(TEST_TEAM_ID), eq(TEST_POST_ID), any(CommentRequest.CreateCommentDto.class))).thenReturn(TEST_COMMENT_ID);
+        when(commentService.createComment(eq(sessionMember.getId()), eq(TEST_TEAM_ID), eq(TEST_POST_ID), any(CommentRequest.CreateCommentDto.class)))
+                .thenReturn(response);
         ResultActions actions = performRequest(post(BASE_URL, TEST_TEAM_ID, TEST_POST_ID), request);
-        verifySuccessResponse(actions, TEST_COMMENT_ID);
+        verifySuccessResponse(actions, response);
     }
-
-
 
     @Test
     @DisplayName("대댓글 생성 기능 테스트")
     @WithMockUser(roles = "USER")
     void create_in_comment_test() throws Exception {
         CommentRequest.CreateCommentDto request = createCommentDto(TEST_CONTENT, 1L);
-
-        when(commentService.createComment(eq(sessionMember.getId()), eq(TEST_TEAM_ID), eq(TEST_POST_ID), any(CommentRequest.CreateCommentDto.class))).thenReturn(TEST_COMMENT_ID);
+        CommentResponse.CommentResponseDTO response = createCommentResponseDTO(request);
+        when(commentService.createComment(eq(sessionMember.getId()), eq(TEST_TEAM_ID), eq(TEST_POST_ID), any(CommentRequest.CreateCommentDto.class)))
+                .thenReturn(response);
         ResultActions actions = performRequest(post(BASE_URL, TEST_TEAM_ID, TEST_POST_ID), request);
-        verifySuccessResponse(actions, TEST_COMMENT_ID);
+        verifySuccessResponse(actions, response);
     }
 
     @Test
@@ -92,23 +97,21 @@ class CommentControllerTest {
     @WithMockUser(roles = "USER")
     void update_test() throws Exception {
         CommentRequest.CreateCommentDto request = createCommentDto("수정된 댓글", null);
-
+        CommentResponse.CommentResponseDTO response = createCommentResponseDTO(request);
         when(commentService.updateComment(eq(sessionMember.getId()), eq(TEST_COMMENT_ID), any(CommentRequest.CreateCommentDto.class)))
-                .thenReturn(TEST_COMMENT_ID);
+                .thenReturn(response);
 
         ResultActions actions = performRequest(patch(BASE_URL_WITH_COMMENT, TEST_TEAM_ID, TEST_POST_ID, TEST_COMMENT_ID), request);
-        verifySuccessResponse(actions, TEST_COMMENT_ID);
+        verifySuccessResponse(actions, response);
     }
 
     @Test
     @DisplayName("댓글 삭제 기능 테스트")
     @WithMockUser(roles = "USER")
     void delete_test() throws Exception {
-        when(commentService.deleteComment(sessionMember.getId(), TEST_COMMENT_ID))
-                .thenReturn(TEST_COMMENT_ID);
-
+        doNothing().when(commentService).deleteComment(sessionMember.getId(), TEST_COMMENT_ID);
         ResultActions actions = performRequest(delete(BASE_URL_WITH_COMMENT, TEST_TEAM_ID, TEST_POST_ID, TEST_COMMENT_ID), null);
-        verifySuccessResponse(actions, TEST_COMMENT_ID);
+        verifySuccessResponse(actions, null);
     }
 
     private CommentRequest.CreateCommentDto createCommentDto(String content, Long parentId) {
@@ -126,10 +129,20 @@ class CommentControllerTest {
                 .with(csrf()));
     }
 
-    private void verifySuccessResponse(ResultActions actions, Long expectedId) throws Exception {
-        actions.andExpect(status().isOk())
-                .andExpect(jsonPath("$.isSuccess").value(true))
-                .andExpect(jsonPath("$.result").value(expectedId))
-                .andDo(print());
+    private <T> void verifySuccessResponse(ResultActions actions, T expected) throws Exception {
+        if (expected instanceof CommentResponse.CommentResponseDTO) {
+            actions.andExpect(status().isOk())
+                    .andExpect(jsonPath("$.isSuccess").value(true))
+                    .andExpect(jsonPath("$.result.content").value(((CommentResponse.CommentResponseDTO) expected).getContent()))
+                    .andDo(print());
+        }
+    }
+
+    private static CommentResponse.CommentResponseDTO createCommentResponseDTO(CommentRequest.CreateCommentDto request) {
+        return CommentResponse.CommentResponseDTO.builder()
+                .commentId(TEST_COMMENT_ID)
+                .content(request.getContent())
+                .parentId((request.getParentId() == null) ? null : request.getParentId())
+                .build();
     }
 }

@@ -22,7 +22,7 @@ public class Team extends BaseEntity {
     @Column(nullable = false)
     private TeamActiveStatus status;
 
-    public void updateStatus(TeamActiveStatus status) {
-        this.status = status;
+    public void delete() {
+        this.status = TeamActiveStatus.INACTIVE;
     }
 }
