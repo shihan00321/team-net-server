@@ -3,6 +3,7 @@ package com.teamnet.team_net.domain.comment.service;
 import com.teamnet.team_net.domain.comment.controller.CommentRequest;
 import com.teamnet.team_net.domain.comment.entity.Comment;
 import com.teamnet.team_net.domain.comment.repository.CommentRepository;
+import com.teamnet.team_net.domain.comment.service.dto.CommentServiceDTO;
 import com.teamnet.team_net.domain.post.entity.Post;
 import com.teamnet.team_net.global.utils.checker.AuthorizationFacade;
 import com.teamnet.team_net.global.utils.checker.EntityChecker;
@@ -10,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.teamnet.team_net.domain.comment.dto.CommentResponse.CommentResponseDTO;
+import static com.teamnet.team_net.domain.comment.service.dto.CommentResponse.CommentResponseDTO;
 import static com.teamnet.team_net.domain.comment.mapper.CommentMapper.toComment;
 import static com.teamnet.team_net.domain.comment.mapper.CommentMapper.toCommentResponseDTO;
 
@@ -23,7 +24,7 @@ public class CommentService {
     private final AuthorizationFacade authorizationFacade;
 
     @Transactional
-    public CommentResponseDTO createComment(Long memberId, Long teamId, Long postId, CommentRequest.CreateCommentDto request) {
+    public CommentResponseDTO createComment(Long memberId, Long teamId, Long postId, CommentServiceDTO.CreateCommentServiceDto request) {
         authorizationFacade.validate("teamAuthorizationChecker", memberId, teamId);
 
         Post post = entityChecker.findPostById(postId);
@@ -34,7 +35,7 @@ public class CommentService {
     }
 
     @Transactional
-    public CommentResponseDTO updateComment(Long memberId, Long commentId, CommentRequest.CreateCommentDto request) {
+    public CommentResponseDTO updateComment(Long memberId, Long commentId, CommentServiceDTO.UpdateCommentServiceDto request) {
         Comment comment = entityChecker.findCommentById(commentId);
         authorizationFacade.validate("commentAuthorizationChecker", memberId, comment);
 

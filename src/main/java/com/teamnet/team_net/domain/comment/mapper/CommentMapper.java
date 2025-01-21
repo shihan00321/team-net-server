@@ -1,8 +1,9 @@
 package com.teamnet.team_net.domain.comment.mapper;
 
 import com.teamnet.team_net.domain.comment.controller.CommentRequest.CreateCommentDto;
-import com.teamnet.team_net.domain.comment.dto.CommentResponse;
+import com.teamnet.team_net.domain.comment.service.dto.CommentResponse;
 import com.teamnet.team_net.domain.comment.entity.Comment;
+import com.teamnet.team_net.domain.comment.service.dto.CommentServiceDTO;
 import com.teamnet.team_net.domain.post.entity.Post;
 
 import java.util.ArrayList;
@@ -12,7 +13,7 @@ import java.util.Map;
 
 public abstract class CommentMapper {
 
-    public static Comment toComment(CreateCommentDto request, Post post, Comment parent) {
+    public static Comment toComment(CommentServiceDTO.CreateCommentServiceDto request, Post post, Comment parent) {
         return Comment.builder()
                 .post(post)
                 .parent(parent)
