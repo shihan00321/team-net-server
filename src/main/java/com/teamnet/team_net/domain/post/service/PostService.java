@@ -1,10 +1,10 @@
 package com.teamnet.team_net.domain.post.service;
 
-import com.teamnet.team_net.domain.post.controller.PostRequest;
-import com.teamnet.team_net.domain.post.dto.PostResponse;
 import com.teamnet.team_net.domain.post.entity.Post;
 import com.teamnet.team_net.domain.post.mapper.PostMapper;
 import com.teamnet.team_net.domain.post.repository.PostRepository;
+import com.teamnet.team_net.domain.post.service.dto.PostResponse;
+import com.teamnet.team_net.domain.post.service.dto.PostServiceDTO;
 import com.teamnet.team_net.domain.teammember.entity.TeamMember;
 import com.teamnet.team_net.domain.teammember.repository.TeamMemberRepository;
 import com.teamnet.team_net.global.exception.handler.MemberHandler;
@@ -43,7 +43,7 @@ public class PostService {
     }
 
     @Transactional
-    public Long save(Long memberId, Long teamId, PostRequest.PostSaveDto postSaveDto) {
+    public Long save(Long memberId, Long teamId, PostServiceDTO.PostSaveServiceDTO postSaveDto) {
         TeamMember teamMember = teamMemberRepository.findByMemberIdAndTeamId(memberId, teamId)
                 .orElseThrow(() -> new TeamHandler(ErrorStatus.TEAM_MEMBER_NOT_FOUND));
 
@@ -57,7 +57,7 @@ public class PostService {
     }
 
     @Transactional
-    public Long update(Long memberId, Long postId, PostRequest.PostUpdateDto postUpdateDto) {
+    public Long update(Long memberId, Long postId, PostServiceDTO.PostUpdateServiceDTO postUpdateDto) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostHandler(ErrorStatus.POST_NOT_FOUND));
 
