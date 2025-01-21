@@ -3,14 +3,15 @@ package com.teamnet.team_net.domain.team.service;
 import com.teamnet.team_net.domain.member.entity.Member;
 import com.teamnet.team_net.domain.member.repository.MemberRepository;
 import com.teamnet.team_net.domain.notification.service.NotificationService;
-import com.teamnet.team_net.domain.post.dto.PostResponse;
+import com.teamnet.team_net.domain.post.service.dto.PostResponse;
 import com.teamnet.team_net.domain.post.entity.Post;
 import com.teamnet.team_net.domain.post.repository.PostRepository;
 import com.teamnet.team_net.domain.team.controller.TeamRequest;
-import com.teamnet.team_net.domain.team.dto.TeamResponse;
+import com.teamnet.team_net.domain.team.service.dto.TeamResponse;
 import com.teamnet.team_net.domain.team.entity.Team;
 import com.teamnet.team_net.domain.team.enums.TeamActiveStatus;
 import com.teamnet.team_net.domain.team.repository.TeamRepository;
+import com.teamnet.team_net.domain.team.service.dto.TeamServiceDTO;
 import com.teamnet.team_net.domain.teammember.entity.TeamMember;
 import com.teamnet.team_net.domain.teammember.enums.TeamRole;
 import com.teamnet.team_net.domain.teammember.repository.TeamMemberRepository;
@@ -36,7 +37,7 @@ public class TeamService {
     private final NotificationService notificationService;
 
     @Transactional
-    public Long createTeam(Long memberId, TeamRequest.CreateTeamDto request) {
+    public Long createTeam(Long memberId, TeamServiceDTO.CreateTeamServiceDTO request) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
         Team team = Team.builder()
@@ -68,7 +69,7 @@ public class TeamService {
     }
 
     @Transactional
-    public void invite(Long memberId, Long teamId, TeamRequest.InviteMemberDto inviteMemberDto) {
+    public void invite(Long memberId, Long teamId, TeamServiceDTO.InviteMemberServiceDTO inviteMemberDto) {
         Member targetMember = memberRepository.findByEmail(inviteMemberDto.getEmail())
                 .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
 
