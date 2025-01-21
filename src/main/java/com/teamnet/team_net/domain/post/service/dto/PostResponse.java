@@ -1,6 +1,6 @@
-package com.teamnet.team_net.domain.post.dto;
+package com.teamnet.team_net.domain.post.service.dto;
 
-import com.teamnet.team_net.domain.comment.dto.CommentResponse;
+import com.teamnet.team_net.domain.comment.service.dto.CommentResponse;
 import lombok.Builder;
 import lombok.Getter;
 

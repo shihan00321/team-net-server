@@ -1,4 +1,4 @@
-package com.teamnet.team_net.domain.notification.dto;
+package com.teamnet.team_net.domain.notification.service.dto;
 
 import lombok.Builder;
 import lombok.Getter;
