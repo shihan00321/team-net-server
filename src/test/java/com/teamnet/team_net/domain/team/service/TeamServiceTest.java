@@ -74,10 +74,11 @@ class TeamServiceTest {
             TeamRequest.CreateTeamDto request = createTeamDto(DEFAULT_TEAM_NAME);
 
             // When
-            Long teamId = teamService.createTeam(defaultMember.getId(), request);
+            TeamResponse.TeamResponseDto teamResponseDto = teamService.createTeam(defaultMember.getId(), request);
 
             // Then
-            assertTeam(teamId);
+            Team savedTeam = teamRepository.findById(teamResponseDto.getId()).get();
+            assertThat(teamResponseDto.getName()).isEqualTo(savedTeam.getName());
         }
     }
 
@@ -93,10 +94,10 @@ class TeamServiceTest {
             createTeamMember(defaultMember, secondTeam, TeamRole.MEMBER);
 
             // When
-            List<TeamResponse.TeamResponseDto> teams = teamService.findMyTeams(defaultMember.getId());
+            TeamResponse.TeamListResponseDto response = teamService.findMyTeams(defaultMember.getId());
 
             // Then
-            assertThat(teams)
+            assertThat(response.getTeams())
                     .hasSize(2)
                     .allSatisfy(team -> {
                         assertThat(team.getName()).isNotNull();
@@ -154,11 +155,10 @@ class TeamServiceTest {
             createPost(defaultTeam, defaultMember, "제목2", "내용2");
 
             // When
-            List<PostResponse.PostResponseDto> posts =
-                    teamService.findTeamPosts(defaultMember.getId(), defaultTeam.getId());
+            PostResponse.PostListResponseDto teamPosts = teamService.findTeamPosts(defaultMember.getId(), defaultTeam.getId());
 
             // Then
-            assertThat(posts)
+            assertThat(teamPosts.getPosts())
                     .hasSize(2)
                     .satisfies(postList -> {
                         assertThat(postList.get(0))
@@ -215,10 +215,5 @@ class TeamServiceTest {
         return TeamRequest.InviteMemberDto.builder()
                 .email(email)
                 .build();
-    }
-
-    private void assertTeam(Long teamId) {
-        Team savedTeam = teamRepository.findById(teamId).get();
-        assertThat(teamId).isEqualTo(savedTeam.getId());
     }
 }

@@ -1,6 +1,7 @@
 package com.teamnet.team_net.domain.comment.service;
 
 import com.teamnet.team_net.domain.comment.controller.CommentRequest;
+import com.teamnet.team_net.domain.comment.dto.CommentResponse;
 import com.teamnet.team_net.domain.comment.entity.Comment;
 import com.teamnet.team_net.domain.comment.repository.CommentRepository;
 import com.teamnet.team_net.domain.member.entity.Member;
@@ -26,9 +27,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -37,12 +35,10 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @Transactional
@@ -117,9 +113,9 @@ class CommentServiceTest {
                 .content("테스트 댓글")
                 .build();
 
-        Long commentId = commentService.createComment(member.getId(), team.getId(), post.getId(), request);
+        CommentResponse.CommentResponseDTO response = commentService.createComment(member.getId(), team.getId(), post.getId(), request);
 
-        Comment savedComment = commentRepository.findById(commentId)
+        Comment savedComment = commentRepository.findById(response.getCommentId())
                 .orElseThrow(() -> new CommentHandler(ErrorStatus.COMMENT_NOT_FOUND));
 
         assertThat(savedComment.getContent()).isEqualTo("테스트 댓글");
@@ -135,13 +131,13 @@ class CommentServiceTest {
                 .parentId(parentComment.getId())
                 .build();
 
-        Long commentId = commentService.createComment(member.getId(), team.getId(), post.getId(), request);
+        CommentResponse.CommentResponseDTO response = commentService.createComment(member.getId(), team.getId(), post.getId(), request);
 
-        Comment savedComment = commentRepository.findById(commentId)
+        Comment findComment = commentRepository.findById(response.getCommentId())
                 .orElseThrow(() -> new CommentHandler(ErrorStatus.COMMENT_NOT_FOUND));
 
-        assertThat(savedComment.getContent()).isEqualTo("테스트 대댓글");
-        assertThat(savedComment.getParent().getId()).isEqualTo(parentComment.getId());
+        assertThat(findComment.getContent()).isEqualTo("테스트 대댓글");
+        assertThat(findComment.getParent().getId()).isEqualTo(parentComment.getId());
     }
 
     @Test
@@ -157,12 +153,12 @@ class CommentServiceTest {
                 .content("수정된 댓글")
                 .build();
 
-        Long updatedCommentId = commentService.updateComment(member.getId(), comment.getId(), request);
+        CommentResponse.CommentResponseDTO updatedComment = commentService.updateComment(member.getId(), comment.getId(), request);
 
-        Comment updatedComment = commentRepository.findById(updatedCommentId)
+        Comment findComment = commentRepository.findById(updatedComment.getCommentId())
                 .orElseThrow(() -> new CommentHandler(ErrorStatus.COMMENT_NOT_FOUND));
 
-        assertThat(updatedComment.getContent()).isEqualTo("수정된 댓글");
+        assertThat(findComment.getContent()).isEqualTo("수정된 댓글");
     }
 
     @Test
@@ -174,9 +170,8 @@ class CommentServiceTest {
                 .post(post)
                 .build());
 
-        Long deletedCommentId = commentService.deleteComment(member.getId(), comment.getId());
-
-        assertThat(commentRepository.findById(deletedCommentId)).isEmpty();
+        commentService.deleteComment(member.getId(), comment.getId());
+        assertThat(commentRepository.findById(comment.getId())).isEmpty();
     }
 
     @Test

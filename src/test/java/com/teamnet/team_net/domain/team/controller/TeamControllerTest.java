@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.teamnet.team_net.domain.member.entity.Member;
 import com.teamnet.team_net.domain.post.dto.PostResponse;
 import com.teamnet.team_net.domain.team.dto.TeamResponse;
+import com.teamnet.team_net.domain.team.entity.Team;
 import com.teamnet.team_net.domain.team.service.TeamService;
 import com.teamnet.team_net.global.config.SecurityConfig;
 import com.teamnet.team_net.global.config.auth.dto.SessionMember;
@@ -24,6 +25,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -72,15 +74,16 @@ class TeamControllerTest {
         void success() throws Exception {
             // Given
             TeamRequest.CreateTeamDto request = createTeamRequest("team");
+            TeamResponse.TeamResponseDto response = createTeamResponse(DEFAULT_TEAM_ID, request.getName());
             given(teamService.createTeam(eq(DEFAULT_MEMBER_ID), any(TeamRequest.CreateTeamDto.class)))
-                    .willReturn(DEFAULT_TEAM_ID);
+                    .willReturn(response);
 
             // When & Then
             performPost(BASE_URL, request)
                     .andExpectAll(
                             status().isOk(),
                             jsonPath("$.isSuccess").value(true),
-                            jsonPath("$.result").value(DEFAULT_TEAM_ID)
+                            jsonPath("$.result.name").value(response.getName())
                     );
         }
 
@@ -105,17 +108,17 @@ class TeamControllerTest {
         @WithMockUser(roles = "USER")
         void findMyTeams() throws Exception {
             // Given
-            List<TeamResponse.TeamResponseDto> teams = createTeamResponses();
-            when(teamService.findMyTeams(DEFAULT_MEMBER_ID)).thenReturn(teams);
+            TeamResponse.TeamListResponseDto teamResponses = createTeamResponses();
+            when(teamService.findMyTeams(DEFAULT_MEMBER_ID)).thenReturn(teamResponses);
 
             // When & Then
             performGet(BASE_URL)
                     .andExpectAll(
                             status().isOk(),
                             jsonPath("$.isSuccess").value(true),
-                            jsonPath("$.result.size()").value(2),
-                            jsonPath("$.result[1].id").value(2L),
-                            jsonPath("$.result[1].name").value("team2")
+                            jsonPath("$.result.teams.size()").value(2),
+                            jsonPath("$.result.teams[1].id").value(2L),
+                            jsonPath("$.result.teams[1].name").value("team2")
                     );
         }
 
@@ -124,19 +127,19 @@ class TeamControllerTest {
         @WithMockUser(roles = "USER")
         void findTeamPosts() throws Exception {
             // Given
-            List<PostResponse.PostResponseDto> posts = createPostResponses();
+            PostResponse.PostListResponseDto postResponses = createPostResponses();
             when(teamService.findTeamPosts(DEFAULT_MEMBER_ID, DEFAULT_TEAM_ID))
-                    .thenReturn(posts);
+                    .thenReturn(postResponses);
 
             // When & Then
             performGet(teamUrl(DEFAULT_TEAM_ID))
                     .andExpectAll(
                             status().isOk(),
                             jsonPath("$.isSuccess").value(true),
-                            jsonPath("$.result.size()").value(2),
-                            jsonPath("$.result[1].id").value(2L),
-                            jsonPath("$.result[1].title").value("제목2"),
-                            jsonPath("$.result[1].content").value("내용2")
+                            jsonPath("$.result.posts.size()").value(2),
+                            jsonPath("$.result.posts[1].id").value(2L),
+                            jsonPath("$.result.posts[1].title").value("제목2"),
+                            jsonPath("$.result.posts[1].content").value("내용2")
                     );
         }
     }
@@ -209,20 +212,27 @@ class TeamControllerTest {
                 .build();
     }
 
-    private List<TeamResponse.TeamResponseDto> createTeamResponses() {
-        return List.of(
-                TeamResponse.TeamResponseDto.builder().id(1L).name("team1").build(),
-                TeamResponse.TeamResponseDto.builder().id(2L).name("team2").build()
-        );
+    private TeamResponse.TeamListResponseDto createTeamResponses() {
+        return TeamResponse.TeamListResponseDto.builder()
+                .teams(List.of(
+                        createTeamResponse(1L, "team1"),
+                        createTeamResponse(2L, "team2")
+                ))
+                .build();
     }
 
-    private List<PostResponse.PostResponseDto> createPostResponses() {
-        return List.of(
-                PostResponse.PostResponseDto.builder().id(1L)
-                        .title("제목1").content("내용1").build(),
-                PostResponse.PostResponseDto.builder().id(2L)
-                        .title("제목2").content("내용2").build()
-        );
+    private TeamResponse.TeamResponseDto createTeamResponse(Long id, String name) {
+        return TeamResponse.TeamResponseDto.builder().id(id).name(name).build();
+    }
+
+    private PostResponse.PostListResponseDto createPostResponses() {
+        return PostResponse.PostListResponseDto.builder()
+                .posts(List.of(
+                        PostResponse.PostResponseDto.builder().id(1L)
+                                .title("제목1").content("내용1").build(),
+                        PostResponse.PostResponseDto.builder().id(2L)
+                                .title("제목2").content("내용2").build()))
+                .build();
     }
 
     private ResultActions performPost(String url, Object content) throws Exception {
