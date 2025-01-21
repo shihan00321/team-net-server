@@ -1,6 +1,5 @@
 package com.teamnet.team_net.domain.post.service;
 
-import com.teamnet.team_net.domain.post.controller.PostRequest;
 import com.teamnet.team_net.domain.post.entity.Post;
 import com.teamnet.team_net.domain.post.mapper.PostMapper;
 import com.teamnet.team_net.domain.post.repository.PostRepository;

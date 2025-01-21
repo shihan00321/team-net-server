@@ -1,7 +1,6 @@
 package com.teamnet.team_net.domain.post.mapper;
 
 import com.teamnet.team_net.domain.comment.mapper.CommentMapper;
-import com.teamnet.team_net.domain.post.controller.PostRequest;
 import com.teamnet.team_net.domain.post.entity.Post;
 import com.teamnet.team_net.domain.post.service.dto.PostResponse;
 import com.teamnet.team_net.domain.post.service.dto.PostServiceDTO;

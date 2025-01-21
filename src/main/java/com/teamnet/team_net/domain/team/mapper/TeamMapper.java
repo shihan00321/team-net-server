@@ -1,6 +1,5 @@
 package com.teamnet.team_net.domain.team.mapper;
 
-import com.teamnet.team_net.domain.team.controller.TeamRequest;
 import com.teamnet.team_net.domain.team.entity.Team;
 import com.teamnet.team_net.domain.team.enums.TeamActiveStatus;
 import com.teamnet.team_net.domain.team.service.dto.TeamResponse;
