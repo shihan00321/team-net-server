@@ -1,4 +1,4 @@
-package com.teamnet.team_net.domain.member.dto;
+package com.teamnet.team_net.domain.member.service.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

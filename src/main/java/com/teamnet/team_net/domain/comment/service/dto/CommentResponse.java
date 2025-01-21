@@ -1,4 +1,4 @@
-package com.teamnet.team_net.domain.comment.dto;
+package com.teamnet.team_net.domain.comment.service.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,4 +1,4 @@
-package com.teamnet.team_net.domain.team.dto;
+package com.teamnet.team_net.domain.team.service.dto;
 
 import lombok.Builder;
 import lombok.Getter;

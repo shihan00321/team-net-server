@@ -1,12 +1,12 @@
 package com.teamnet.team_net.domain.member.service;
 
-import com.teamnet.team_net.domain.member.controller.MemberRequest;
-import com.teamnet.team_net.domain.member.dto.MemberResponse.UpdateMemberResponseDto;
 import com.teamnet.team_net.domain.member.entity.Member;
-import com.teamnet.team_net.domain.notification.dto.NotificationResponse.NotificationListResponseDto;
+import com.teamnet.team_net.domain.member.service.dto.MemberResponse.UpdateMemberResponseDto;
+import com.teamnet.team_net.domain.member.service.dto.MemberServiceDTO;
 import com.teamnet.team_net.domain.notification.entity.Notification;
 import com.teamnet.team_net.domain.notification.mapper.NotificationMapper;
 import com.teamnet.team_net.domain.notification.repository.NotificationRepository;
+import com.teamnet.team_net.domain.notification.service.dto.NotificationResponse.NotificationListResponseDto;
 import com.teamnet.team_net.global.utils.checker.EntityChecker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,7 +26,7 @@ public class MemberService {
     private final NotificationRepository notificationRepository;
 
     @Transactional
-    public UpdateMemberResponseDto saveAdditionalMemberInfo(MemberRequest.AdditionalMemberInfoDto memberInfoDto, Long memberId) {
+    public UpdateMemberResponseDto saveAdditionalMemberInfo(MemberServiceDTO.AdditionalMemberInfoServiceDTO memberInfoDto, Long memberId) {
         Member member = entityChecker.findMemberById(memberId);
         member.addNickname(memberInfoDto.getNickname());
         member.updateRole();
