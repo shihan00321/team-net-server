@@ -1,7 +1,7 @@
 package com.teamnet.team_net.domain.notification.service;
 
 import com.teamnet.team_net.domain.member.entity.Member;
-import com.teamnet.team_net.domain.notification.dto.NotificationResponse;
+import com.teamnet.team_net.domain.notification.service.dto.NotificationResponse;
 import com.teamnet.team_net.domain.notification.entity.Notification;
 import com.teamnet.team_net.domain.notification.enums.NotificationType;
 import com.teamnet.team_net.domain.notification.repository.NotificationRepository;

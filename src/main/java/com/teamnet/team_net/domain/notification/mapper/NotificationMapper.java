@@ -1,7 +1,7 @@
 package com.teamnet.team_net.domain.notification.mapper;
 
-import com.teamnet.team_net.domain.notification.dto.NotificationResponse;
-import com.teamnet.team_net.domain.notification.dto.NotificationResponse.NotificationListResponseDto;
+import com.teamnet.team_net.domain.notification.service.dto.NotificationResponse;
+import com.teamnet.team_net.domain.notification.service.dto.NotificationResponse.NotificationListResponseDto;
 import com.teamnet.team_net.domain.notification.entity.Notification;
 
 import java.util.List;
