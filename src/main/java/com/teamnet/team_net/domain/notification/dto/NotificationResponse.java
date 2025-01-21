@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class NotificationResponse {
 
@@ -14,5 +15,11 @@ public class NotificationResponse {
         String title;
         String message;
         LocalDateTime createdAt;
+    }
+
+    @Getter
+    @Builder
+    public static class NotificationListResponseDto {
+        List<NotificationResponseDto> notifications;
     }
 }

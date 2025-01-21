@@ -1,7 +1,5 @@
 package com.teamnet.team_net.domain.teammember.repository;
 
-import com.teamnet.team_net.domain.member.entity.Member;
-import com.teamnet.team_net.domain.member.enums.Role;
 import com.teamnet.team_net.domain.team.entity.Team;
 import com.teamnet.team_net.domain.team.enums.TeamActiveStatus;
 import com.teamnet.team_net.domain.teammember.entity.TeamMember;
@@ -21,4 +19,5 @@ public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
     Optional<TeamMember> findMemberWithRole(@Param("memberId") Long memberId, @Param("role") TeamRole role);
 
     Optional<TeamMember> findByMemberIdAndTeamId(@Param("memberId") Long memberId, @Param("teamId") Long teamId);
+    Boolean existsByMemberIdAndTeamId(@Param("memberId") Long memberId, @Param("teamId") Long teamId);
 }
