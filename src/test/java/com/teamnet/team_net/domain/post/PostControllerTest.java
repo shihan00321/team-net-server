@@ -1,9 +1,12 @@
-package com.teamnet.team_net.domain.post.controller;
+package com.teamnet.team_net.domain.post;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.teamnet.team_net.domain.member.entity.Member;
-import com.teamnet.team_net.domain.post.dto.PostResponse;
+import com.teamnet.team_net.domain.post.controller.PostController;
+import com.teamnet.team_net.domain.post.controller.PostRequest;
 import com.teamnet.team_net.domain.post.service.PostService;
+import com.teamnet.team_net.domain.post.service.dto.PostResponse;
+import com.teamnet.team_net.domain.post.service.dto.PostServiceDTO;
 import com.teamnet.team_net.global.config.SecurityConfig;
 import com.teamnet.team_net.global.config.auth.dto.SessionMember;
 import jakarta.servlet.http.HttpSession;
@@ -33,7 +36,8 @@ import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = PostController.class, excludeFilters = {
         @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = SecurityConfig.class)
@@ -108,9 +112,9 @@ class PostControllerTest {
     @DisplayName("게시글 저장 테스트")
     @WithMockUser(roles = "USER")
     void save() throws Exception {
-        PostRequest.PostSaveDto request = createPostSaveDto(TEST_TITLE, TEST_CONTENT);
+        PostRequest.PostSaveDTO request = createPostSaveDto(TEST_TITLE, TEST_CONTENT);
         PostResponse.PostResponseDto responseDto = createPostResponseDto(TEST_POST_ID, TEST_TITLE, TEST_CONTENT);
-        given(postService.save(eq(sessionMember.getId()), eq(TEST_TEAM_ID), any(PostRequest.PostSaveDto.class)))
+        given(postService.save(eq(sessionMember.getId()), eq(TEST_TEAM_ID), any(PostServiceDTO.PostSaveServiceDTO.class)))
                 .willReturn(responseDto);
 
         performPostRequest(request, TEST_TEAM_ID)
@@ -141,12 +145,12 @@ class PostControllerTest {
     @WithMockUser(roles = "USER")
     void update() throws Exception {
         PostResponse.PostResponseDto responseDto = createPostResponseDto(TEST_POST_ID, TEST_TITLE, TEST_CONTENT);
-        PostRequest.PostUpdateDto updateDto = PostRequest.PostUpdateDto.builder()
+        PostRequest.PostUpdateDTO updateDto = PostRequest.PostUpdateDTO.builder()
                 .title("수정된 제목")
                 .content("수정된 내용")
                 .build();
 
-        when(postService.update(eq(sessionMember.getId()), eq(TEST_POST_ID), any(PostRequest.PostUpdateDto.class)))
+        when(postService.update(eq(sessionMember.getId()), eq(TEST_POST_ID), any(PostServiceDTO.PostUpdateServiceDTO.class)))
                 .thenReturn(responseDto);
 
         mvc.perform(patch(BASE_URL + "/{postId}", TEST_TEAM_ID, TEST_POST_ID)
@@ -182,8 +186,8 @@ class PostControllerTest {
                 .build();
     }
 
-    private PostRequest.PostSaveDto createPostSaveDto(String title, String content) {
-        return PostRequest.PostSaveDto.builder()
+    private PostRequest.PostSaveDTO createPostSaveDto(String title, String content) {
+        return PostRequest.PostSaveDTO.builder()
                 .title(title)
                 .content(content)
                 .build();

@@ -1,13 +1,14 @@
-package com.teamnet.team_net.domain.post.service;
+package com.teamnet.team_net.domain.post;
 
 import com.teamnet.team_net.domain.member.entity.Member;
 import com.teamnet.team_net.domain.member.enums.DeletionStatus;
 import com.teamnet.team_net.domain.member.enums.Role;
 import com.teamnet.team_net.domain.member.repository.MemberRepository;
-import com.teamnet.team_net.domain.post.controller.PostRequest;
-import com.teamnet.team_net.domain.post.dto.PostResponse;
 import com.teamnet.team_net.domain.post.entity.Post;
 import com.teamnet.team_net.domain.post.repository.PostRepository;
+import com.teamnet.team_net.domain.post.service.PostService;
+import com.teamnet.team_net.domain.post.service.dto.PostResponse;
+import com.teamnet.team_net.domain.post.service.dto.PostServiceDTO;
 import com.teamnet.team_net.domain.team.entity.Team;
 import com.teamnet.team_net.domain.team.enums.TeamActiveStatus;
 import com.teamnet.team_net.domain.team.repository.TeamRepository;
@@ -112,7 +113,7 @@ class PostServiceTest {
     @DisplayName("게시글 저장 테스트")
     void save() {
         // given
-        PostRequest.PostSaveDto postSaveDto = createPostSaveDto();
+        PostServiceDTO.PostSaveServiceDTO postSaveDto = createPostSaveDto();
 
         // when
         PostResponse.PostResponseDto responseDto = postService.save(testMember.getId(), testTeam.getId(), postSaveDto);
@@ -129,7 +130,7 @@ class PostServiceTest {
     void update() {
         // given
         Post savedPost = createAndSavePost(testMember, testTeam);
-        PostRequest.PostUpdateDto updateRequest = createPostUpdateDto();
+        PostServiceDTO.PostUpdateServiceDTO updateRequest = createPostUpdateDto();
 
         // when
         PostResponse.PostResponseDto update = postService.update(testMember.getId(), savedPost.getId(), updateRequest);
@@ -146,7 +147,7 @@ class PostServiceTest {
     @DisplayName("존재하지 않는 게시글 업데이트 시 예외")
     void update_exception() {
         // given
-        PostRequest.PostUpdateDto updateDto = createPostUpdateDto();
+        PostServiceDTO.PostUpdateServiceDTO updateDto = createPostUpdateDto();
 
         // when & then
         assertThrows(PostHandler.class,
@@ -212,15 +213,15 @@ class PostServiceTest {
         return postRepository.save(post);
     }
 
-    private PostRequest.PostSaveDto createPostSaveDto() {
-        return PostRequest.PostSaveDto.builder()
+    private PostServiceDTO.PostSaveServiceDTO createPostSaveDto() {
+        return PostServiceDTO.PostSaveServiceDTO.builder()
                 .title(TEST_TITLE)
                 .content(TEST_CONTENT)
                 .build();
     }
 
-    private PostRequest.PostUpdateDto createPostUpdateDto() {
-        return PostRequest.PostUpdateDto.builder()
+    private PostServiceDTO.PostUpdateServiceDTO createPostUpdateDto() {
+        return PostServiceDTO.PostUpdateServiceDTO.builder()
                 .title(UPDATED_TITLE)
                 .content(TEST_CONTENT)
                 .build();

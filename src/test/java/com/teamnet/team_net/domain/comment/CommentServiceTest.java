@@ -1,9 +1,10 @@
-package com.teamnet.team_net.domain.comment.service;
+package com.teamnet.team_net.domain.comment;
 
-import com.teamnet.team_net.domain.comment.controller.CommentRequest;
-import com.teamnet.team_net.domain.comment.dto.CommentResponse;
 import com.teamnet.team_net.domain.comment.entity.Comment;
 import com.teamnet.team_net.domain.comment.repository.CommentRepository;
+import com.teamnet.team_net.domain.comment.service.CommentService;
+import com.teamnet.team_net.domain.comment.service.dto.CommentResponse;
+import com.teamnet.team_net.domain.comment.service.dto.CommentServiceDTO;
 import com.teamnet.team_net.domain.member.entity.Member;
 import com.teamnet.team_net.domain.member.enums.DeletionStatus;
 import com.teamnet.team_net.domain.member.enums.Role;
@@ -109,7 +110,7 @@ class CommentServiceTest {
     @Test
     @DisplayName("댓글 생성 테스트")
     void createComment() {
-        CommentRequest.CreateCommentDto request = CommentRequest.CreateCommentDto.builder()
+        CommentServiceDTO.CreateCommentServiceDto request = CommentServiceDTO.CreateCommentServiceDto.builder()
                 .content("테스트 댓글")
                 .build();
 
@@ -126,7 +127,7 @@ class CommentServiceTest {
     @Test
     @DisplayName("대댓글 생성 테스트")
     void createReplyComment() {
-        CommentRequest.CreateCommentDto request = CommentRequest.CreateCommentDto.builder()
+        CommentServiceDTO.CreateCommentServiceDto request = CommentServiceDTO.CreateCommentServiceDto.builder()
                 .content("테스트 대댓글")
                 .parentId(parentComment.getId())
                 .build();
@@ -149,7 +150,7 @@ class CommentServiceTest {
                 .post(post)
                 .build());
 
-        CommentRequest.CreateCommentDto request = CommentRequest.CreateCommentDto.builder()
+        CommentServiceDTO.UpdateCommentServiceDto request = CommentServiceDTO.UpdateCommentServiceDto.builder()
                 .content("수정된 댓글")
                 .build();
 
@@ -190,7 +191,7 @@ class CommentServiceTest {
                 .nickname("unauthorizedMember")
                 .build());
 
-        CommentRequest.CreateCommentDto request = CommentRequest.CreateCommentDto.builder()
+        CommentServiceDTO.UpdateCommentServiceDto request = CommentServiceDTO.UpdateCommentServiceDto.builder()
                 .content("수정된 댓글")
                 .build();
 
@@ -210,7 +211,7 @@ class CommentServiceTest {
                 .nickname("nonTeamMember")
                 .build());
 
-        CommentRequest.CreateCommentDto request = CommentRequest.CreateCommentDto.builder()
+        CommentServiceDTO.CreateCommentServiceDto request = CommentServiceDTO.CreateCommentServiceDto.builder()
                 .content("테스트 댓글")
                 .build();
 
@@ -222,7 +223,7 @@ class CommentServiceTest {
     @Test
     @DisplayName("존재하지 않는 게시글에 댓글 생성 시 예외 발생")
     void createCommentToNonExistentPost() {
-        CommentRequest.CreateCommentDto request = CommentRequest.CreateCommentDto.builder()
+        CommentServiceDTO.CreateCommentServiceDto request = CommentServiceDTO.CreateCommentServiceDto.builder()
                 .content("테스트 댓글")
                 .build();
 

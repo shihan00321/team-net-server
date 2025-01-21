@@ -1,11 +1,12 @@
-package com.teamnet.team_net.domain.team.controller;
+package com.teamnet.team_net.domain.team;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.teamnet.team_net.domain.member.entity.Member;
-import com.teamnet.team_net.domain.post.dto.PostResponse;
-import com.teamnet.team_net.domain.team.dto.TeamResponse;
-import com.teamnet.team_net.domain.team.entity.Team;
+import com.teamnet.team_net.domain.post.service.dto.PostResponse;
+import com.teamnet.team_net.domain.team.controller.TeamController;
 import com.teamnet.team_net.domain.team.service.TeamService;
+import com.teamnet.team_net.domain.team.service.dto.TeamResponse;
+import com.teamnet.team_net.domain.team.service.dto.TeamServiceDTO;
 import com.teamnet.team_net.global.config.SecurityConfig;
 import com.teamnet.team_net.global.config.auth.dto.SessionMember;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,7 +26,6 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -73,9 +73,9 @@ class TeamControllerTest {
         @WithMockUser(roles = "USER")
         void success() throws Exception {
             // Given
-            TeamRequest.CreateTeamDto request = createTeamRequest("team");
+            TeamServiceDTO.CreateTeamServiceDTO request = createTeamRequest("team");
             TeamResponse.TeamResponseDto response = createTeamResponse(DEFAULT_TEAM_ID, request.getName());
-            given(teamService.createTeam(eq(DEFAULT_MEMBER_ID), any(TeamRequest.CreateTeamDto.class)))
+            given(teamService.createTeam(eq(DEFAULT_MEMBER_ID), any(TeamServiceDTO.CreateTeamServiceDTO.class)))
                     .willReturn(response);
 
             // When & Then
@@ -92,7 +92,7 @@ class TeamControllerTest {
         @WithMockUser(roles = "USER")
         void validationFailure() throws Exception {
             // Given
-            TeamRequest.CreateTeamDto request = createTeamRequest("");
+            TeamServiceDTO.CreateTeamServiceDTO request = createTeamRequest("");
 
             // When & Then
             performPost(BASE_URL, request)
@@ -152,7 +152,7 @@ class TeamControllerTest {
         @WithMockUser(roles = "USER")
         void inviteMember() throws Exception {
             // Given
-            TeamRequest.InviteMemberDto request = createInviteRequest(DEFAULT_EMAIL);
+            TeamServiceDTO.InviteMemberServiceDTO request = createInviteRequest(DEFAULT_EMAIL);
             doNothing().when(teamService)
                     .invite(DEFAULT_MEMBER_ID, DEFAULT_TEAM_ID, request);
 
@@ -200,14 +200,14 @@ class TeamControllerTest {
                 .build());
     }
 
-    private TeamRequest.CreateTeamDto createTeamRequest(String name) {
-        return TeamRequest.CreateTeamDto.builder()
+    private TeamServiceDTO.CreateTeamServiceDTO createTeamRequest(String name) {
+        return TeamServiceDTO.CreateTeamServiceDTO.builder()
                 .name(name)
                 .build();
     }
 
-    private TeamRequest.InviteMemberDto createInviteRequest(String email) {
-        return TeamRequest.InviteMemberDto.builder()
+    private TeamServiceDTO.InviteMemberServiceDTO createInviteRequest(String email) {
+        return TeamServiceDTO.InviteMemberServiceDTO.builder()
                 .email(email)
                 .build();
     }

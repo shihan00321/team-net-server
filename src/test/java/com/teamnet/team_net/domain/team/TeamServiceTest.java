@@ -1,17 +1,18 @@
-package com.teamnet.team_net.domain.team.service;
+package com.teamnet.team_net.domain.team;
 
 import com.teamnet.team_net.domain.member.entity.Member;
 import com.teamnet.team_net.domain.member.enums.DeletionStatus;
 import com.teamnet.team_net.domain.member.enums.Role;
 import com.teamnet.team_net.domain.member.repository.MemberRepository;
-import com.teamnet.team_net.domain.post.dto.PostResponse;
 import com.teamnet.team_net.domain.post.entity.Post;
 import com.teamnet.team_net.domain.post.repository.PostRepository;
-import com.teamnet.team_net.domain.team.controller.TeamRequest;
-import com.teamnet.team_net.domain.team.dto.TeamResponse;
+import com.teamnet.team_net.domain.post.service.dto.PostResponse;
 import com.teamnet.team_net.domain.team.entity.Team;
 import com.teamnet.team_net.domain.team.enums.TeamActiveStatus;
 import com.teamnet.team_net.domain.team.repository.TeamRepository;
+import com.teamnet.team_net.domain.team.service.TeamService;
+import com.teamnet.team_net.domain.team.service.dto.TeamResponse;
+import com.teamnet.team_net.domain.team.service.dto.TeamServiceDTO;
 import com.teamnet.team_net.domain.teammember.entity.TeamMember;
 import com.teamnet.team_net.domain.teammember.enums.TeamRole;
 import com.teamnet.team_net.domain.teammember.repository.TeamMemberRepository;
@@ -24,8 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -71,7 +70,7 @@ class TeamServiceTest {
         @DisplayName("성공적으로 팀을 생성한다")
         void createTeam_success() {
             // Given
-            TeamRequest.CreateTeamDto request = createTeamDto(DEFAULT_TEAM_NAME);
+            TeamServiceDTO.CreateTeamServiceDTO request = createTeamDto(DEFAULT_TEAM_NAME);
 
             // When
             TeamResponse.TeamResponseDto teamResponseDto = teamService.createTeam(defaultMember.getId(), request);
@@ -122,7 +121,7 @@ class TeamServiceTest {
             // Given
             Member targetMember = createMember("target@test.com", "target");
             createTeamMember(defaultMember, defaultTeam, TeamRole.ADMIN);
-            TeamRequest.InviteMemberDto inviteDto = createInviteDto(targetMember.getEmail());
+            TeamServiceDTO.InviteMemberServiceDTO inviteDto = createInviteDto(targetMember.getEmail());
 
             // When & Then
             assertDoesNotThrow(() ->
@@ -134,7 +133,7 @@ class TeamServiceTest {
         void invite_unauthorizedMember() {
             // Given
             Member normalMember = createMember("normal@test.com", "normal");
-            TeamRequest.InviteMemberDto inviteDto = createInviteDto(defaultMember.getEmail());
+            TeamServiceDTO.InviteMemberServiceDTO inviteDto = createInviteDto(defaultMember.getEmail());
 
             // When & Then
             assertThatThrownBy(() ->
@@ -171,8 +170,8 @@ class TeamServiceTest {
     }
 
     // Utility Methods
-    private TeamRequest.CreateTeamDto createTeamDto(String name) {
-        return TeamRequest.CreateTeamDto.builder()
+    private TeamServiceDTO.CreateTeamServiceDTO createTeamDto(String name) {
+        return TeamServiceDTO.CreateTeamServiceDTO.builder()
                 .name(name)
                 .build();
     }
@@ -211,8 +210,8 @@ class TeamServiceTest {
                 .build());
     }
 
-    private TeamRequest.InviteMemberDto createInviteDto(String email) {
-        return TeamRequest.InviteMemberDto.builder()
+    private TeamServiceDTO.InviteMemberServiceDTO createInviteDto(String email) {
+        return TeamServiceDTO.InviteMemberServiceDTO.builder()
                 .email(email)
                 .build();
     }

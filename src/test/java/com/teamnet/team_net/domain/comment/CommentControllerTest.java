@@ -1,8 +1,11 @@
-package com.teamnet.team_net.domain.comment.controller;
+package com.teamnet.team_net.domain.comment;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.teamnet.team_net.domain.comment.dto.CommentResponse;
+import com.teamnet.team_net.domain.comment.controller.CommentController;
+import com.teamnet.team_net.domain.comment.controller.CommentRequest;
 import com.teamnet.team_net.domain.comment.service.CommentService;
+import com.teamnet.team_net.domain.comment.service.dto.CommentResponse;
+import com.teamnet.team_net.domain.comment.service.dto.CommentServiceDTO;
 import com.teamnet.team_net.domain.member.entity.Member;
 import com.teamnet.team_net.global.config.SecurityConfig;
 import com.teamnet.team_net.global.config.auth.dto.SessionMember;
@@ -20,8 +23,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-
-import java.util.ArrayList;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -72,9 +73,13 @@ class CommentControllerTest {
     @WithMockUser(roles = "USER")
     void create_test() throws Exception {
         CommentRequest.CreateCommentDto request = createCommentDto(TEST_CONTENT, null);
-        CommentResponse.CommentResponseDTO response = createCommentResponseDTO(request);
+        CommentResponse.CommentResponseDTO response = CommentResponse.CommentResponseDTO.builder()
+                .commentId(TEST_COMMENT_ID)
+                .content(request.getContent())
+                .parentId((request.getParentId() == null) ? null : request.getParentId())
+                .build();
 
-        when(commentService.createComment(eq(sessionMember.getId()), eq(TEST_TEAM_ID), eq(TEST_POST_ID), any(CommentRequest.CreateCommentDto.class)))
+        when(commentService.createComment(eq(sessionMember.getId()), eq(TEST_TEAM_ID), eq(TEST_POST_ID), any(CommentServiceDTO.CreateCommentServiceDto.class)))
                 .thenReturn(response);
         ResultActions actions = performRequest(post(BASE_URL, TEST_TEAM_ID, TEST_POST_ID), request);
         verifySuccessResponse(actions, response);
@@ -85,8 +90,12 @@ class CommentControllerTest {
     @WithMockUser(roles = "USER")
     void create_in_comment_test() throws Exception {
         CommentRequest.CreateCommentDto request = createCommentDto(TEST_CONTENT, 1L);
-        CommentResponse.CommentResponseDTO response = createCommentResponseDTO(request);
-        when(commentService.createComment(eq(sessionMember.getId()), eq(TEST_TEAM_ID), eq(TEST_POST_ID), any(CommentRequest.CreateCommentDto.class)))
+        CommentResponse.CommentResponseDTO response = CommentResponse.CommentResponseDTO.builder()
+                .commentId(TEST_COMMENT_ID)
+                .content(request.getContent())
+                .parentId((request.getParentId() == null) ? null : request.getParentId())
+                .build();
+        when(commentService.createComment(eq(sessionMember.getId()), eq(TEST_TEAM_ID), eq(TEST_POST_ID), any(CommentServiceDTO.CreateCommentServiceDto.class)))
                 .thenReturn(response);
         ResultActions actions = performRequest(post(BASE_URL, TEST_TEAM_ID, TEST_POST_ID), request);
         verifySuccessResponse(actions, response);
@@ -96,9 +105,13 @@ class CommentControllerTest {
     @DisplayName("댓글 수정 기능 테스트")
     @WithMockUser(roles = "USER")
     void update_test() throws Exception {
-        CommentRequest.CreateCommentDto request = createCommentDto("수정된 댓글", null);
-        CommentResponse.CommentResponseDTO response = createCommentResponseDTO(request);
-        when(commentService.updateComment(eq(sessionMember.getId()), eq(TEST_COMMENT_ID), any(CommentRequest.CreateCommentDto.class)))
+        CommentRequest.UpdateCommentDto request = createUpdateCommentDto("수정된 댓글", null);
+        CommentResponse.CommentResponseDTO response = CommentResponse.CommentResponseDTO.builder()
+                .commentId(TEST_COMMENT_ID)
+                .content(request.getContent())
+                .parentId((request.getParentId() == null) ? null : request.getParentId())
+                .build();
+        when(commentService.updateComment(eq(sessionMember.getId()), eq(TEST_COMMENT_ID), any(CommentServiceDTO.UpdateCommentServiceDto.class)))
                 .thenReturn(response);
 
         ResultActions actions = performRequest(patch(BASE_URL_WITH_COMMENT, TEST_TEAM_ID, TEST_POST_ID, TEST_COMMENT_ID), request);
@@ -121,6 +134,13 @@ class CommentControllerTest {
                 .build();
     }
 
+    private CommentRequest.UpdateCommentDto createUpdateCommentDto(String content, Long parentId) {
+        return CommentRequest.UpdateCommentDto.builder()
+                .content(content)
+                .parentId(parentId)
+                .build();
+    }
+
     private ResultActions performRequest(MockHttpServletRequestBuilder requestBuilder, Object content) throws Exception {
         return mvc.perform(requestBuilder
                 .contentType(MediaType.APPLICATION_JSON)
@@ -136,13 +156,5 @@ class CommentControllerTest {
                     .andExpect(jsonPath("$.result.content").value(((CommentResponse.CommentResponseDTO) expected).getContent()))
                     .andDo(print());
         }
-    }
-
-    private static CommentResponse.CommentResponseDTO createCommentResponseDTO(CommentRequest.CreateCommentDto request) {
-        return CommentResponse.CommentResponseDTO.builder()
-                .commentId(TEST_COMMENT_ID)
-                .content(request.getContent())
-                .parentId((request.getParentId() == null) ? null : request.getParentId())
-                .build();
     }
 }
