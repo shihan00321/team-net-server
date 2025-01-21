@@ -6,6 +6,7 @@ import com.teamnet.team_net.domain.post.dto.PostResponse;
 import com.teamnet.team_net.domain.post.entity.Post;
 import com.teamnet.team_net.domain.teammember.entity.TeamMember;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,9 +17,11 @@ public abstract class PostMapper {
                 .id(post.getId())
                 .title(post.getTitle())
                 .content(post.getContent())
-                .comments(CommentMapper.toCommentListResponseDTO(post.getComments()))
+                .comments(CommentMapper.toCommentListResponseDTO(
+                        post.getComments() != null ? post.getComments() : Collections.emptyList()))
                 .build();
     }
+
 
     public static PostResponse.PostListResponseDto toPostListResponseDto(List<Post> posts) {
         return PostResponse.PostListResponseDto.builder()
