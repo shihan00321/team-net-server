@@ -2,10 +2,6 @@ package com.teamnet.team_net.domain.team.service;
 
 import com.teamnet.team_net.domain.member.entity.Member;
 import com.teamnet.team_net.domain.notification.service.NotificationService;
-import com.teamnet.team_net.domain.post.entity.Post;
-import com.teamnet.team_net.domain.post.mapper.PostMapper;
-import com.teamnet.team_net.domain.post.repository.PostRepository;
-import com.teamnet.team_net.domain.post.service.dto.PostResponse;
 import com.teamnet.team_net.domain.team.entity.Team;
 import com.teamnet.team_net.domain.team.enums.TeamActiveStatus;
 import com.teamnet.team_net.domain.team.repository.TeamRepository;
@@ -30,7 +26,6 @@ public class TeamService {
 
     private final TeamRepository teamRepository;
     private final TeamMemberRepository teamMemberRepository;
-    private final PostRepository postRepository;
     private final NotificationService notificationService;
     private final EntityChecker entityChecker;
 
@@ -66,12 +61,6 @@ public class TeamService {
 
         TeamMember teamMember = TeamMember.createMember(team, member);
         teamMemberRepository.save(teamMember);
-    }
-
-    public PostResponse.PostListResponseDto findTeamPosts(Long memberId, Long teamId) {
-        entityChecker.findTeamMemberByMemberIdAndTeamId(memberId, teamId);
-        List<Post> teamPosts = postRepository.findAllByTeamId(teamId);
-        return PostMapper.toPostListResponseDto(teamPosts);
     }
 
     @Transactional

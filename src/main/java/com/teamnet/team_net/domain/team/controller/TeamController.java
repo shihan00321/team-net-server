@@ -30,13 +30,6 @@ public class TeamController {
         return ApiResponse.onSuccess(teamService.findMyTeams(sessionMember.getId()));
     }
 
-    @GetMapping("/{teamId}")
-    public ApiResponse<PostResponse.PostListResponseDto> findTeamPosts(
-            @LoginMember SessionMember sessionMember,
-            @PathVariable("teamId") Long teamId) {
-        return ApiResponse.onSuccess(teamService.findTeamPosts(sessionMember.getId(), teamId));
-    }
-
     @PostMapping("/{teamId}/invite")
     public ApiResponse<Void> inviteMember(
             @LoginMember SessionMember sessionMember,
