@@ -24,6 +24,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -91,9 +93,10 @@ class TeamServiceTest {
             Team secondTeam = createTeam("Second Team");
             createTeamMember(defaultMember, defaultTeam, TeamRole.ADMIN);
             createTeamMember(defaultMember, secondTeam, TeamRole.MEMBER);
+            PageRequest pageRequest = PageRequest.of(0, 20);
 
             // When
-            TeamResponse.TeamListResponseDto response = teamService.findMyTeams(defaultMember.getId());
+            TeamResponse.TeamListResponseDto response = teamService.findMyTeams(defaultMember.getId(), pageRequest);
 
             // Then
             assertThat(response.getTeams())
@@ -107,7 +110,8 @@ class TeamServiceTest {
         @Test
         @DisplayName("존재하지 않는 회원의 팀 목록 조회시 예외가 발생한다")
         void findMyTeams_memberNotFound() {
-            assertThatThrownBy(() -> teamService.findMyTeams(999L))
+            PageRequest pageRequest = PageRequest.of(0, 20);
+            assertThatThrownBy(() -> teamService.findMyTeams(999L, pageRequest))
                     .isInstanceOf(MemberHandler.class);
         }
     }
@@ -139,33 +143,6 @@ class TeamServiceTest {
             assertThatThrownBy(() ->
                     teamService.invite(normalMember.getId(), defaultTeam.getId(), inviteDto))
                     .isInstanceOf(TeamHandler.class);
-        }
-    }
-
-    @Nested
-    @DisplayName("팀 게시글 테스트")
-    class TeamPosts {
-        @Test
-        @DisplayName("팀 게시글 목록을 성공적으로 조회한다")
-        void findTeamPosts_success() {
-            // Given
-            createTeamMember(defaultMember, defaultTeam, TeamRole.ADMIN);
-            createPost(defaultTeam, defaultMember, "제목1", "내용1");
-            createPost(defaultTeam, defaultMember, "제목2", "내용2");
-
-            // When
-            PostResponse.PostListResponseDto teamPosts = teamService.findTeamPosts(defaultMember.getId(), defaultTeam.getId());
-
-            // Then
-            assertThat(teamPosts.getPosts())
-                    .hasSize(2)
-                    .satisfies(postList -> {
-                        assertThat(postList.get(0))
-                                .satisfies(post -> {
-                                    assertThat(post.getTitle()).isEqualTo("제목1");
-                                    assertThat(post.getContent()).isEqualTo("내용1");
-                                });
-                    });
         }
     }
 

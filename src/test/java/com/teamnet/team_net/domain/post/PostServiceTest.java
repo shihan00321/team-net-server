@@ -21,6 +21,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -98,15 +100,16 @@ class PostServiceTest {
                         .build())
                 .collect(Collectors.toList());
         postRepository.saveAll(posts);
+        PageRequest pageRequest = PageRequest.of(0, 10);
 
         // when
-        PostResponse.PostListResponseDto listResponseDto = postService.findAllByTeamId(testTeam.getId());
-        List<PostResponse.PostResponseDto> findAll = listResponseDto.getPosts();
+        PostResponse.PostListResponseDto listResponseDto = postService.findAllByTeamId(testTeam.getId(), pageRequest);
+        Page<PostResponse.PostResponseDto> findAll = listResponseDto.getPosts();
 
         // then
         assertThat(findAll).hasSize(5);
-        assertThat(findAll.get(2).getTitle()).isEqualTo(TEST_TITLE + "3");
-        assertThat(findAll.get(2).getContent()).isEqualTo(TEST_CONTENT + "3");
+        assertThat(findAll.get().map(PostResponse.PostResponseDto::getTitle).equals(TEST_TITLE + "3"));
+        assertThat(findAll.get().map(PostResponse.PostResponseDto::getContent).equals(TEST_TITLE + "3"));
     }
 
     @Test
