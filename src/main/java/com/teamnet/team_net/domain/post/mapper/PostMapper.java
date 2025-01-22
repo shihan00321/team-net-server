@@ -5,6 +5,7 @@ import com.teamnet.team_net.domain.post.entity.Post;
 import com.teamnet.team_net.domain.post.service.dto.PostResponse;
 import com.teamnet.team_net.domain.post.service.dto.PostServiceDTO;
 import com.teamnet.team_net.domain.teammember.entity.TeamMember;
+import org.springframework.data.domain.Page;
 
 import java.util.Collections;
 import java.util.List;
@@ -23,12 +24,9 @@ public abstract class PostMapper {
     }
 
 
-    public static PostResponse.PostListResponseDto toPostListResponseDto(List<Post> posts) {
+    public static PostResponse.PostListResponseDto toPostListResponseDto(Page<Post> posts) {
         return PostResponse.PostListResponseDto.builder()
-                .posts(posts
-                        .stream()
-                        .map(PostMapper::toPostResponseDto)
-                        .collect(Collectors.toList()))
+                .posts(posts.map(PostMapper::toPostResponseDto))
                 .build();
     }
 
