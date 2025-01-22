@@ -12,6 +12,8 @@ import com.teamnet.team_net.domain.teammember.enums.TeamRole;
 import com.teamnet.team_net.domain.teammember.repository.TeamMemberRepository;
 import com.teamnet.team_net.global.utils.checker.EntityChecker;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,9 +43,9 @@ public class TeamService {
         return toTeamResponseDto(team);
     }
 
-    public TeamResponse.TeamListResponseDto findMyTeams(Long memberId) {
+    public TeamResponse.TeamListResponseDto findMyTeams(Long memberId, Pageable pageable) {
         entityChecker.findMemberById(memberId);
-        List<Team> myTeam = teamMemberRepository.findTeamsByMemberIdAndStatus(memberId, TeamActiveStatus.ACTIVE);
+        Page<Team> myTeam = teamMemberRepository.findTeamsByMemberIdAndStatus(memberId, TeamActiveStatus.ACTIVE, pageable);
         return toTeamListResponseDto(myTeam);
     }
 

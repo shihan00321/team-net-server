@@ -7,6 +7,7 @@ import com.teamnet.team_net.global.config.auth.dto.SessionMember;
 import com.teamnet.team_net.global.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
@@ -25,8 +26,9 @@ public class TeamController {
 
     @GetMapping
     public ApiResponse<TeamResponse.TeamListResponseDto> myTeam(
-            @LoginMember SessionMember sessionMember) {
-        return ApiResponse.onSuccess(teamService.findMyTeams(sessionMember.getId()));
+            @LoginMember SessionMember sessionMember,
+            Pageable pageable) {
+        return ApiResponse.onSuccess(teamService.findMyTeams(sessionMember.getId(), pageable));
     }
 
     @PostMapping("/{teamId}/invite")
