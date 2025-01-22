@@ -1,5 +1,6 @@
 package com.teamnet.team_net.domain.comment.service.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,6 +19,7 @@ public class CommentResponse {
         Long parentId;
         String content;
         LocalDateTime createdAt;
+        @JsonInclude(JsonInclude.Include.NON_NULL)
         List<CommentResponseDTO> childrenComment;
     }
 
