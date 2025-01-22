@@ -49,8 +49,3 @@ spring:
   web:
     resources:
       add-mappings: false
-
-  data:
-    web:
-      pageable:
-        default-page-size: 20
