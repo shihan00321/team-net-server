@@ -49,7 +49,13 @@ public class CommentService {
         authorizationFacade.validate("commentAuthorizationChecker", memberId, comment);
 
         comment.update(request.getContent());
-        return toCommentResponseDTO(comment, null);
+
+        List<Comment> children = null;
+        if (comment.getParent() == null) {  // 부모 댓글인 경우에만 자식 댓글 조회
+            children = commentRepository.findChildrenByParentId(commentId);
+        }
+
+        return toCommentResponseDTO(comment, children);
     }
 
     @Transactional
@@ -69,18 +75,21 @@ public class CommentService {
                 .map(Comment::getId)
                 .toList();
 
-        // 3. 대댓글 조회
-        List<Comment> children = parentIds.isEmpty() ?
-                Collections.emptyList() :
-                commentRepository.findChildrenByParentIds(parentIds);
+        // 3. 대댓글 조회 및 그룹화
+        Map<Long, List<Comment>> childrenMap = getChildrenMap(parentIds);
 
-        // 4. 대댓글을 부모 댓글별로 그룹화
-        Map<Long, List<Comment>> childrenMap = children.stream()
-                .collect(Collectors.groupingBy(c -> c.getParent().getId()));
-
-        Page<CommentResponseDTO> commentDtoPage = parentCommentsPage.map(parent ->
-                CommentMapper.toCommentResponseDTO(parent, childrenMap.getOrDefault(parent.getId(), Collections.emptyList()))
-        );
-        return CommentMapper.toCommentListResponseDTO(commentDtoPage);
+        // 4. DTO 변환
+        return CommentMapper.toCommentListResponseDTO(parentCommentsPage, childrenMap);
     }
+
+    private Map<Long, List<Comment>> getChildrenMap(List<Long> parentIds) {
+        if (parentIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        List<Comment> children = commentRepository.findChildrenByParentIds(parentIds);
+        return children.stream()
+                .collect(Collectors.groupingBy(c -> c.getParent().getId()));
+    }
+
 }

@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public abstract class CommentMapper {
@@ -21,16 +22,29 @@ public abstract class CommentMapper {
     }
 
     public static CommentResponse.CommentResponseDTO toCommentResponseDTO(Comment parent, List<Comment> children) {
+        List<CommentResponse.CommentResponseDTO> childDtos = null;
+        if (children != null) {
+            childDtos = children.stream()
+                    .map(CommentMapper::toChildCommentResponseDTO)
+                    .toList();
+        }
+
         return CommentResponse.CommentResponseDTO.builder()
                 .commentId(parent.getId())
                 .parentId(parent.getParent() != null ? parent.getParent().getId() : null)
                 .content(parent.getContent())
                 .createdAt(parent.getCreatedAt())
-                .childrenComment(children != null ?
-                        children.stream()
-                                .map(CommentMapper::toChildCommentResponseDTO)
-                                .collect(Collectors.toList())
-                        : Collections.emptyList()) // null일 경우 빈 리스트 처리
+                .childrenComment(childDtos)
+                .build();
+    }
+
+    public static CommentResponse.CommentListResponseDTO toCommentListResponseDTO(Page<Comment> parentCommentsPage, Map<Long, List<Comment>> childrenMap) {
+        Page<CommentResponse.CommentResponseDTO> commentDtoPage = parentCommentsPage.map(parent ->
+                toCommentResponseDTO(parent, childrenMap.getOrDefault(parent.getId(), Collections.emptyList()))
+        );
+
+        return CommentResponse.CommentListResponseDTO.builder()
+                .comments(commentDtoPage)
                 .build();
     }
 
@@ -40,13 +54,6 @@ public abstract class CommentMapper {
                 .parentId(child.getParent() != null ? child.getParent().getId() : null) // null 체크 추가
                 .content(child.getContent())
                 .createdAt(child.getCreatedAt())
-                .childrenComment(Collections.emptyList()) // 대댓글의 대댓글은 빈 리스트
-                .build();
-    }
-
-    public static CommentResponse.CommentListResponseDTO toCommentListResponseDTO(Page<CommentResponse.CommentResponseDTO> comments) {
-        return CommentResponse.CommentListResponseDTO.builder()
-                .comments(comments)
                 .build();
     }
 }
