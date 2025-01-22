@@ -1,6 +1,5 @@
 package com.teamnet.team_net.domain.team.controller;
 
-import com.teamnet.team_net.domain.post.service.dto.PostResponse;
 import com.teamnet.team_net.domain.team.service.TeamService;
 import com.teamnet.team_net.domain.team.service.dto.TeamResponse;
 import com.teamnet.team_net.global.config.auth.LoginMember;
