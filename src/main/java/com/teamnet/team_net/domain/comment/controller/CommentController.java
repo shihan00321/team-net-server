@@ -1,5 +1,6 @@
 package com.teamnet.team_net.domain.comment.controller;
 
+import com.teamnet.team_net.domain.comment.service.dto.CommentResponse;
 import com.teamnet.team_net.domain.comment.service.dto.CommentResponse.CommentResponseDTO;
 import com.teamnet.team_net.domain.comment.service.CommentService;
 import com.teamnet.team_net.global.config.auth.LoginMember;
@@ -7,6 +8,7 @@ import com.teamnet.team_net.global.config.auth.dto.SessionMember;
 import com.teamnet.team_net.global.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
@@ -22,6 +24,13 @@ public class CommentController {
             @PathVariable("postId") Long postId,
             @Valid @RequestBody CommentRequest.CreateCommentDto request) {
         return ApiResponse.onSuccess(commentService.createComment(sessionMember.getId(), teamId, postId, request.toCommentServiceDTO()));
+    }
+
+    @GetMapping
+    public ApiResponse<CommentResponse.CommentListResponseDTO> getComments(
+            @PathVariable Long postId,
+            Pageable pageable) {
+        return ApiResponse.onSuccess(commentService.findComments(postId, pageable));
     }
 
     @PatchMapping("/{commentId}")
