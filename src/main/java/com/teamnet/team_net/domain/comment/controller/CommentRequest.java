@@ -38,7 +38,6 @@ public class CommentRequest {
         protected CommentServiceDTO.UpdateCommentServiceDto toCommentServiceDTO() {
             return CommentServiceDTO.UpdateCommentServiceDto
                     .builder()
-                    .parentId(parentId)
                     .content(content)
                     .build();
         }
