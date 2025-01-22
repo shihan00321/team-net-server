@@ -1,15 +1,10 @@
 package com.teamnet.team_net.domain.post.mapper;
 
-import com.teamnet.team_net.domain.comment.mapper.CommentMapper;
 import com.teamnet.team_net.domain.post.entity.Post;
 import com.teamnet.team_net.domain.post.service.dto.PostResponse;
 import com.teamnet.team_net.domain.post.service.dto.PostServiceDTO;
 import com.teamnet.team_net.domain.teammember.entity.TeamMember;
 import org.springframework.data.domain.Page;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public abstract class PostMapper {
     public static PostResponse.PostResponseDto toPostResponseDto(Post post) {
@@ -18,11 +13,8 @@ public abstract class PostMapper {
                 .id(post.getId())
                 .title(post.getTitle())
                 .content(post.getContent())
-                .comments(CommentMapper.toCommentListResponseDTO(
-                        post.getComments() != null ? post.getComments() : Collections.emptyList()))
                 .build();
     }
-
 
     public static PostResponse.PostListResponseDto toPostListResponseDto(Page<Post> posts) {
         return PostResponse.PostListResponseDto.builder()
