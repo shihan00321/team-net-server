@@ -29,24 +29,22 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
 
     @Override
     public Page<Post> searchPosts(Long teamId, String searchKeyword, SearchType searchType, Pageable pageable) {
-        System.out.println("searchKeyword : " + searchKeyword);
-        System.out.println("searchType : " + searchType);
-
         List<Post> posts = queryFactory
                 .selectFrom(post)
-                .leftJoin(post.team, team)
+                .innerJoin(post.team, team)
                 .where(
                         post.team.id.eq(teamId),
                         getSearchCondition(searchKeyword, searchType)
                 )
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
+                .orderBy(post.createdAt.desc())
                 .fetch();
 
         JPAQuery<Long> count = queryFactory
                 .select(post.count())
                 .from(post)
-                .leftJoin(post.team, team)
+                .innerJoin(post.team, team)
                 .where(
                         post.team.id.eq(teamId),
                         getSearchCondition(searchKeyword, searchType)
