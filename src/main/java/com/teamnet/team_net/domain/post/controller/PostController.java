@@ -19,9 +19,13 @@ public class PostController {
 
     @GetMapping
     public ApiResponse<PostResponse.PostListResponseDto> findAll(
+            @LoginMember SessionMember sessionMember,
             @PathVariable("teamId") Long teamId,
+            @ModelAttribute PostRequest.PostSearchKeywordDTO searchDTO,
             Pageable pageable) {
-        return ApiResponse.onSuccess(postService.findAllByTeamId(teamId, pageable));
+        System.out.println("searchDTO : " + searchDTO.keyword);
+        System.out.println("searchDTO : " + searchDTO.type);
+        return ApiResponse.onSuccess(postService.findAll(sessionMember.getId(), teamId, searchDTO.toPostSearchKeywordServiceDTO(), pageable));
     }
 
     @GetMapping("/{postId}")
