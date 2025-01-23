@@ -14,7 +14,6 @@ public class PostResponse {
         Long id;
         String title;
         String content;
-        List<CommentResponse.CommentResponseDTO> comments;
     }
 
     @Getter
