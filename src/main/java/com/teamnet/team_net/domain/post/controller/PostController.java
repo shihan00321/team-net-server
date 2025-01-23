@@ -7,6 +7,7 @@ import com.teamnet.team_net.global.config.auth.dto.SessionMember;
 import com.teamnet.team_net.global.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,8 +19,9 @@ public class PostController {
 
     @GetMapping
     public ApiResponse<PostResponse.PostListResponseDto> findAll(
-            @PathVariable("teamId") Long teamId) {
-        return ApiResponse.onSuccess(postService.findAllByTeamId(teamId));
+            @PathVariable("teamId") Long teamId,
+            Pageable pageable) {
+        return ApiResponse.onSuccess(postService.findAllByTeamId(teamId, pageable));
     }
 
     @GetMapping("/{postId}")

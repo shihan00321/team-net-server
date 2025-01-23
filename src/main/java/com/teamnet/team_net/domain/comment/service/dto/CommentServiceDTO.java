@@ -18,7 +18,6 @@ public class CommentServiceDTO {
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
     @AllArgsConstructor(access = AccessLevel.PROTECTED)
     public static class UpdateCommentServiceDto {
-        Long parentId;
         String content;
     }
 }

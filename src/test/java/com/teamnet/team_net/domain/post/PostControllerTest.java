@@ -19,6 +19,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -77,6 +80,7 @@ class PostControllerTest {
     void findOne() throws Exception {
         PostResponse.PostResponseDto responseDto = createPostResponseDto(TEST_POST_ID, TEST_TITLE, TEST_CONTENT);
         when(postService.findOne(TEST_POST_ID)).thenReturn(responseDto);
+        PageRequest pageRequest = PageRequest.of(0, 10);
 
         performGetRequest(BASE_URL + "/{postId}", TEST_TEAM_ID, TEST_POST_ID)
                 .andExpect(status().isOk())
@@ -94,17 +98,25 @@ class PostControllerTest {
         List<PostResponse.PostResponseDto> posts = IntStream.rangeClosed(1, 5)
                 .mapToObj(i -> createPostResponseDto((long) i, TEST_TITLE + i, TEST_CONTENT + i))
                 .collect(Collectors.toList());
-        PostResponse.PostListResponseDto response = PostResponse.PostListResponseDto.builder().posts(posts).build();
 
-        when(postService.findAllByTeamId(TEST_TEAM_ID)).thenReturn(response);
+        PageRequest pageRequest = PageRequest.of(0, 20);
+        PageImpl<PostResponse.PostResponseDto> pageResult = new PageImpl<>(
+                posts,
+                pageRequest,
+                15 // 전체 요소 개수
+        );
+
+        PostResponse.PostListResponseDto response = PostResponse.PostListResponseDto.builder().posts(pageResult).build();
+
+        when(postService.findAllByTeamId(TEST_TEAM_ID, pageRequest)).thenReturn(response);
 
         performGetRequest(BASE_URL, TEST_TEAM_ID)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.isSuccess").value(true))
-                .andExpect(jsonPath("$.result.posts", hasSize(5)))
-                .andExpect(jsonPath("$.result.posts[1].id").value(2L))
-                .andExpect(jsonPath("$.result.posts[1].title").value(TEST_TITLE + "2"))
-                .andExpect(jsonPath("$.result.posts[1].content").value(TEST_CONTENT + "2"))
+                .andExpect(jsonPath("$.result.posts.content", hasSize(5)))
+                .andExpect(jsonPath("$.result.posts.content[1].id").value(2L))
+                .andExpect(jsonPath("$.result.posts.content[1].title").value(TEST_TITLE + "2"))
+                .andExpect(jsonPath("$.result.posts.content[1].content").value(TEST_CONTENT + "2"))
                 .andDo(print());
     }
 

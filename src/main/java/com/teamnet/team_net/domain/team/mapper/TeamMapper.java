@@ -4,9 +4,7 @@ import com.teamnet.team_net.domain.team.entity.Team;
 import com.teamnet.team_net.domain.team.enums.TeamActiveStatus;
 import com.teamnet.team_net.domain.team.service.dto.TeamResponse;
 import com.teamnet.team_net.domain.team.service.dto.TeamServiceDTO;
-
-import java.util.List;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
 
 public abstract class TeamMapper {
     public static Team toTeam(TeamServiceDTO.CreateTeamServiceDTO request) {
@@ -25,9 +23,9 @@ public abstract class TeamMapper {
                 .build();
     }
 
-    public static TeamResponse.TeamListResponseDto toTeamListResponseDto(List<Team> teams) {
+    public static TeamResponse.TeamListResponseDto toTeamListResponseDto(Page<Team> teams) {
         return TeamResponse.TeamListResponseDto.builder()
-                .teams(teams.stream().map(TeamMapper::toTeamResponseDto).collect(Collectors.toList()))
+                .teams(teams.map(TeamMapper::toTeamResponseDto))
                 .build();
     }
 }

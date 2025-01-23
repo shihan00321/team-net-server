@@ -9,6 +9,8 @@ import com.teamnet.team_net.domain.teammember.entity.TeamMember;
 import com.teamnet.team_net.global.utils.checker.AuthorizationFacade;
 import com.teamnet.team_net.global.utils.checker.EntityChecker;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,8 +32,8 @@ public class PostService {
         return toPostResponseDto(post);
     }
 
-    public PostResponse.PostListResponseDto findAllByTeamId(Long teamId) {
-        List<Post> posts = postRepository.findAllByTeamId(teamId);
+    public PostResponse.PostListResponseDto findAllByTeamId(Long teamId, Pageable pageable) {
+        Page<Post> posts = postRepository.findAllByTeamId(teamId, pageable);
         return PostMapper.toPostListResponseDto(posts);
     }
 

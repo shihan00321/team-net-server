@@ -2,10 +2,6 @@ package com.teamnet.team_net.domain.team.service;
 
 import com.teamnet.team_net.domain.member.entity.Member;
 import com.teamnet.team_net.domain.notification.service.NotificationService;
-import com.teamnet.team_net.domain.post.entity.Post;
-import com.teamnet.team_net.domain.post.mapper.PostMapper;
-import com.teamnet.team_net.domain.post.repository.PostRepository;
-import com.teamnet.team_net.domain.post.service.dto.PostResponse;
 import com.teamnet.team_net.domain.team.entity.Team;
 import com.teamnet.team_net.domain.team.enums.TeamActiveStatus;
 import com.teamnet.team_net.domain.team.repository.TeamRepository;
@@ -16,6 +12,8 @@ import com.teamnet.team_net.domain.teammember.enums.TeamRole;
 import com.teamnet.team_net.domain.teammember.repository.TeamMemberRepository;
 import com.teamnet.team_net.global.utils.checker.EntityChecker;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +28,6 @@ public class TeamService {
 
     private final TeamRepository teamRepository;
     private final TeamMemberRepository teamMemberRepository;
-    private final PostRepository postRepository;
     private final NotificationService notificationService;
     private final EntityChecker entityChecker;
 
@@ -46,9 +43,9 @@ public class TeamService {
         return toTeamResponseDto(team);
     }
 
-    public TeamResponse.TeamListResponseDto findMyTeams(Long memberId) {
+    public TeamResponse.TeamListResponseDto findMyTeams(Long memberId, Pageable pageable) {
         entityChecker.findMemberById(memberId);
-        List<Team> myTeam = teamMemberRepository.findTeamsByMemberIdAndStatus(memberId, TeamActiveStatus.ACTIVE);
+        Page<Team> myTeam = teamMemberRepository.findTeamsByMemberIdAndStatus(memberId, TeamActiveStatus.ACTIVE, pageable);
         return toTeamListResponseDto(myTeam);
     }
 
@@ -66,12 +63,6 @@ public class TeamService {
 
         TeamMember teamMember = TeamMember.createMember(team, member);
         teamMemberRepository.save(teamMember);
-    }
-
-    public PostResponse.PostListResponseDto findTeamPosts(Long memberId, Long teamId) {
-        entityChecker.findTeamMemberByMemberIdAndTeamId(memberId, teamId);
-        List<Post> teamPosts = postRepository.findAllByTeamId(teamId);
-        return PostMapper.toPostListResponseDto(teamPosts);
     }
 
     @Transactional

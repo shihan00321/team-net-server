@@ -18,6 +18,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -108,40 +111,22 @@ class TeamControllerTest {
         @WithMockUser(roles = "USER")
         void findMyTeams() throws Exception {
             // Given
-            TeamResponse.TeamListResponseDto teamResponses = createTeamResponses();
-            when(teamService.findMyTeams(DEFAULT_MEMBER_ID)).thenReturn(teamResponses);
+            PageRequest pageRequest = PageRequest.of(0, 20);
+            TeamResponse.TeamListResponseDto teamResponses = createTeamResponses(pageRequest);
+
+            when(teamService.findMyTeams(DEFAULT_MEMBER_ID, pageRequest)).thenReturn(teamResponses);
 
             // When & Then
             performGet(BASE_URL)
                     .andExpectAll(
                             status().isOk(),
                             jsonPath("$.isSuccess").value(true),
-                            jsonPath("$.result.teams.size()").value(2),
-                            jsonPath("$.result.teams[1].id").value(2L),
-                            jsonPath("$.result.teams[1].name").value("team2")
+                            jsonPath("$.result.teams.content.size()").value(2),
+                            jsonPath("$.result.teams.content[1].id").value(2L),
+                            jsonPath("$.result.teams.content[1].name").value("team2")
                     );
         }
 
-        @Test
-        @DisplayName("팀별 게시글을 조회한다")
-        @WithMockUser(roles = "USER")
-        void findTeamPosts() throws Exception {
-            // Given
-            PostResponse.PostListResponseDto postResponses = createPostResponses();
-            when(teamService.findTeamPosts(DEFAULT_MEMBER_ID, DEFAULT_TEAM_ID))
-                    .thenReturn(postResponses);
-
-            // When & Then
-            performGet(teamUrl(DEFAULT_TEAM_ID))
-                    .andExpectAll(
-                            status().isOk(),
-                            jsonPath("$.isSuccess").value(true),
-                            jsonPath("$.result.posts.size()").value(2),
-                            jsonPath("$.result.posts[1].id").value(2L),
-                            jsonPath("$.result.posts[1].title").value("제목2"),
-                            jsonPath("$.result.posts[1].content").value("내용2")
-                    );
-        }
     }
 
     @Nested
@@ -212,12 +197,18 @@ class TeamControllerTest {
                 .build();
     }
 
-    private TeamResponse.TeamListResponseDto createTeamResponses() {
+    private TeamResponse.TeamListResponseDto createTeamResponses(PageRequest pageRequest) {
+        List<TeamResponse.TeamResponseDto> teamDtos = List.of(
+                createTeamResponse(1L, "team1"),
+                createTeamResponse(2L, "team2")
+        );
+        PageImpl<TeamResponse.TeamResponseDto> pageResult = new PageImpl<>(
+                teamDtos,
+                pageRequest,
+                15 // 전체 요소 개수
+        );
         return TeamResponse.TeamListResponseDto.builder()
-                .teams(List.of(
-                        createTeamResponse(1L, "team1"),
-                        createTeamResponse(2L, "team2")
-                ))
+                .teams(pageResult)
                 .build();
     }
 
@@ -225,13 +216,19 @@ class TeamControllerTest {
         return TeamResponse.TeamResponseDto.builder().id(id).name(name).build();
     }
 
-    private PostResponse.PostListResponseDto createPostResponses() {
+    private PostResponse.PostListResponseDto createPostResponses(PageRequest pageRequest) {
+        List<PostResponse.PostResponseDto> dtos = List.of(
+                PostResponse.PostResponseDto.builder().id(1L)
+                        .title("제목1").content("내용1").build(),
+                PostResponse.PostResponseDto.builder().id(2L)
+                        .title("제목2").content("내용2").build());
+        PageImpl<PostResponse.PostResponseDto> pageResult = new PageImpl<PostResponse.PostResponseDto>(
+                dtos,
+                pageRequest,
+                15 // 전체 요소 개수
+        );
         return PostResponse.PostListResponseDto.builder()
-                .posts(List.of(
-                        PostResponse.PostResponseDto.builder().id(1L)
-                                .title("제목1").content("내용1").build(),
-                        PostResponse.PostResponseDto.builder().id(2L)
-                                .title("제목2").content("내용2").build()))
+                .posts(pageResult)
                 .build();
     }
 
