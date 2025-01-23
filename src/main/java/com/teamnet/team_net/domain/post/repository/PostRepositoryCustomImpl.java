@@ -6,6 +6,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.teamnet.team_net.domain.post.entity.Post;
 import com.teamnet.team_net.domain.post.enums.SearchType;
 import jakarta.persistence.EntityManager;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -18,14 +19,11 @@ import java.util.List;
 import static com.teamnet.team_net.domain.post.entity.QPost.post;
 import static com.teamnet.team_net.domain.team.entity.QTeam.team;
 
+@RequiredArgsConstructor
 @Repository
 public class PostRepositoryCustomImpl implements PostRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
-
-    public PostRepositoryCustomImpl(EntityManager em) {
-        this.queryFactory = new JPAQueryFactory(em);
-    }
 
     @Override
     public Page<Post> searchPosts(Long teamId, String searchKeyword, SearchType searchType, Pageable pageable) {
