@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.data.web.config.PageableHandlerMethodArgumentResolverCustomizer;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -28,7 +29,7 @@ public class WebConfig implements WebMvcConfigurer {
         return pageableResolver -> {
             pageableResolver.setOneIndexedParameters(true); // 1부터 시작하는 페이지 번호
             pageableResolver.setMaxPageSize(500);
-            pageableResolver.setFallbackPageable(PageRequest.of(0, 10)); // 기본 페이지 요청 설정
+            pageableResolver.setFallbackPageable(PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createdAt"))); // 기본 페이지 요청 설정
         };
     }
 }
