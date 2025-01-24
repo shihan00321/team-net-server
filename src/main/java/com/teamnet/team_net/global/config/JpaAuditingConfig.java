@@ -1,6 +1,8 @@
 package com.teamnet.team_net.global.config;
 
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.teamnet.team_net.global.config.auth.CustomOAuth2User;
+import jakarta.persistence.EntityManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.AuditorAware;
@@ -14,6 +16,11 @@ import java.util.Optional;
 @EnableJpaAuditing
 @Configuration
 public class JpaAuditingConfig {
+
+    @Bean
+    public JPAQueryFactory jpaQueryFactory(EntityManager em) {
+        return new JPAQueryFactory(em);
+    }
 
     @Bean
     public AuditorAware<String> auditorProvider() {

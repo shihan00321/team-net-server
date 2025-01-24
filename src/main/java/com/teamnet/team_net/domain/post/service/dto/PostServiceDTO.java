@@ -1,5 +1,6 @@
 package com.teamnet.team_net.domain.post.service.dto;
 
+import com.teamnet.team_net.domain.post.enums.SearchType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,5 +23,14 @@ public class PostServiceDTO {
     public static class PostUpdateServiceDTO {
         String title;
         String content;
+    }
+
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class PostSearchKeywordServiceDTO {
+        String keyword;
+        SearchType type;
     }
 }

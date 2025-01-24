@@ -4,12 +4,15 @@ import com.teamnet.team_net.domain.member.entity.Member;
 import com.teamnet.team_net.domain.notification.service.NotificationService;
 import com.teamnet.team_net.domain.team.entity.Team;
 import com.teamnet.team_net.domain.team.enums.TeamActiveStatus;
+import com.teamnet.team_net.domain.team.mapper.TeamMapper;
 import com.teamnet.team_net.domain.team.repository.TeamRepository;
 import com.teamnet.team_net.domain.team.service.dto.TeamResponse;
 import com.teamnet.team_net.domain.team.service.dto.TeamServiceDTO;
 import com.teamnet.team_net.domain.teammember.entity.TeamMember;
 import com.teamnet.team_net.domain.teammember.enums.TeamRole;
 import com.teamnet.team_net.domain.teammember.repository.TeamMemberRepository;
+import com.teamnet.team_net.global.exception.handler.TeamHandler;
+import com.teamnet.team_net.global.response.code.status.ErrorStatus;
 import com.teamnet.team_net.global.utils.checker.EntityChecker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -18,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.teamnet.team_net.domain.team.mapper.TeamMapper.*;
 
@@ -70,5 +74,12 @@ public class TeamService {
         TeamMember member = entityChecker.findTeamMemberByMemberIdAndTeamIdAndRole(memberId, teamId, TeamRole.ADMIN);
         Team team = member.getTeam();
         team.delete();
+    }
+
+    public TeamResponse.TeamResponseDto searchTeam(TeamServiceDTO.TeamSearchServiceDTO searchServiceDTO) {
+        Team team = Optional.ofNullable(teamRepository.findTeamByKeyword(searchServiceDTO.getKeyword(), searchServiceDTO.getType()))
+                .orElseThrow(() -> new TeamHandler(ErrorStatus.TEAM_NOT_FOUND));
+        return TeamMapper.toTeamResponseDto(team);
+
     }
 }

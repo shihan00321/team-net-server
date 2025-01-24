@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface TeamRepository extends JpaRepository<Team, Long> {
+public interface TeamRepository extends JpaRepository<Team, Long>, TeamRepositoryCustom {
     @Query("update Team t set t.status = :status where t.id = :teamId")
     void updateTeamStatus(Long teamId, @Param("status") TeamActiveStatus status);
 }
