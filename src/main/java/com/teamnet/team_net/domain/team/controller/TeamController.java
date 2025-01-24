@@ -60,4 +60,10 @@ public class TeamController {
     public ApiResponse<String> rejectInvitation() {
         return ApiResponse.onSuccess("Invitation rejected");
     }
+
+    @GetMapping("/search")
+    public ApiResponse<TeamResponse.TeamResponseDto> searchTeam(
+            @ModelAttribute TeamRequest.TeamSearchDTO searchDTO) {
+        return ApiResponse.onSuccess(teamService.searchTeam(searchDTO.toTeamSearchServiceDTO()));
+    }
 }
