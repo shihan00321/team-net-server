@@ -5,6 +5,7 @@ import com.teamnet.team_net.domain.member.enums.DeletionStatus;
 import com.teamnet.team_net.domain.member.enums.Role;
 import com.teamnet.team_net.domain.member.repository.MemberRepository;
 import com.teamnet.team_net.domain.post.entity.Post;
+import com.teamnet.team_net.domain.post.enums.SearchType;
 import com.teamnet.team_net.domain.post.repository.PostRepository;
 import com.teamnet.team_net.domain.post.service.PostService;
 import com.teamnet.team_net.domain.post.service.dto.PostResponse;
@@ -88,8 +89,8 @@ class PostServiceTest {
     }
 
     @Test
-    @DisplayName("게시글 모두 조회")
-    void findAllByTeamId() {
+    @DisplayName("검색 조건이 없을 때 게시글 모두 조회")
+    void findAll() {
         // given
         List<Post> posts = IntStream.range(1, 6)
                 .mapToObj(i -> Post.builder()
@@ -102,8 +103,41 @@ class PostServiceTest {
         postRepository.saveAll(posts);
         PageRequest pageRequest = PageRequest.of(0, 10);
 
+        PostServiceDTO.PostSearchKeywordServiceDTO emptyDto = PostServiceDTO.PostSearchKeywordServiceDTO.builder()
+                .keyword(null)
+                .type(null)
+                .build();
         // when
-        PostResponse.PostListResponseDto listResponseDto = postService.findAllByTeamId(testTeam.getId(), pageRequest);
+        PostResponse.PostListResponseDto listResponseDto = postService.findAll(testMember.getId(), testTeam.getId(), emptyDto, pageRequest);
+        Page<PostResponse.PostResponseDto> findAll = listResponseDto.getPosts();
+
+        // then
+        assertThat(findAll).hasSize(5);
+        assertThat(findAll.get().map(PostResponse.PostResponseDto::getTitle).equals(TEST_TITLE + "3"));
+        assertThat(findAll.get().map(PostResponse.PostResponseDto::getContent).equals(TEST_TITLE + "3"));
+    }
+
+    @Test
+    @DisplayName("검색 조건이 없을 때 게시글 모두 조회")
+    void findAllBySearchKeyword() {
+        // given
+        List<Post> posts = IntStream.range(1, 6)
+                .mapToObj(i -> Post.builder()
+                        .title(TEST_TITLE + i)
+                        .content(TEST_CONTENT + i)
+                        .member(testMember)
+                        .team(testTeam)
+                        .build())
+                .collect(Collectors.toList());
+        postRepository.saveAll(posts);
+        PageRequest pageRequest = PageRequest.of(0, 10);
+
+        PostServiceDTO.PostSearchKeywordServiceDTO emptyDto = PostServiceDTO.PostSearchKeywordServiceDTO.builder()
+                .keyword(TEST_TITLE)
+                .type(SearchType.TITLE)
+                .build();
+        // when
+        PostResponse.PostListResponseDto listResponseDto = postService.findAll(testMember.getId(), testTeam.getId(), emptyDto, pageRequest);
         Page<PostResponse.PostResponseDto> findAll = listResponseDto.getPosts();
 
         // then

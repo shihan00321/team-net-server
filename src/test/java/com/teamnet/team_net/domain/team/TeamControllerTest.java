@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.teamnet.team_net.domain.member.entity.Member;
 import com.teamnet.team_net.domain.post.service.dto.PostResponse;
 import com.teamnet.team_net.domain.team.controller.TeamController;
+import com.teamnet.team_net.domain.team.controller.TeamRequest;
 import com.teamnet.team_net.domain.team.service.TeamService;
 import com.teamnet.team_net.domain.team.service.dto.TeamResponse;
 import com.teamnet.team_net.domain.team.service.dto.TeamServiceDTO;
@@ -18,9 +19,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -28,10 +29,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
@@ -90,6 +91,7 @@ class TeamControllerTest {
                     );
         }
 
+
         @Test
         @DisplayName("유효하지 않은 팀 이름으로 생성 실패")
         @WithMockUser(roles = "USER")
@@ -106,17 +108,16 @@ class TeamControllerTest {
     @Nested
     @DisplayName("팀 조회 테스트")
     class FindTeamTest {
+
         @Test
         @DisplayName("내 팀 목록을 조회한다")
         @WithMockUser(roles = "USER")
         void findMyTeams() throws Exception {
             // Given
-            PageRequest pageRequest = PageRequest.of(0, 20);
+            PageRequest pageRequest = PageRequest.of(0, 10);
             TeamResponse.TeamListResponseDto teamResponses = createTeamResponses(pageRequest);
+            when(teamService.findMyTeams(eq(DEFAULT_MEMBER_ID), any(Pageable.class))).thenReturn(teamResponses);
 
-            when(teamService.findMyTeams(DEFAULT_MEMBER_ID, pageRequest)).thenReturn(teamResponses);
-
-            // When & Then
             performGet(BASE_URL)
                     .andExpectAll(
                             status().isOk(),
@@ -132,17 +133,37 @@ class TeamControllerTest {
     @Nested
     @DisplayName("팀원 관리 테스트")
     class TeamMemberTest {
+//        @Test
+//        @DisplayName("팀원을 초대한다")
+//        @WithMockUser(roles = "USER")
+//        void inviteMember() throws Exception {
+//            // Given
+//            TeamServiceDTO.InviteMemberServiceDTO request = createInviteRequest(DEFAULT_EMAIL);
+//            doNothing().when(teamService)
+//                    .invite(eq(DEFAULT_MEMBER_ID), eq(DEFAULT_TEAM_ID), any(TeamServiceDTO.InviteMemberServiceDTO.class));
+//
+//            // When & Then
+//            performPost(teamUrl("/invite"), request)
+//                    .andExpectAll(
+//                            status().isOk(),
+//                            jsonPath("$.isSuccess").value(true)
+//                    );
+//        }
+
         @Test
-        @DisplayName("팀원을 초대한다")
+        @DisplayName("팀원 초대 성공")
         @WithMockUser(roles = "USER")
         void inviteMember() throws Exception {
             // Given
-            TeamServiceDTO.InviteMemberServiceDTO request = createInviteRequest(DEFAULT_EMAIL);
+            TeamRequest.InviteMemberDTO request = TeamRequest.InviteMemberDTO.builder()
+                    .email(DEFAULT_EMAIL)
+                    .build();
+
             doNothing().when(teamService)
-                    .invite(DEFAULT_MEMBER_ID, DEFAULT_TEAM_ID, request);
+                    .invite(anyLong(), anyLong(), any(TeamServiceDTO.InviteMemberServiceDTO.class));
 
             // When & Then
-            performPost(teamUrl("/invite"), request)
+            performPost("/api/teams/1/invite", request)
                     .andExpectAll(
                             status().isOk(),
                             jsonPath("$.isSuccess").value(true)
@@ -205,7 +226,7 @@ class TeamControllerTest {
         PageImpl<TeamResponse.TeamResponseDto> pageResult = new PageImpl<>(
                 teamDtos,
                 pageRequest,
-                15 // 전체 요소 개수
+                10 // 전체 요소 개수
         );
         return TeamResponse.TeamListResponseDto.builder()
                 .teams(pageResult)
@@ -213,7 +234,7 @@ class TeamControllerTest {
     }
 
     private TeamResponse.TeamResponseDto createTeamResponse(Long id, String name) {
-        return TeamResponse.TeamResponseDto.builder().id(id).name(name).build();
+        return TeamResponse.TeamResponseDto.builder().id(id).name(name).createdAt(LocalDateTime.MIN).build();
     }
 
     private PostResponse.PostListResponseDto createPostResponses(PageRequest pageRequest) {

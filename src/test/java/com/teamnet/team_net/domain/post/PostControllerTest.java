@@ -2,8 +2,11 @@ package com.teamnet.team_net.domain.post;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.teamnet.team_net.domain.member.entity.Member;
+import com.teamnet.team_net.domain.member.enums.DeletionStatus;
+import com.teamnet.team_net.domain.member.enums.Role;
 import com.teamnet.team_net.domain.post.controller.PostController;
 import com.teamnet.team_net.domain.post.controller.PostRequest;
+import com.teamnet.team_net.domain.post.enums.SearchType;
 import com.teamnet.team_net.domain.post.service.PostService;
 import com.teamnet.team_net.domain.post.service.dto.PostResponse;
 import com.teamnet.team_net.domain.post.service.dto.PostServiceDTO;
@@ -19,15 +22,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -68,6 +70,10 @@ class PostControllerTest {
         sessionMember = new SessionMember(Member.builder()
                 .id(1L)
                 .nickname("hbb")
+                .name("hbb")
+                .email("xxx.xxx.com")
+                .role(Role.USER)
+                .status(DeletionStatus.NOT_DELETE)
                 .build());
         mockSession = new MockHttpSession();
         mockSession.setAttribute("member", sessionMember);
@@ -80,7 +86,6 @@ class PostControllerTest {
     void findOne() throws Exception {
         PostResponse.PostResponseDto responseDto = createPostResponseDto(TEST_POST_ID, TEST_TITLE, TEST_CONTENT);
         when(postService.findOne(TEST_POST_ID)).thenReturn(responseDto);
-        PageRequest pageRequest = PageRequest.of(0, 10);
 
         performGetRequest(BASE_URL + "/{postId}", TEST_TEAM_ID, TEST_POST_ID)
                 .andExpect(status().isOk())
@@ -99,18 +104,28 @@ class PostControllerTest {
                 .mapToObj(i -> createPostResponseDto((long) i, TEST_TITLE + i, TEST_CONTENT + i))
                 .collect(Collectors.toList());
 
-        PageRequest pageRequest = PageRequest.of(0, 20);
+        PageRequest pageRequest = PageRequest.of(0, 10);
         PageImpl<PostResponse.PostResponseDto> pageResult = new PageImpl<>(
                 posts,
                 pageRequest,
-                15 // 전체 요소 개수
+                10
         );
 
         PostResponse.PostListResponseDto response = PostResponse.PostListResponseDto.builder().posts(pageResult).build();
 
-        when(postService.findAllByTeamId(TEST_TEAM_ID, pageRequest)).thenReturn(response);
+        when(postService.findAll(
+                eq(sessionMember.getId()),
+                eq(TEST_TEAM_ID),
+                any(PostServiceDTO.PostSearchKeywordServiceDTO.class),
+                any(Pageable.class)
+        )).thenReturn(response);
 
-        performGetRequest(BASE_URL, TEST_TEAM_ID)
+        mvc.perform(get(BASE_URL, TEST_TEAM_ID)
+                        .param("keyword", "테스트")
+                        .param("type", "TITLE")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .session(mockSession)
+                        .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.isSuccess").value(true))
                 .andExpect(jsonPath("$.result.posts.content", hasSize(5)))
