@@ -4,12 +4,17 @@ import com.teamnet.team_net.global.response.ApiResponse;
 import com.teamnet.team_net.global.response.code.ErrorReasonDTO;
 import com.teamnet.team_net.global.response.code.status.ErrorStatus;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
@@ -27,6 +32,7 @@ public abstract class BaseExceptionHandler extends ResponseEntityExceptionHandle
                 .body(ApiResponse.onFailure(e.getCode(), e.getMessage(), null));
     }
 
+
     //MethodArgumentNotValidException DTO Validation 검증
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
@@ -34,7 +40,7 @@ public abstract class BaseExceptionHandler extends ResponseEntityExceptionHandle
         ErrorReasonDTO e = ErrorStatus._BAD_REQUEST.getReasonHttpStatus();
         return ResponseEntity
                 .status(e.getHttpStatus())
-                .body(ApiResponse.onFailure(e.getCode(), e.getMessage(), fieldErrors));
+                .body(ApiResponse.onFailure(e.getCode(), fieldErrors.get(0).getDefaultMessage(), fieldErrors));
     }
 
     @Override
