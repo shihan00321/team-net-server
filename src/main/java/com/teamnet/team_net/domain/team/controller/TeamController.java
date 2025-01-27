@@ -63,7 +63,7 @@ public class TeamController {
 
     @GetMapping("/search")
     public ApiResponse<TeamResponse.TeamResponseDto> searchTeam(
-            @ModelAttribute TeamRequest.TeamSearchDTO searchDTO) {
+            @Valid @ModelAttribute TeamRequest.TeamSearchDTO searchDTO) {
         return ApiResponse.onSuccess(teamService.searchTeam(searchDTO.toTeamSearchServiceDTO()));
     }
 }
