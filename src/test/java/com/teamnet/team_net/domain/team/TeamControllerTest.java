@@ -170,6 +170,28 @@ class TeamControllerTest {
         }
 
         @Test
+        @DisplayName("팀원 초대시 이메일은 필수이다.")
+        @WithMockUser(roles = "USER")
+        void inviteMemberWithoutEmail() throws Exception {
+            // Given
+            TeamRequest.InviteMemberDTO request = TeamRequest.InviteMemberDTO.builder()
+                    .email("")
+                    .build();
+
+            // When & Then
+            mvc.perform(post("/api/teams/{teamId}/invite", DEFAULT_TEAM_ID)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .session(session)
+                            .content(objectMapper.writeValueAsString(request))
+                            .with(csrf()))
+                    .andExpectAll(
+                            status().isBadRequest(),
+                            jsonPath("$.isSuccess").value(false),
+                            jsonPath("$.message").value("초대하려는 멤버 이메일을 입력해주세요.")
+                    ).andDo(print());
+        }
+
+        @Test
         @DisplayName("초대 요청을 수락한다.")
         @WithMockUser(roles = "USER")
         void acceptInvitation() throws Exception {
