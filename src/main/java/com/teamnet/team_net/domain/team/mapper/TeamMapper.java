@@ -19,6 +19,7 @@ public abstract class TeamMapper {
                 .id(team.getId())
                 .name(team.getName())
                 .teamImage(null)
+                .createdBy(team.getCreatedBy())
                 .createdAt(team.getCreatedAt())
                 .build();
     }

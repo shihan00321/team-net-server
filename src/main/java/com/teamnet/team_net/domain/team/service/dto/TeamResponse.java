@@ -15,6 +15,7 @@ public class TeamResponse {
         Long id;
         String name;
         String teamImage;
+        String createdBy;
         LocalDateTime createdAt;
     }
 
