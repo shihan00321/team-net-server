@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.teamnet.team_net.domain.member.entity.Member;
 import com.teamnet.team_net.domain.team.controller.TeamController;
 import com.teamnet.team_net.domain.team.controller.TeamRequest;
+import com.teamnet.team_net.domain.team.enums.TeamSearchType;
 import com.teamnet.team_net.domain.team.service.TeamService;
 import com.teamnet.team_net.domain.team.service.dto.TeamResponse;
 import com.teamnet.team_net.domain.team.service.dto.TeamServiceDTO;
@@ -75,7 +76,7 @@ class TeamControllerTest {
         void success() throws Exception {
             // Given
             TeamRequest.CreateTeamDTO request = createTeamRequest("team");
-            TeamResponse.TeamResponseDto response = createTeamResponse(DEFAULT_TEAM_ID, request.getName());
+            TeamResponse.TeamResponseDto response = createTeamResponse(DEFAULT_TEAM_ID, "hbb", request.getName());
             when(teamService.createTeam(eq(DEFAULT_MEMBER_ID), any(TeamServiceDTO.CreateTeamServiceDTO.class)))
                     .thenReturn(response);
 
@@ -225,6 +226,90 @@ class TeamControllerTest {
         }
     }
 
+
+    @Nested
+    @DisplayName("팀 검색 시 조건에 맞는 팀이 조회된다.")
+    class TeamSearchTest {
+        @Test
+        @DisplayName("팀 이름으로 검색 시 해당 조건에 맞는 팀이 조회된다.")
+        @WithMockUser(roles = "USER")
+        void searchTeamByTeamName() throws Exception {
+            // given
+            TeamResponse.TeamResponseDto response = createTeamResponse(DEFAULT_TEAM_ID, "hbb", "team");
+
+            // when & then
+            when(teamService.searchTeam(any(TeamServiceDTO.TeamSearchServiceDTO.class)))
+                    .thenReturn(response);
+
+            mvc.perform(get(BASE_URL + "/search")
+                            .session(session)
+                            .with(csrf())
+                            .param("keyword", "team")
+                            .param("type", TeamSearchType.NAME.name()))
+                    .andExpectAll(
+                            status().isOk(),
+                            jsonPath("$.isSuccess").value(true),
+                            jsonPath("$.result.name").value("team")
+                    ).andDo(print());
+        }
+
+        @Test
+        @DisplayName("팀장 이름으로 검색 시 해당 조건에 맞는 팀이 조회된다.")
+        @WithMockUser(roles = "USER")
+        void searchTeamByAdmin() throws Exception {
+            // given
+            TeamResponse.TeamResponseDto response = createTeamResponse(DEFAULT_TEAM_ID, "hbb", "team");
+
+            // when & then
+            when(teamService.searchTeam(any(TeamServiceDTO.TeamSearchServiceDTO.class)))
+                    .thenReturn(response);
+
+            mvc.perform(get(BASE_URL + "/search")
+                            .session(session)
+                            .with(csrf())
+                            .param("keyword", "hbb")
+                            .param("type", TeamSearchType.AUTHOR.name()))
+                    .andExpectAll(
+                            status().isOk(),
+                            jsonPath("$.isSuccess").value(true),
+                            jsonPath("$.result.createdBy").value("hbb"),
+                            jsonPath("$.result.name").value("team")
+                    ).andDo(print());
+        }
+
+        @Test
+        @DisplayName("팀 검색 시 키워드는 필수이다.")
+        @WithMockUser(roles = "USER")
+        void searchTeamWithoutKeyword() throws Exception {
+            mvc.perform(get(BASE_URL + "/search")
+                            .session(session)
+                            .with(csrf())
+                            .param("keyword", "")
+                            .param("type", TeamSearchType.AUTHOR.name()))
+                    .andExpectAll(
+                            status().isBadRequest(),
+                            jsonPath("$.isSuccess").value(false),
+                            jsonPath("$.message").value("검색어를 입력해주세요.")
+                    ).andDo(print());
+        }
+
+        @Test
+        @DisplayName("팀 검색 시 키워드는 필수이다.")
+        @WithMockUser(roles = "USER")
+        void searchTeamWithoutType() throws Exception {
+            mvc.perform(get(BASE_URL + "/search")
+                            .session(session)
+                            .with(csrf())
+                            .param("keyword", "team")
+                            .param("type", ""))
+                    .andExpectAll(
+                            status().isBadRequest(),
+                            jsonPath("$.isSuccess").value(false),
+                            jsonPath("$.message").value("검색 타입을 선택해주세요.")
+                    ).andDo(print());
+        }
+    }
+
     // Utility Methods
     private SessionMember createDefaultSessionMember() {
         return new SessionMember(Member.builder()
@@ -241,8 +326,8 @@ class TeamControllerTest {
 
     private TeamResponse.TeamListResponseDto createTeamResponses(PageRequest pageRequest) {
         List<TeamResponse.TeamResponseDto> teamDtos = List.of(
-                createTeamResponse(1L, "team1"),
-                createTeamResponse(2L, "team2")
+                createTeamResponse(1L, "hbb", "team1"),
+                createTeamResponse(2L, "hbb", "team2")
         );
         PageImpl<TeamResponse.TeamResponseDto> pageResult = new PageImpl<>(
                 teamDtos,
@@ -254,7 +339,12 @@ class TeamControllerTest {
                 .build();
     }
 
-    private TeamResponse.TeamResponseDto createTeamResponse(Long id, String name) {
-        return TeamResponse.TeamResponseDto.builder().id(id).name(name).createdAt(LocalDateTime.MIN).build();
+    private TeamResponse.TeamResponseDto createTeamResponse(Long id, String createdBy, String name) {
+        return TeamResponse.TeamResponseDto.builder()
+                .id(id)
+                .name(name)
+                .createdBy(createdBy)
+                .createdAt(LocalDateTime.MIN)
+                .build();
     }
 }
