@@ -42,7 +42,7 @@ public class TeamRequest {
     @Builder
     @AllArgsConstructor
     public static class TeamSearchDTO {
-        @NotBlank(message = "검색하려는 팀 이름을 입력해주세요.")
+        @NotBlank(message = "검색어를 입력해주세요.")
         String keyword;
 
         @NotNull(message = "검색 타입을 선택해주세요.")
