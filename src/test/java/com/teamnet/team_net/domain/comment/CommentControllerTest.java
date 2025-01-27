@@ -21,8 +21,6 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -69,7 +67,7 @@ class CommentControllerTest {
     }
 
     @Test
-    @DisplayName("댓글 생성 기능 테스트")
+    @DisplayName("게시글에 댓글을 등록한다.")
     @WithMockUser(roles = "USER")
     void create_test() throws Exception {
         CommentRequest.CreateCommentDto request = createCommentDto(TEST_CONTENT, null);
@@ -79,14 +77,24 @@ class CommentControllerTest {
                 .parentId((request.getParentId() == null) ? null : request.getParentId())
                 .build();
 
-        when(commentService.createComment(eq(sessionMember.getId()), eq(TEST_TEAM_ID), eq(TEST_POST_ID), any(CommentServiceDTO.CreateCommentServiceDto.class)))
-                .thenReturn(response);
-        ResultActions actions = performRequest(post(BASE_URL, TEST_TEAM_ID, TEST_POST_ID), request);
-        verifySuccessResponse(actions, response);
+        when(commentService.createComment(
+                eq(sessionMember.getId()), eq(TEST_TEAM_ID), eq(TEST_POST_ID), any(CommentServiceDTO.CreateCommentServiceDto.class)
+        )).thenReturn(response);
+
+        mvc.perform(post(BASE_URL, TEST_TEAM_ID, TEST_POST_ID)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .session(mockHttpSession)
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isSuccess").value(true))
+                .andExpect(jsonPath("$.result.content").value(response.getContent()))
+                .andDo(print());
     }
 
+
     @Test
-    @DisplayName("대댓글 생성 기능 테스트")
+    @DisplayName("댓글 하위에 대댓글 등록한다.")
     @WithMockUser(roles = "USER")
     void create_in_comment_test() throws Exception {
         CommentRequest.CreateCommentDto request = createCommentDto(TEST_CONTENT, 1L);
@@ -95,10 +103,19 @@ class CommentControllerTest {
                 .content(request.getContent())
                 .parentId((request.getParentId() == null) ? null : request.getParentId())
                 .build();
+
         when(commentService.createComment(eq(sessionMember.getId()), eq(TEST_TEAM_ID), eq(TEST_POST_ID), any(CommentServiceDTO.CreateCommentServiceDto.class)))
                 .thenReturn(response);
-        ResultActions actions = performRequest(post(BASE_URL, TEST_TEAM_ID, TEST_POST_ID), request);
-        verifySuccessResponse(actions, response);
+
+        mvc.perform(post(BASE_URL, TEST_TEAM_ID, TEST_POST_ID)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .session(mockHttpSession)
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isSuccess").value(true))
+                .andExpect(jsonPath("$.result.content").value(response.getContent()))
+                .andDo(print());
     }
 
     @Test
@@ -114,8 +131,15 @@ class CommentControllerTest {
         when(commentService.updateComment(eq(sessionMember.getId()), eq(TEST_COMMENT_ID), any(CommentServiceDTO.UpdateCommentServiceDto.class)))
                 .thenReturn(response);
 
-        ResultActions actions = performRequest(patch(BASE_URL_WITH_COMMENT, TEST_TEAM_ID, TEST_POST_ID, TEST_COMMENT_ID), request);
-        verifySuccessResponse(actions, response);
+        mvc.perform(patch(BASE_URL_WITH_COMMENT, TEST_TEAM_ID, TEST_POST_ID, TEST_COMMENT_ID)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .session(mockHttpSession)
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isSuccess").value(true))
+                .andExpect(jsonPath("$.result.content").value(response.getContent()))
+                .andDo(print());
     }
 
     @Test
@@ -123,8 +147,13 @@ class CommentControllerTest {
     @WithMockUser(roles = "USER")
     void delete_test() throws Exception {
         doNothing().when(commentService).deleteComment(sessionMember.getId(), TEST_COMMENT_ID);
-        ResultActions actions = performRequest(delete(BASE_URL_WITH_COMMENT, TEST_TEAM_ID, TEST_POST_ID, TEST_COMMENT_ID), null);
-        verifySuccessResponse(actions, null);
+        mvc.perform(delete(BASE_URL_WITH_COMMENT, TEST_TEAM_ID, TEST_POST_ID, TEST_COMMENT_ID)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .session(mockHttpSession)
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isSuccess").value(true))
+                .andDo(print());
     }
 
     private CommentRequest.CreateCommentDto createCommentDto(String content, Long parentId) {
@@ -139,22 +168,5 @@ class CommentControllerTest {
                 .content(content)
                 .parentId(parentId)
                 .build();
-    }
-
-    private ResultActions performRequest(MockHttpServletRequestBuilder requestBuilder, Object content) throws Exception {
-        return mvc.perform(requestBuilder
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(content))
-                .session(mockHttpSession)
-                .with(csrf()));
-    }
-
-    private <T> void verifySuccessResponse(ResultActions actions, T expected) throws Exception {
-        if (expected instanceof CommentResponse.CommentResponseDTO) {
-            actions.andExpect(status().isOk())
-                    .andExpect(jsonPath("$.isSuccess").value(true))
-                    .andExpect(jsonPath("$.result.content").value(((CommentResponse.CommentResponseDTO) expected).getContent()))
-                    .andDo(print());
-        }
     }
 }
