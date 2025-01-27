@@ -169,6 +169,7 @@ class CommentControllerTest {
                 .content(request.getContent())
                 .parentId((request.getParentId() == null) ? null : request.getParentId())
                 .build();
+
         when(commentService.updateComment(eq(sessionMember.getId()), eq(TEST_COMMENT_ID), any(CommentServiceDTO.UpdateCommentServiceDto.class)))
                 .thenReturn(response);
 
