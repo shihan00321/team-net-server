@@ -122,11 +122,10 @@ class CommentControllerTest {
 
     }
 
-
     @Test
     @DisplayName("댓글 하위에 대댓글 등록한다.")
     @WithMockUser(roles = "USER")
-    void create_in_comment_test() throws Exception {
+    void creatSubComment() throws Exception {
         CommentRequest.CreateCommentDto request = createCommentDto(TEST_CONTENT, 1L);
         CommentResponse.CommentResponseDTO response = CommentResponse.CommentResponseDTO.builder()
                 .commentId(TEST_COMMENT_ID)
@@ -149,7 +148,28 @@ class CommentControllerTest {
     }
 
     @Test
-    @DisplayName("댓글 수정 기능 테스트")
+    @DisplayName("게시글을 수정할 때 내용은 필수이다.")
+    @WithMockUser(roles = "USER")
+    void updateCommentWithoutContent() throws Exception {
+        // given
+        CommentRequest.UpdateCommentDto request = createUpdateCommentDto(null, null);
+
+        // when
+        // then
+        mvc.perform(post(BASE_URL, TEST_TEAM_ID, TEST_POST_ID)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .session(mockHttpSession)
+                        .with(csrf()))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.isSuccess").value(false))
+                .andExpect(jsonPath("$.message").value("댓글은 비어있을 수 없습니다."))
+                .andDo(print());
+
+    }
+
+    @Test
+    @DisplayName("댓글 작성자가 기존에 작성한 댓글의 내용을 수정한다.")
     @WithMockUser(roles = "USER")
     void update_test() throws Exception {
         CommentRequest.UpdateCommentDto request = createUpdateCommentDto("수정된 댓글", null);
@@ -173,7 +193,7 @@ class CommentControllerTest {
     }
 
     @Test
-    @DisplayName("댓글 삭제 기능 테스트")
+    @DisplayName("댓글 작성자가 기존에 작성한 댓글을 삭제한다.")
     @WithMockUser(roles = "USER")
     void delete_test() throws Exception {
         doNothing().when(commentService).deleteComment(sessionMember.getId(), TEST_COMMENT_ID);
