@@ -69,7 +69,7 @@ class CommentControllerTest {
     @Test
     @DisplayName("게시글에 댓글을 등록한다.")
     @WithMockUser(roles = "USER")
-    void create_test() throws Exception {
+    void createCommentTest() throws Exception {
         CommentRequest.CreateCommentDto request = createCommentDto(TEST_CONTENT, null);
         CommentResponse.CommentResponseDTO response = CommentResponse.CommentResponseDTO.builder()
                 .commentId(TEST_COMMENT_ID)
@@ -90,6 +90,36 @@ class CommentControllerTest {
                 .andExpect(jsonPath("$.isSuccess").value(true))
                 .andExpect(jsonPath("$.result.content").value(response.getContent()))
                 .andDo(print());
+    }
+
+    @Test
+    @DisplayName("게시글을 등록할 때 내용은 필수이다.")
+    @WithMockUser(roles = "USER")
+    void createCommentWithoutContent() throws Exception {
+        // given
+        CommentRequest.CreateCommentDto request = createCommentDto(null, null);
+        CommentResponse.CommentResponseDTO response = CommentResponse.CommentResponseDTO.builder()
+                .commentId(TEST_COMMENT_ID)
+                .content(request.getContent())
+                .parentId((request.getParentId() == null) ? null : request.getParentId())
+                .build();
+
+        when(commentService.createComment(
+                eq(sessionMember.getId()), eq(TEST_TEAM_ID), eq(TEST_POST_ID), any(CommentServiceDTO.CreateCommentServiceDto.class)
+        )).thenReturn(response);
+
+        // when
+        // then
+        mvc.perform(post(BASE_URL, TEST_TEAM_ID, TEST_POST_ID)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .session(mockHttpSession)
+                        .with(csrf()))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.isSuccess").value(false))
+                .andExpect(jsonPath("$.message").value("댓글은 비어있을 수 없습니다."))
+                .andDo(print());
+
     }
 
 
