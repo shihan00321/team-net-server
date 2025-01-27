@@ -98,15 +98,6 @@ class CommentControllerTest {
     void createCommentWithoutContent() throws Exception {
         // given
         CommentRequest.CreateCommentDto request = createCommentDto(null, null);
-        CommentResponse.CommentResponseDTO response = CommentResponse.CommentResponseDTO.builder()
-                .commentId(TEST_COMMENT_ID)
-                .content(request.getContent())
-                .parentId((request.getParentId() == null) ? null : request.getParentId())
-                .build();
-
-        when(commentService.createComment(
-                eq(sessionMember.getId()), eq(TEST_TEAM_ID), eq(TEST_POST_ID), any(CommentServiceDTO.CreateCommentServiceDto.class)
-        )).thenReturn(response);
 
         // when
         // then
