@@ -1,5 +1,6 @@
 package com.teamnet.team_net.domain.post;
 
+import com.teamnet.team_net.domain.IntegrationTestSupport;
 import com.teamnet.team_net.domain.member.entity.Member;
 import com.teamnet.team_net.domain.member.enums.DeletionStatus;
 import com.teamnet.team_net.domain.member.enums.Role;
@@ -21,10 +22,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,9 +33,7 @@ import java.util.stream.IntStream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@SpringBootTest
-@Transactional
-class PostServiceTest {
+class PostServiceTest extends IntegrationTestSupport {
     private static final String TEST_EMAIL = "xxx@xxx.com";
     private static final String TEST_NICKNAME = "hbb";
     private static final String TEST_TITLE = "테스트 제목";
