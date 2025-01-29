@@ -1,26 +1,17 @@
 package com.teamnet.team_net.domain.comment;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.teamnet.team_net.domain.comment.controller.CommentController;
+import com.teamnet.team_net.domain.ControllerTestSupport;
 import com.teamnet.team_net.domain.comment.controller.CommentRequest;
-import com.teamnet.team_net.domain.comment.service.CommentService;
 import com.teamnet.team_net.domain.comment.service.dto.CommentResponse;
 import com.teamnet.team_net.domain.comment.service.dto.CommentServiceDTO;
 import com.teamnet.team_net.domain.member.entity.Member;
-import com.teamnet.team_net.global.config.SecurityConfig;
 import com.teamnet.team_net.global.config.auth.dto.SessionMember;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -32,10 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(controllers = {CommentController.class}, excludeFilters = {
-        @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = SecurityConfig.class)
-})
-class CommentControllerTest {
+class CommentControllerTest extends ControllerTestSupport {
 
     private static final Long TEST_TEAM_ID = 1L;
     private static final Long TEST_POST_ID = 1L;
@@ -43,15 +31,6 @@ class CommentControllerTest {
     private static final String BASE_URL = "/api/teams/{teamId}/posts/{postId}/comments";
     private static final String BASE_URL_WITH_COMMENT = BASE_URL + "/{commentId}";
     private static final String TEST_CONTENT = "테스트 댓글";
-
-    @Autowired
-    private MockMvc mvc;
-
-    @MockBean
-    private CommentService commentService;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     private MockHttpSession mockHttpSession;
     private SessionMember sessionMember;

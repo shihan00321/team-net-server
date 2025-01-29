@@ -1,32 +1,23 @@
 package com.teamnet.team_net.domain.post;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.teamnet.team_net.domain.ControllerTestSupport;
 import com.teamnet.team_net.domain.member.entity.Member;
 import com.teamnet.team_net.domain.member.enums.DeletionStatus;
 import com.teamnet.team_net.domain.member.enums.Role;
-import com.teamnet.team_net.domain.post.controller.PostController;
 import com.teamnet.team_net.domain.post.controller.PostRequest;
-import com.teamnet.team_net.domain.post.service.PostService;
 import com.teamnet.team_net.domain.post.service.dto.PostResponse;
 import com.teamnet.team_net.domain.post.service.dto.PostServiceDTO;
-import com.teamnet.team_net.global.config.SecurityConfig;
 import com.teamnet.team_net.global.config.auth.dto.SessionMember;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -42,22 +33,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(controllers = PostController.class, excludeFilters = {
-        @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = SecurityConfig.class)
-})
-class PostControllerTest {
+class PostControllerTest extends ControllerTestSupport {
     private static final Long TEST_TEAM_ID = 1L;
     private static final Long TEST_POST_ID = 1L;
     private static final String BASE_URL = "/api/teams/{teamId}/posts";
     private static final String TEST_TITLE = "테스트 제목";
     private static final String TEST_CONTENT = "테스트 내용";
 
-    @Autowired
-    private MockMvc mvc;
-    @MockBean
-    private PostService postService;
-    @Autowired
-    private ObjectMapper objectMapper;
     private SessionMember sessionMember;
     private MockHttpSession mockSession;
 

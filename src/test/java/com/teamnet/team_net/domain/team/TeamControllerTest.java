@@ -1,31 +1,22 @@
 package com.teamnet.team_net.domain.team;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.teamnet.team_net.domain.ControllerTestSupport;
 import com.teamnet.team_net.domain.member.entity.Member;
-import com.teamnet.team_net.domain.team.controller.TeamController;
 import com.teamnet.team_net.domain.team.controller.TeamRequest;
 import com.teamnet.team_net.domain.team.enums.TeamSearchType;
-import com.teamnet.team_net.domain.team.service.TeamService;
 import com.teamnet.team_net.domain.team.service.dto.TeamResponse;
 import com.teamnet.team_net.domain.team.service.dto.TeamServiceDTO;
-import com.teamnet.team_net.global.config.SecurityConfig;
 import com.teamnet.team_net.global.config.auth.dto.SessionMember;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -40,23 +31,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(controllers = TeamController.class, excludeFilters = {
-        @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = SecurityConfig.class)
-})
-class TeamControllerTest {
+class TeamControllerTest extends ControllerTestSupport {
     private static final String BASE_URL = "/api/teams";
     private static final Long DEFAULT_TEAM_ID = 1L;
     private static final Long DEFAULT_MEMBER_ID = 1L;
     private static final String DEFAULT_EMAIL = "xxx.xxx.com";
-
-    @Autowired
-    private MockMvc mvc;
-
-    @MockBean
-    private TeamService teamService;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     private MockHttpSession session;
 
