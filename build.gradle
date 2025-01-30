@@ -55,11 +55,11 @@ tasks.named('test') {
 	useJUnitPlatform()
 }
 
-ext {
+ext { // 전역 변수 (snippet : 문서 조각을 의미하며, 이러한 스니펫에 대한 디렉토리 지정)
 	snippetsDir = file('build/generated-snippets')
 }
 
-test {
+test { // 테스트가 끝난 결과물을 snippetsDir 디렉토리로 지정
 	outputs.dir snippetsDir
 }
 
@@ -67,11 +67,16 @@ asciidoctor {
 	inputs.dir snippetsDir
 	configurations 'asciidoctorExt'
 
-	dependsOn test
+	sources {
+		include("**/index.adoc")
+	}
+	baseDirFollowsSourceDir() // 다른 adoc 파일을 include 할 때 경로를 baseDir로 맞춘다.
+	dependsOn test // dependsOn = 작업 순서. 즉 테스트가 수행된 다음에 AsciiDoctor가 실행.
 }
+// 즉 테스트가 수행 -> 결과물이 snippetsDir 안에 존재. -> 거기 있는 결과물을 받아서 AsciiDoctor가 html 문서로 변환
 
 bootJar {
-	dependsOn asciidoctor
+	dependsOn asciidoctor // asciidoctor가 수행된 다음에 bootJar 실행하여 나온 문서를 static docs 하위에 복사
 	from("${asciidoctor.outputDir}") {
 		into 'static/docs'
 	}
