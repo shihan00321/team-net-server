@@ -1,0 +1,10 @@
+[[posts-find-all]]
+=== 팀 게시글 조회
+
+==== HTTP Request
+include::{snippets}/posts-find-all/http-request.adoc[]
+include::{snippets}/posts-find-all/query-parameters.adoc[]
+
+==== HTTP Response
+include::{snippets}/posts-find-all/http-response.adoc[]
+include::{snippets}/posts-find-all/response-fields.adoc[]
