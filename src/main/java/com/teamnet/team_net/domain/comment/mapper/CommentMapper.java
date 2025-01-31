@@ -5,11 +5,11 @@ import com.teamnet.team_net.domain.comment.service.dto.CommentResponse;
 import com.teamnet.team_net.domain.comment.service.dto.CommentServiceDTO;
 import com.teamnet.team_net.domain.post.entity.Post;
 import org.springframework.data.domain.Page;
+import org.springframework.data.web.PagedModel;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public abstract class CommentMapper {
 
@@ -42,9 +42,10 @@ public abstract class CommentMapper {
         Page<CommentResponse.CommentResponseDTO> commentDtoPage = parentCommentsPage.map(parent ->
                 toCommentResponseDTO(parent, childrenMap.getOrDefault(parent.getId(), Collections.emptyList()))
         );
+        PagedModel<CommentResponse.CommentResponseDTO> result = new PagedModel<>(commentDtoPage);
 
         return CommentResponse.CommentListResponseDTO.builder()
-                .comments(commentDtoPage)
+                .comments(result)
                 .build();
     }
 

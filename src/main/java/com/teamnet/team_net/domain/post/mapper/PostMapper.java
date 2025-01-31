@@ -5,6 +5,7 @@ import com.teamnet.team_net.domain.post.service.dto.PostResponse;
 import com.teamnet.team_net.domain.post.service.dto.PostServiceDTO;
 import com.teamnet.team_net.domain.teammember.entity.TeamMember;
 import org.springframework.data.domain.Page;
+import org.springframework.data.web.PagedModel;
 
 public abstract class PostMapper {
     public static PostResponse.PostResponseDto toPostResponseDto(Post post) {
@@ -17,8 +18,10 @@ public abstract class PostMapper {
     }
 
     public static PostResponse.PostListResponseDto toPostListResponseDto(Page<Post> posts) {
+        Page<PostResponse.PostResponseDto> pages = posts.map(PostMapper::toPostResponseDto);
+        PagedModel<PostResponse.PostResponseDto> pagedModel = new PagedModel<>(pages);
         return PostResponse.PostListResponseDto.builder()
-                .posts(posts.map(PostMapper::toPostResponseDto))
+                .posts(pagedModel)
                 .build();
     }
 

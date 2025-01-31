@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -93,7 +94,9 @@ class PostControllerTest extends ControllerTestSupport {
                     pageRequest,
                     10
             );
-            PostResponse.PostListResponseDto response = PostResponse.PostListResponseDto.builder().posts(pageResult).build();
+
+            PagedModel<PostResponse.PostResponseDto> pagedModel = new PagedModel<>(pageResult);
+            PostResponse.PostListResponseDto response = PostResponse.PostListResponseDto.builder().posts(pagedModel).build();
 
             //when & then
             when(postService.findAll(
