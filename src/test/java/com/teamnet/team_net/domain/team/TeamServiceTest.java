@@ -88,13 +88,13 @@ class TeamServiceTest extends IntegrationTestSupport {
             Team secondTeam = createTeam("Second Team");
             createTeamMember(defaultMember, defaultTeam, TeamRole.ADMIN);
             createTeamMember(defaultMember, secondTeam, TeamRole.MEMBER);
-            PageRequest pageRequest = PageRequest.of(0, 20);
+            PageRequest pageRequest = PageRequest.of(0, 10);
 
             // When
             TeamResponse.TeamListResponseDto response = teamService.findMyTeams(defaultMember.getId(), pageRequest);
 
             // Then
-            assertThat(response.getTeams())
+            assertThat(response.getTeams().getContent())
                     .hasSize(2)
                     .allSatisfy(team -> {
                         assertThat(team.getName()).isNotNull();

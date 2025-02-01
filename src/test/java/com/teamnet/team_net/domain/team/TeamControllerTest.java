@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -313,8 +314,9 @@ class TeamControllerTest extends ControllerTestSupport {
                 pageRequest,
                 10
         );
+        PagedModel<TeamResponse.TeamResponseDto> pagedModel = new PagedModel<>(pageResult);
         return TeamResponse.TeamListResponseDto.builder()
-                .teams(pageResult)
+                .teams(pagedModel)
                 .build();
     }
 
