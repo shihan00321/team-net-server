@@ -46,7 +46,7 @@ public class SecurityConfig {
         http.authorizeHttpRequests((auth) -> auth
                 .requestMatchers("/api/members/additional").hasAuthority(Role.GUEST.getKey())
                 .requestMatchers("/api/posts/**", "/api/teams/**").hasAuthority(Role.USER.getKey())
-                .requestMatchers("/", "/oauth2/**", "/login/**").permitAll()
+                .requestMatchers("/", "/oauth2/**", "/login/**", "/docs/**").permitAll()
                 .anyRequest().authenticated());
 
         return http.build();
