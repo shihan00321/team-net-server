@@ -1,12 +1,12 @@
 package com.teamnet.team_net.domain.team;
 
+import com.teamnet.team_net.domain.IntegrationTestSupport;
 import com.teamnet.team_net.domain.member.entity.Member;
 import com.teamnet.team_net.domain.member.enums.DeletionStatus;
 import com.teamnet.team_net.domain.member.enums.Role;
 import com.teamnet.team_net.domain.member.repository.MemberRepository;
 import com.teamnet.team_net.domain.post.entity.Post;
 import com.teamnet.team_net.domain.post.repository.PostRepository;
-import com.teamnet.team_net.domain.post.service.dto.PostResponse;
 import com.teamnet.team_net.domain.team.entity.Team;
 import com.teamnet.team_net.domain.team.enums.TeamActiveStatus;
 import com.teamnet.team_net.domain.team.repository.TeamRepository;
@@ -23,18 +23,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-@SpringBootTest
-@Transactional
-class TeamServiceTest {
+class TeamServiceTest extends IntegrationTestSupport {
 
     @Autowired
     private TeamService teamService;
@@ -93,13 +88,13 @@ class TeamServiceTest {
             Team secondTeam = createTeam("Second Team");
             createTeamMember(defaultMember, defaultTeam, TeamRole.ADMIN);
             createTeamMember(defaultMember, secondTeam, TeamRole.MEMBER);
-            PageRequest pageRequest = PageRequest.of(0, 20);
+            PageRequest pageRequest = PageRequest.of(0, 10);
 
             // When
             TeamResponse.TeamListResponseDto response = teamService.findMyTeams(defaultMember.getId(), pageRequest);
 
             // Then
-            assertThat(response.getTeams())
+            assertThat(response.getTeams().getContent())
                     .hasSize(2)
                     .allSatisfy(team -> {
                         assertThat(team.getName()).isNotNull();

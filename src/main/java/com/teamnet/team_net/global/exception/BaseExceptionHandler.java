@@ -27,6 +27,7 @@ public abstract class BaseExceptionHandler extends ResponseEntityExceptionHandle
                 .body(ApiResponse.onFailure(e.getCode(), e.getMessage(), null));
     }
 
+
     //MethodArgumentNotValidException DTO Validation 검증
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
@@ -34,7 +35,7 @@ public abstract class BaseExceptionHandler extends ResponseEntityExceptionHandle
         ErrorReasonDTO e = ErrorStatus._BAD_REQUEST.getReasonHttpStatus();
         return ResponseEntity
                 .status(e.getHttpStatus())
-                .body(ApiResponse.onFailure(e.getCode(), e.getMessage(), fieldErrors));
+                .body(ApiResponse.onFailure(e.getCode(), fieldErrors.get(0).getDefaultMessage(), fieldErrors));
     }
 
     @Override

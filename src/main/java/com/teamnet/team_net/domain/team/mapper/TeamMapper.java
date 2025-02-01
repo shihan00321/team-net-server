@@ -5,6 +5,7 @@ import com.teamnet.team_net.domain.team.enums.TeamActiveStatus;
 import com.teamnet.team_net.domain.team.service.dto.TeamResponse;
 import com.teamnet.team_net.domain.team.service.dto.TeamServiceDTO;
 import org.springframework.data.domain.Page;
+import org.springframework.data.web.PagedModel;
 
 public abstract class TeamMapper {
     public static Team toTeam(TeamServiceDTO.CreateTeamServiceDTO request) {
@@ -19,13 +20,16 @@ public abstract class TeamMapper {
                 .id(team.getId())
                 .name(team.getName())
                 .teamImage(null)
+                .createdBy(team.getCreatedBy())
                 .createdAt(team.getCreatedAt())
                 .build();
     }
 
     public static TeamResponse.TeamListResponseDto toTeamListResponseDto(Page<Team> teams) {
+        Page<TeamResponse.TeamResponseDto> page = teams.map(TeamMapper::toTeamResponseDto);
+        PagedModel<TeamResponse.TeamResponseDto> pagedModel = new PagedModel<>(page);
         return TeamResponse.TeamListResponseDto.builder()
-                .teams(teams.map(TeamMapper::toTeamResponseDto))
+                .teams(pagedModel)
                 .build();
     }
 }

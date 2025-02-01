@@ -1,0 +1,70 @@
+[[team-create]]
+=== 팀 생성
+
+==== HTTP Request
+include::{snippets}/team-create/http-request.adoc[]
+
+==== HTTP Response
+include::{snippets}/team-create/http-response.adoc[]
+include::{snippets}/team-create/response-fields.adoc[]
+
+'''
+
+[[team-find-all]]
+=== 팀 목록 조회
+
+==== HTTP Request
+include::{snippets}/team-find-all/http-request.adoc[]
+
+==== HTTP Response
+include::{snippets}/team-find-all/http-response.adoc[]
+include::{snippets}/team-find-all/response-fields.adoc[]
+
+'''
+
+[[team-invite]]
+=== 팀 초대
+
+==== HTTP Request
+include::{snippets}/team-invite/http-request.adoc[]
+
+==== HTTP Response
+include::{snippets}/team-invite/http-response.adoc[]
+include::{snippets}/team-invite/response-fields.adoc[]
+
+'''
+
+[[team-accept]]
+=== 팀 요청 수락
+
+==== HTTP Request
+include::{snippets}/team-accept/http-request.adoc[]
+
+==== HTTP Response
+include::{snippets}/team-accept/http-response.adoc[]
+include::{snippets}/team-accept/response-fields.adoc[]
+
+'''
+
+[[team-inject]]
+=== 팀 요청 거절
+
+==== HTTP Request
+include::{snippets}/team-inject/http-request.adoc[]
+
+==== HTTP Response
+include::{snippets}/team-inject/http-response.adoc[]
+include::{snippets}/team-inject/response-fields.adoc[]
+
+'''
+
+[[team-search]]
+=== 팀 검색
+
+==== HTTP Request
+include::{snippets}/team-search/http-request.adoc[]
+include::{snippets}/team-search/query-parameters.adoc[]
+
+==== HTTP Response
+include::{snippets}/team-search/http-response.adoc[]
+include::{snippets}/team-search/response-fields.adoc[]

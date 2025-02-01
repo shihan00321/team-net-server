@@ -1,5 +1,6 @@
 package com.teamnet.team_net.domain.comment;
 
+import com.teamnet.team_net.domain.IntegrationTestSupport;
 import com.teamnet.team_net.domain.comment.entity.Comment;
 import com.teamnet.team_net.domain.comment.repository.CommentRepository;
 import com.teamnet.team_net.domain.comment.service.CommentService;
@@ -27,13 +28,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.Map;
@@ -41,9 +40,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@SpringBootTest
-@Transactional
-class CommentServiceTest {
+class CommentServiceTest extends IntegrationTestSupport {
 
     @Autowired
     private CommentService commentService;

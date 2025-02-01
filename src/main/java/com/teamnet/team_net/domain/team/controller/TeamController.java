@@ -34,7 +34,7 @@ public class TeamController {
     @PostMapping("/{teamId}/invite")
     public ApiResponse<Void> inviteMember(
             @LoginMember SessionMember sessionMember,
-            @RequestBody TeamRequest.InviteMemberDTO inviteMemberDto,
+            @Valid @RequestBody TeamRequest.InviteMemberDTO inviteMemberDto,
             @PathVariable Long teamId) {
         teamService.invite(sessionMember.getId(), teamId, inviteMemberDto.toInviteMemberServiceDTO());
         return ApiResponse.onSuccess(null);
@@ -63,7 +63,7 @@ public class TeamController {
 
     @GetMapping("/search")
     public ApiResponse<TeamResponse.TeamResponseDto> searchTeam(
-            @ModelAttribute TeamRequest.TeamSearchDTO searchDTO) {
+            @Valid @ModelAttribute TeamRequest.TeamSearchDTO searchDTO) {
         return ApiResponse.onSuccess(teamService.searchTeam(searchDTO.toTeamSearchServiceDTO()));
     }
 }

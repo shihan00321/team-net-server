@@ -1,5 +1,6 @@
 package com.teamnet.team_net.domain.post;
 
+import com.teamnet.team_net.domain.IntegrationTestSupport;
 import com.teamnet.team_net.domain.member.entity.Member;
 import com.teamnet.team_net.domain.member.enums.DeletionStatus;
 import com.teamnet.team_net.domain.member.enums.Role;
@@ -21,10 +22,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.web.PagedModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,9 +34,7 @@ import java.util.stream.IntStream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@SpringBootTest
-@Transactional
-class PostServiceTest {
+class PostServiceTest extends IntegrationTestSupport {
     private static final String TEST_EMAIL = "xxx@xxx.com";
     private static final String TEST_NICKNAME = "hbb";
     private static final String TEST_TITLE = "테스트 제목";
@@ -109,12 +107,11 @@ class PostServiceTest {
                 .build();
         // when
         PostResponse.PostListResponseDto listResponseDto = postService.findAll(testMember.getId(), testTeam.getId(), emptyDto, pageRequest);
-        Page<PostResponse.PostResponseDto> findAll = listResponseDto.getPosts();
+        PagedModel<PostResponse.PostResponseDto> findAll = listResponseDto.getPosts();
 
         // then
-        assertThat(findAll).hasSize(5);
-        assertThat(findAll.get().map(PostResponse.PostResponseDto::getTitle).equals(TEST_TITLE + "3"));
-        assertThat(findAll.get().map(PostResponse.PostResponseDto::getContent).equals(TEST_TITLE + "3"));
+        assertThat(findAll.getContent().get(3).getTitle().equals(TEST_TITLE + "3"));
+        assertThat(findAll.getContent().get(3).getContent().equals(TEST_CONTENT + "3"));
     }
 
     @Test
@@ -138,12 +135,11 @@ class PostServiceTest {
                 .build();
         // when
         PostResponse.PostListResponseDto listResponseDto = postService.findAll(testMember.getId(), testTeam.getId(), emptyDto, pageRequest);
-        Page<PostResponse.PostResponseDto> findAll = listResponseDto.getPosts();
+        PagedModel<PostResponse.PostResponseDto> findAll = listResponseDto.getPosts();
 
         // then
-        assertThat(findAll).hasSize(5);
-        assertThat(findAll.get().map(PostResponse.PostResponseDto::getTitle).equals(TEST_TITLE + "3"));
-        assertThat(findAll.get().map(PostResponse.PostResponseDto::getContent).equals(TEST_TITLE + "3"));
+        assertThat(findAll.getContent().get(3).getTitle().equals(TEST_TITLE + "3"));
+        assertThat(findAll.getContent().get(3).getContent().equals(TEST_CONTENT + "3"));
     }
 
     @Test
