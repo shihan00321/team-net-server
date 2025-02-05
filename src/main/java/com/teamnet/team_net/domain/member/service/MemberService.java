@@ -27,6 +27,8 @@ public class MemberService {
 
     @Transactional
     public UpdateMemberResponseDto saveAdditionalMemberInfo(MemberServiceDTO.AdditionalMemberInfoServiceDTO memberInfoDto, Long memberId) {
+        entityChecker.findMemberByNickname(memberInfoDto.getNickname());
+
         Member member = entityChecker.findMemberById(memberId);
         member.addNickname(memberInfoDto.getNickname());
         member.updateRole();
