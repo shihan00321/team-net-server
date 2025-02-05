@@ -15,7 +15,7 @@ import java.nio.file.AccessDeniedException;
 @RestControllerAdvice
 public class ExceptionAdvice extends BaseExceptionHandler {
 
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(value = GeneralException.class)
     public ApiResponse<Object> onThrowException(GeneralException generalException) {
         ErrorReasonDTO e = generalException.getErrorReasonHttpStatus();
