@@ -56,9 +56,23 @@ public class EntityChecker {
                 .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
     }
 
+    public void findMemberByNickname(String nickname) {
+        memberRepository.findByNickname(nickname)
+                .ifPresent(member -> {
+                    throw new MemberHandler(ErrorStatus.MEMBER_NICKNAME_EXIST); // 이미 존재하는 닉네임일 경우 예외 던짐
+                });
+    }
+
     public Team findTeamById(Long teamId) {
         return teamRepository.findById(teamId)
                 .orElseThrow(() -> new TeamHandler(ErrorStatus.TEAM_NOT_FOUND));
+    }
+
+    public void findTeamByName(String name) {
+        teamRepository.findByName(name)
+                .ifPresent(team -> {
+                    throw new TeamHandler(ErrorStatus.TEAM_NAME_EXIST);
+                });
     }
 
     public TeamMember findTeamMemberByMemberIdAndTeamId(Long memberId, Long teamId) {
