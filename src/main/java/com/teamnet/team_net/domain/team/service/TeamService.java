@@ -38,6 +38,8 @@ public class TeamService {
     @Transactional
     public TeamResponse.TeamResponseDto createTeam(Long memberId, TeamServiceDTO.CreateTeamServiceDTO request) {
         Member member = entityChecker.findMemberById(memberId);
+        entityChecker.findTeamByName(request.getName());
+
         Team team = toTeam(request);
         teamRepository.save(team);
 
