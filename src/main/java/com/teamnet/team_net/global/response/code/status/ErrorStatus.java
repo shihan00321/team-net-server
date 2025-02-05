@@ -20,6 +20,7 @@ public enum ErrorStatus implements BaseErrorCode {
     // 멤버 관려 에러
     MEMBER_NOT_FOUND(HttpStatus.BAD_REQUEST, "MEMBER4001", "사용자가 없습니다."),
     NICKNAME_NOT_EXIST(HttpStatus.BAD_REQUEST, "MEMBER4002", "닉네임은 필수 입니다."),
+    MEMBER_NICKNAME_EXIST(HttpStatus.BAD_REQUEST, "MEMBER4003", "이미 존재하는 닉네임입니다."),
 
     // 게시글 관련 에러
     POST_NOT_FOUND(HttpStatus.BAD_REQUEST, "POST4001", "게시글을 찾을 수 없습니다."),
@@ -29,6 +30,7 @@ public enum ErrorStatus implements BaseErrorCode {
     TEAM_NOT_FOUND(HttpStatus.NOT_FOUND, "TEAM4001", "해당 팀을 찾을 수 없습니다."),
     TEAM_MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "TEAM4002", "해당 팀의 멤버가 아닙니다."),
     TEAM_MEMBER_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "TEAM4003", "해당 팀에 대한 권한이 없습니다."),
+    TEAM_NAME_EXIST(HttpStatus.BAD_REQUEST, "TEAM4004", "이미 존재하는 팀 이름입니다."),
 
     // 알림 관련 에러
     NOTIFICATION_CONNECT_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "NOTI4001", "알림 연결 중 에러가 발생했습니다."),
