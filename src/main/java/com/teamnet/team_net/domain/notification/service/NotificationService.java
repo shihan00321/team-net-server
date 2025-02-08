@@ -2,6 +2,7 @@ package com.teamnet.team_net.domain.notification.service;
 
 import com.teamnet.team_net.domain.member.entity.Member;
 import com.teamnet.team_net.domain.notification.entity.Notification;
+import com.teamnet.team_net.domain.notification.mapper.NotificationMapper;
 import com.teamnet.team_net.domain.notification.repository.NotificationRepository;
 import com.teamnet.team_net.domain.notification.service.dto.NotificationResponse;
 import com.teamnet.team_net.domain.sse.EmitterRepository;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
+import java.util.List;
 
 import static com.teamnet.team_net.domain.notification.mapper.NotificationMapper.toNotificationResponseDto;
 
@@ -53,6 +55,19 @@ public class NotificationService {
                         emitter -> sendNotificationEvent(emitter, recipient.getId(), response),
                         () -> log.info("No emitter found")
                 );
+    }
+
+    @Transactional
+    public void markNotificationsAsRead(Long memberId, List<Long> notificationIds) {
+        if (notificationIds == null || notificationIds.isEmpty()) {
+            return;
+        }
+        notificationRepository.markAsRead(notificationIds);
+    }
+
+    public NotificationResponse.NotificationListResponseDto findNotificationList(Long memberId) {
+        List<Notification> notifications = notificationRepository.findNotifications(memberId);
+        return NotificationMapper.toNotificationResponseListDto(notifications);
     }
 
     private void sendConnectEvent(SseEmitter emitter, Long memberId) {
