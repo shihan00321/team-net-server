@@ -16,6 +16,7 @@ public class PostResponse {
         String content;
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
         LocalDateTime createdAt;
+        String createdBy;
     }
 
     @Getter

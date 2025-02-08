@@ -15,6 +15,7 @@ public abstract class PostMapper {
                 .title(post.getTitle())
                 .content(post.getContent())
                 .createdAt(post.getCreatedAt())
+                .createdBy(post.getCreatedBy())
                 .build();
     }
 
