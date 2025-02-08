@@ -1,5 +1,6 @@
 package com.teamnet.team_net.domain.notification.service.dto;
 
+import com.teamnet.team_net.domain.notification.enums.NotificationType;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -12,8 +13,11 @@ public class NotificationResponse {
     @Builder
     public static class NotificationResponseDto {
         Long id;
+        Long referenceId;
         String title;
         String message;
+        Boolean isRead;
+        NotificationType type;
         LocalDateTime createdAt;
     }
 

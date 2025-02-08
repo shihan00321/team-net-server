@@ -1,8 +1,8 @@
 package com.teamnet.team_net.domain.notification.mapper;
 
+import com.teamnet.team_net.domain.notification.entity.Notification;
 import com.teamnet.team_net.domain.notification.service.dto.NotificationResponse;
 import com.teamnet.team_net.domain.notification.service.dto.NotificationResponse.NotificationListResponseDto;
-import com.teamnet.team_net.domain.notification.entity.Notification;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -12,8 +12,11 @@ public abstract class NotificationMapper {
         return NotificationResponse.NotificationResponseDto
                 .builder()
                 .id(notification.getId())
+                .referenceId(notification.getReferenceId())
                 .title(notification.getTitle())
                 .message(notification.getMessage())
+                .type(notification.getType())
+                .isRead(notification.getIsRead())
                 .createdAt(notification.getCreatedAt())
                 .build();
     }
