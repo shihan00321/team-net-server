@@ -23,8 +23,6 @@ public class MemberService {
 
     private final SecurityContextManager securityContextManager;
     private final EntityChecker entityChecker;
-    private final NotificationRepository notificationRepository;
-
     @Transactional
     public UpdateMemberResponseDto saveAdditionalMemberInfo(MemberServiceDTO.AdditionalMemberInfoServiceDTO memberInfoDto, Long memberId) {
         entityChecker.findMemberByNickname(memberInfoDto.getNickname());
@@ -34,10 +32,5 @@ public class MemberService {
         member.updateRole();
         securityContextManager.updateSecurityContext(member);
         return toUpdateMemberResponseDto(member);
-    }
-
-    public NotificationListResponseDto findNotificationList(Long memberId) {
-        List<Notification> notifications = notificationRepository.findNotifications(memberId);
-        return NotificationMapper.toNotificationResponseListDto(notifications);
     }
 }
