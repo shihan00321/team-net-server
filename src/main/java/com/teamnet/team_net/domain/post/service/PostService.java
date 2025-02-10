@@ -33,7 +33,7 @@ public class PostService {
     public PostResponse.PostListResponseDto findAll(Long memberId, Long teamId, PostSearchKeywordServiceDTO postSearchKeywordServiceDTO, Pageable pageable) {
         entityChecker.findTeamMemberByMemberIdAndTeamId(memberId, teamId);
         Page<Post> posts = postRepository.searchPosts(teamId, postSearchKeywordServiceDTO.getKeyword(), postSearchKeywordServiceDTO.getType(), pageable);
-        return PostMapper.toPostListResponseDto(posts);
+        return PostMapper.toPostListResponseDto(posts, memberId);
     }
 
     @Transactional

@@ -19,8 +19,11 @@ public abstract class PostMapper {
                 .build();
     }
 
-    public static PostResponse.PostListResponseDto toPostListResponseDto(Page<Post> posts) {
-        Page<PostResponse.PostResponseDto> pages = posts.map(PostMapper::toPostResponseDto);
+    public static PostResponse.PostListResponseDto toPostListResponseDto(Page<Post> posts, Long memberId) {
+        Page<PostResponse.PostResponseDto> pages = posts.map(post -> toPostResponseDtoWithIsMine(
+                post,
+                memberId.equals(post.getMember().getId())
+        ));
         PagedModel<PostResponse.PostResponseDto> pagedModel = new PagedModel<>(pages);
         return PostResponse.PostListResponseDto.builder()
                 .posts(pagedModel)
@@ -33,6 +36,18 @@ public abstract class PostMapper {
                 .team(teamMember.getTeam())
                 .content(postSaveDto.getContent())
                 .member(teamMember.getMember())
+                .build();
+    }
+
+    private static PostResponse.PostResponseDto toPostResponseDtoWithIsMine(Post post, Boolean isMine) {
+        return PostResponse.PostResponseDto
+                .builder()
+                .id(post.getId())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .createdAt(post.getCreatedAt())
+                .createdBy(post.getCreatedBy())
+                .isMine(isMine)
                 .build();
     }
 }
