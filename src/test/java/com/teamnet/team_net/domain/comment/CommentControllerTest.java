@@ -23,8 +23,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -156,7 +155,7 @@ class CommentControllerTest extends ControllerTestSupport {
         PagedModel<CommentResponse.CommentResponseDTO> pagedModel = new PagedModel<>(pageResult);
         CommentResponse.CommentListResponseDTO response = CommentResponse.CommentListResponseDTO.builder().comments(pagedModel).build();
 
-        when(commentService.findComments(eq(TEST_POST_ID), any(Pageable.class)))
+        when(commentService.findComments(anyLong(), anyLong(), any(Pageable.class)))
                 .thenReturn(response);
 
         mvc.perform(get(BASE_URL, TEST_TEAM_ID, TEST_POST_ID)

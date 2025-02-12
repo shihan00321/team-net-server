@@ -67,7 +67,7 @@ class TeamServiceTest extends IntegrationTestSupport {
         @DisplayName("성공적으로 팀을 생성한다")
         void createTeam_success() {
             // Given
-            TeamServiceDTO.CreateTeamServiceDTO request = createTeamDto(DEFAULT_TEAM_NAME);
+            TeamServiceDTO.CreateTeamServiceDTO request = createTeamDto("First Team");
 
             // When
             TeamResponse.TeamResponseDto teamResponseDto = teamService.createTeam(defaultMember.getId(), request);

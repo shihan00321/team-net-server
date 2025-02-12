@@ -27,7 +27,6 @@ import static org.mockito.Mockito.*;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -58,6 +57,8 @@ public class CommentControllerDocsTest extends RestDocsSupport {
                 .commentId(TEST_COMMENT_ID)
                 .content(request.getContent())
                 .parentId((request.getParentId() == null) ? null : request.getParentId())
+                .createdBy("hbb")
+                .isMine(true)
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -99,7 +100,11 @@ public class CommentControllerDocsTest extends RestDocsSupport {
                                 fieldWithPath("result.content").type(JsonFieldType.STRING)
                                         .description("댓글 내용"),
                                 fieldWithPath("result.createdAt").type(JsonFieldType.STRING)
-                                        .description("댓글 ID")
+                                        .description("댓글 작성일자"),
+                                fieldWithPath("result.createdBy").type(JsonFieldType.STRING)
+                                        .description("댓글 작성자"),
+                                fieldWithPath("result.isMine").type(JsonFieldType.BOOLEAN)
+                                        .description("나의 댓글 여부")
                         )
                 ));
     }
@@ -113,12 +118,16 @@ public class CommentControllerDocsTest extends RestDocsSupport {
                         .content(TEST_CONTENT + i)
                         .commentId((long) i)
                         .createdAt(LocalDateTime.now())
+                        .createdBy("hbb")
+                        .isMine(false)
                         .parentId(null)
                         .childrenComment(List.of(
                                 CommentResponse.CommentResponseDTO.builder()
                                         .commentId((long) i + 5)
                                         .content("대댓글" + i)
                                         .parentId((long) i)
+                                        .createdBy("hbb2")
+                                        .isMine(true)
                                         .createdAt(LocalDateTime.now())
                                         .build()
                         ))
@@ -133,13 +142,12 @@ public class CommentControllerDocsTest extends RestDocsSupport {
         PagedModel<CommentResponse.CommentResponseDTO> pagedModel = new PagedModel<>(pageResult);
         CommentResponse.CommentListResponseDTO response = CommentResponse.CommentListResponseDTO.builder().comments(pagedModel).build();
 
-        when(commentService.findComments(eq(TEST_POST_ID), any(Pageable.class)))
+        when(commentService.findComments(anyLong(), anyLong(), any(Pageable.class)))
                 .thenReturn(response);
 
         mvc.perform(get(BASE_URL, TEST_TEAM_ID, TEST_POST_ID)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .session(mockHttpSession)
-                        .with(csrf()))
+                        .session(mockHttpSession))
                 .andDo(print())
                 .andExpect(jsonPath("$.isSuccess").value(true))
                 .andExpect(jsonPath("$.result.comments.content[1].content").value("테스트 댓글2"))
@@ -165,6 +173,10 @@ public class CommentControllerDocsTest extends RestDocsSupport {
                                         .description("댓글 내용"),
                                 fieldWithPath("result.comments.content[].createdAt").type(JsonFieldType.STRING)
                                         .description("댓글 ID"),
+                                fieldWithPath("result.comments.content[].createdBy").type(JsonFieldType.STRING)
+                                        .description("댓글 작성자"),
+                                fieldWithPath("result.comments.content[].isMine").type(JsonFieldType.BOOLEAN)
+                                        .description("나의 댓글 여부"),
                                 fieldWithPath("result.comments.content[].childrenComment").type(JsonFieldType.ARRAY)
                                         .description("대댓글 목록").optional(),
                                 fieldWithPath("result.comments.content[].childrenComment[].commentId").type(JsonFieldType.NUMBER)
@@ -175,6 +187,10 @@ public class CommentControllerDocsTest extends RestDocsSupport {
                                         .description("대댓글 내용"),
                                 fieldWithPath("result.comments.content[].childrenComment[].createdAt").type(JsonFieldType.STRING)
                                         .description("대댓글 생성 시간"),
+                                fieldWithPath("result.comments.content[].childrenComment[].createdBy").type(JsonFieldType.STRING)
+                                        .description("댓글 작성자"),
+                                fieldWithPath("result.comments.content[].childrenComment[].isMine").type(JsonFieldType.BOOLEAN)
+                                        .description("나의 댓글 여부"),
                                 fieldWithPath("result.comments.page.size").type(JsonFieldType.NUMBER)
                                         .description("페이지 크기"),
                                 fieldWithPath("result.comments.page.number").type(JsonFieldType.NUMBER)
@@ -197,6 +213,8 @@ public class CommentControllerDocsTest extends RestDocsSupport {
                 .commentId(TEST_COMMENT_ID)
                 .content(request.getContent())
                 .createdAt(LocalDateTime.now())
+                .createdBy("hbb")
+                .isMine(false)
                 .build();
 
         when(commentService.updateComment(eq(sessionMember.getId()), eq(TEST_COMMENT_ID), any(CommentServiceDTO.UpdateCommentServiceDto.class)))
@@ -233,7 +251,11 @@ public class CommentControllerDocsTest extends RestDocsSupport {
                                 fieldWithPath("result.content").type(JsonFieldType.STRING)
                                         .description("댓글 내용"),
                                 fieldWithPath("result.createdAt").type(JsonFieldType.STRING)
-                                        .description("댓글 ID")
+                                        .description("댓글 ID"),
+                                fieldWithPath("result.createdBy").type(JsonFieldType.STRING)
+                                        .description("댓글 작성자"),
+                                fieldWithPath("result.isMine").type(JsonFieldType.BOOLEAN)
+                                        .description("나의 댓글 여부")
                         )
                 ));
         ;

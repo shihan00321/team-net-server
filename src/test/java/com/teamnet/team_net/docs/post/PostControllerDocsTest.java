@@ -88,7 +88,11 @@ public class PostControllerDocsTest extends RestDocsSupport {
                                     fieldWithPath("result.content").type(JsonFieldType.STRING)
                                             .description("게시글 내용"),
                                     fieldWithPath("result.createdAt").type(JsonFieldType.STRING)
-                                            .description("게시글 작성 시간")
+                                            .description("게시글 작성 시간"),
+                                    fieldWithPath("result.createdBy").type(JsonFieldType.STRING)
+                                            .description("게시글 작성자"),
+                                    fieldWithPath("result.isMine").type(JsonFieldType.BOOLEAN)
+                                            .description("게시글 작성자 본인 여부")
                             )));
         }
 
@@ -130,6 +134,8 @@ public class PostControllerDocsTest extends RestDocsSupport {
                             jsonPath("$.result.posts.content[1].id").value(2L),
                             jsonPath("$.result.posts.content[1].title").value(TEST_TITLE + "2"),
                             jsonPath("$.result.posts.content[1].content").value(TEST_CONTENT + "2"),
+                            jsonPath("$.result.posts.content[1].createdBy").value("hbb"),
+                            jsonPath("$.result.posts.content[1].isMine").value(true),
                             jsonPath("$.result.posts.page.size").value(10),
                             jsonPath("$.result.posts.page.number").value(0),
                             jsonPath("$.result.posts.page.totalPages").value(1))
@@ -154,6 +160,10 @@ public class PostControllerDocsTest extends RestDocsSupport {
                                             .description("게시글 내용"),
                                     fieldWithPath("result.posts.content[].createdAt").type(JsonFieldType.STRING)
                                             .description("게시글 작성 시간"),
+                                    fieldWithPath("result.posts.content[].createdBy").type(JsonFieldType.STRING)
+                                            .description("게시글 작성자"),
+                                    fieldWithPath("result.posts.content[].isMine").type(JsonFieldType.BOOLEAN)
+                                            .description("게시글 작성자 본인 여부"),
                                     fieldWithPath("result.posts.page.size").type(JsonFieldType.NUMBER)
                                             .description("페이지 크기"),
                                     fieldWithPath("result.posts.page.number").type(JsonFieldType.NUMBER)
@@ -211,7 +221,11 @@ public class PostControllerDocsTest extends RestDocsSupport {
                                     fieldWithPath("result.content").type(JsonFieldType.STRING)
                                             .description("게시글 내용"),
                                     fieldWithPath("result.createdAt").type(JsonFieldType.STRING)
-                                            .description("게시글 작성 시간")
+                                            .description("게시글 작성 시간"),
+                                    fieldWithPath("result.createdBy").type(JsonFieldType.STRING)
+                                            .description("게시글 작성자"),
+                                    fieldWithPath("result.isMine").type(JsonFieldType.BOOLEAN)
+                                            .description("게시글 작성자 본인 여부")
                             )
                     ));
         }
@@ -265,7 +279,11 @@ public class PostControllerDocsTest extends RestDocsSupport {
                                     fieldWithPath("result.content").type(JsonFieldType.STRING)
                                             .description("게시글 내용"),
                                     fieldWithPath("result.createdAt").type(JsonFieldType.STRING)
-                                            .description("게시글 작성 시간")
+                                            .description("게시글 작성 시간"),
+                                    fieldWithPath("result.createdBy").type(JsonFieldType.STRING)
+                                            .description("게시글 작성자"),
+                                    fieldWithPath("result.isMine").type(JsonFieldType.BOOLEAN)
+                                            .description("게시글 작성자 본인 여부")
                             )
                     ));
         }
@@ -297,6 +315,8 @@ public class PostControllerDocsTest extends RestDocsSupport {
                 .title(title)
                 .content(content)
                 .createdAt(LocalDateTime.now())
+                .createdBy("hbb")
+                .isMine(true)
                 .build();
     }
 
