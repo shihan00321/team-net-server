@@ -25,7 +25,7 @@ public abstract class CommentMapper {
         List<CommentResponse.CommentResponseDTO> childDtos = null;
         if (children != null) {
             childDtos = children.stream()
-                    .map(CommentMapper::toChildCommentResponseDTO)
+                    .map(child -> toChildCommentResponseDTO(null, child))
                     .toList();
         }
 
@@ -33,14 +33,15 @@ public abstract class CommentMapper {
                 .commentId(parent.getId())
                 .parentId(parent.getParent() != null ? parent.getParent().getId() : null)
                 .content(parent.getContent())
+                .createdBy(parent.getCreatedBy())
                 .createdAt(parent.getCreatedAt())
                 .childrenComment(childDtos)
                 .build();
     }
 
-    public static CommentResponse.CommentListResponseDTO toCommentListResponseDTO(Page<Comment> parentCommentsPage, Map<Long, List<Comment>> childrenMap) {
+    public static CommentResponse.CommentListResponseDTO toCommentListResponseDTO(Long memberId, Page<Comment> parentCommentsPage, Map<Long, List<Comment>> childrenMap) {
         Page<CommentResponse.CommentResponseDTO> commentDtoPage = parentCommentsPage.map(parent ->
-                toCommentResponseDTO(parent, childrenMap.getOrDefault(parent.getId(), Collections.emptyList()))
+                toCommentWithIsMineResponseDTO(memberId, parent, childrenMap.getOrDefault(parent.getId(), Collections.emptyList()))
         );
         PagedModel<CommentResponse.CommentResponseDTO> result = new PagedModel<>(commentDtoPage);
 
@@ -49,11 +50,31 @@ public abstract class CommentMapper {
                 .build();
     }
 
-    private static CommentResponse.CommentResponseDTO toChildCommentResponseDTO(Comment child) {
+    private static CommentResponse.CommentResponseDTO toCommentWithIsMineResponseDTO(Long memberId, Comment parent, List<Comment> children) {
+        List<CommentResponse.CommentResponseDTO> childDtos = null;
+        if (children != null) {
+            childDtos = children.stream()
+                    .map(child -> toChildCommentResponseDTO(memberId, child))
+                    .toList();
+        }
+
+        return CommentResponse.CommentResponseDTO.builder()
+                .commentId(parent.getId())
+                .parentId(parent.getParent() != null ? parent.getParent().getId() : null)
+                .content(parent.getContent())
+                .isMine(parent.getPost().getMember().getId().equals(memberId))
+                .createdBy(parent.getCreatedBy())
+                .createdAt(parent.getCreatedAt())
+                .childrenComment(childDtos)
+                .build();
+    }
+
+    private static CommentResponse.CommentResponseDTO toChildCommentResponseDTO(Long memberId, Comment child) {
         return CommentResponse.CommentResponseDTO.builder()
                 .commentId(child.getId())
                 .parentId(child.getParent() != null ? child.getParent().getId() : null) // null 체크 추가
                 .content(child.getContent())
+                .isMine(memberId.equals(child.getPost().getMember().getId()))
                 .createdAt(child.getCreatedAt())
                 .build();
     }

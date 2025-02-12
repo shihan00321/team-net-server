@@ -66,7 +66,7 @@ public class CommentService {
         commentRepository.delete(comment);
     }
 
-    public CommentResponse.CommentListResponseDTO findComments(Long postId, Pageable pageable) {
+    public CommentResponse.CommentListResponseDTO findComments(Long memberId, Long postId, Pageable pageable) {
         // 1. 부모 댓글 페이징 조회
         Page<Comment> parentCommentsPage = commentRepository.findParentCommentsByPostId(postId, pageable);
 
@@ -79,7 +79,7 @@ public class CommentService {
         Map<Long, List<Comment>> childrenMap = getChildrenMap(parentIds);
 
         // 4. DTO 변환
-        return CommentMapper.toCommentListResponseDTO(parentCommentsPage, childrenMap);
+        return CommentMapper.toCommentListResponseDTO(memberId, parentCommentsPage, childrenMap);
     }
 
     private Map<Long, List<Comment>> getChildrenMap(List<Long> parentIds) {

@@ -28,9 +28,10 @@ public class CommentController {
 
     @GetMapping
     public ApiResponse<CommentResponse.CommentListResponseDTO> getComments(
+            @LoginMember SessionMember sessionMember,
             @PathVariable Long postId,
             Pageable pageable) {
-        return ApiResponse.onSuccess(commentService.findComments(postId, pageable));
+        return ApiResponse.onSuccess(commentService.findComments(sessionMember.getId(), postId, pageable));
     }
 
     @PatchMapping("/{commentId}")

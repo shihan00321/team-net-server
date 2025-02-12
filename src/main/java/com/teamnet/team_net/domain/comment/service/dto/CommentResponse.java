@@ -19,6 +19,8 @@ public class CommentResponse {
         Long commentId;
         Long parentId;
         String content;
+        String createdBy;
+        Boolean isMine;
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
         LocalDateTime createdAt;
         @JsonInclude(JsonInclude.Include.NON_NULL)
