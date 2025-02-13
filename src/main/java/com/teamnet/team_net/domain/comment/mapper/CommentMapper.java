@@ -75,6 +75,7 @@ public abstract class CommentMapper {
                 .parentId(child.getParent() != null ? child.getParent().getId() : null) // null 체크 추가
                 .content(child.getContent())
                 .isMine(memberId.equals(child.getPost().getMember().getId()))
+                .createdBy(child.getCreatedBy())
                 .createdAt(child.getCreatedAt())
                 .build();
     }
