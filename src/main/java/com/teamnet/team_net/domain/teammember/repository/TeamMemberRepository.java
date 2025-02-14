@@ -13,7 +13,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
-    @Query("select distinct t from TeamMember tm join tm.team t where tm.member.id = :memberId and t.status = :status")
+    @Query("select t from TeamMember tm join tm.team t where tm.member.id = :memberId and t.status = :status")
     Page<Team> findTeamsByMemberIdAndStatus(@Param("memberId") Long memberId, @Param("status") TeamActiveStatus status, Pageable pageable);
 
     Optional<TeamMember> findByMemberIdAndTeamId(@Param("memberId") Long memberId, @Param("teamId") Long teamId);
