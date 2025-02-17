@@ -3,6 +3,7 @@ package com.teamnet.team_net.domain.comment.mapper;
 import com.teamnet.team_net.domain.comment.entity.Comment;
 import com.teamnet.team_net.domain.comment.service.dto.CommentResponse;
 import com.teamnet.team_net.domain.comment.service.dto.CommentServiceDTO;
+import com.teamnet.team_net.domain.member.entity.Member;
 import com.teamnet.team_net.domain.post.entity.Post;
 import org.springframework.data.domain.Page;
 import org.springframework.data.web.PagedModel;
@@ -13,10 +14,11 @@ import java.util.Map;
 
 public abstract class CommentMapper {
 
-    public static Comment toComment(CommentServiceDTO.CreateCommentServiceDto request, Post post, Comment parent) {
+    public static Comment toComment(CommentServiceDTO.CreateCommentServiceDto request, Post post, Comment parent, Member member) {
         return Comment.builder()
                 .post(post)
                 .parent(parent)
+                .member(member)
                 .content(request.getContent())
                 .build();
     }
@@ -62,7 +64,7 @@ public abstract class CommentMapper {
                 .commentId(parent.getId())
                 .parentId(parent.getParent() != null ? parent.getParent().getId() : null)
                 .content(parent.getContent())
-                .isMine(parent.getPost().getMember().getId().equals(memberId))
+                .isMine(parent.getMember().getId().equals(memberId))
                 .createdBy(parent.getCreatedBy())
                 .createdAt(parent.getCreatedAt())
                 .childrenComment(childDtos)
@@ -74,7 +76,7 @@ public abstract class CommentMapper {
                 .commentId(child.getId())
                 .parentId(child.getParent() != null ? child.getParent().getId() : null) // null 체크 추가
                 .content(child.getContent())
-                .isMine(memberId.equals(child.getPost().getMember().getId()))
+                .isMine(child.getMember().getId().equals(memberId))
                 .createdBy(child.getCreatedBy())
                 .createdAt(child.getCreatedAt())
                 .build();
