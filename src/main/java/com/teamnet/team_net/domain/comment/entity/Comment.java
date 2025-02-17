@@ -1,5 +1,6 @@
 package com.teamnet.team_net.domain.comment.entity;
 
+import com.teamnet.team_net.domain.member.entity.Member;
 import com.teamnet.team_net.global.common.entity.BaseEntity;
 import com.teamnet.team_net.global.common.entity.BaseTimeEntity;
 import com.teamnet.team_net.domain.post.entity.Post;
@@ -31,6 +32,10 @@ public class Comment extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
     private Comment parent;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
+    private Member member;
 
     @Builder.Default
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
