@@ -6,6 +6,7 @@ import com.teamnet.team_net.domain.comment.mapper.CommentMapper;
 import com.teamnet.team_net.domain.comment.repository.CommentRepository;
 import com.teamnet.team_net.domain.comment.service.dto.CommentResponse;
 import com.teamnet.team_net.domain.comment.service.dto.CommentServiceDTO;
+import com.teamnet.team_net.domain.member.entity.Member;
 import com.teamnet.team_net.domain.post.entity.Post;
 import com.teamnet.team_net.global.utils.checker.AuthorizationFacade;
 import com.teamnet.team_net.global.utils.checker.EntityChecker;
@@ -38,8 +39,9 @@ public class CommentService {
 
         Post post = entityChecker.findPostById(postId);
         Comment parent = entityChecker.findParentCommentIfExists(request.getParentId());
+        Member member = entityChecker.findMemberById(memberId);
 
-        Comment comment = commentRepository.save(toComment(request, post, parent));
+        Comment comment = commentRepository.save(toComment(request, post, parent, member));
         return toCommentResponseDTO(comment, null);
     }
 
