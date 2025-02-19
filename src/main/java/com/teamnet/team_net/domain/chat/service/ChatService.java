@@ -1,13 +1,11 @@
 package com.teamnet.team_net.domain.chat.service;
 
 import com.teamnet.team_net.domain.chat.entity.ChatMessage;
-import com.teamnet.team_net.domain.chat.mapper.ChatMessageMapper;
 import com.teamnet.team_net.domain.chat.repository.ChatMessageRepository;
 import com.teamnet.team_net.domain.chat.service.dto.ChatResponse;
 import com.teamnet.team_net.domain.teammember.entity.TeamMember;
 import com.teamnet.team_net.global.utils.checker.EntityChecker;
 import lombok.RequiredArgsConstructor;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
