@@ -20,7 +20,7 @@ public class ChatController {
     private final ChatService chatService;
 
     @MessageMapping("/chat.send.{teamId}") // 해당 주소(WebSocket Prefix /publish + /chat.send.{teamId} 로 발행된 메시지를
-    @SendTo("/topic/teams.{teamId}") // 해당 주소(WebSocket Prefix /subscribe + /topic/teams.{teamId})를 구독한 사용자에게 전달
+    @SendTo("/subscribe/topic/teams.{teamId}") // /subscribe/topic/teams.{teamId})를 구독한 사용자에게 전달
     public ApiResponse<ChatResponse.ChatResponseDTO> sendMessage(
             @LoginMember SessionMember sessionMember,
             @DestinationVariable Long teamId,
