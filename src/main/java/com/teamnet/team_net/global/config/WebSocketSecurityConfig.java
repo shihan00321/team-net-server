@@ -13,9 +13,9 @@ public class WebSocketSecurityConfig extends AbstractSecurityWebSocketMessageBro
                 .simpDestMatchers("/ws-connect/**").authenticated()
                 .simpDestMatchers("/publish/**").authenticated()
                 .simpSubscribeDestMatchers("/subscribe/**").authenticated()
+                .simpSubscribeDestMatchers("/user/**").authenticated()
                 .anyMessage().denyAll();
     }
-
     @Override
     protected boolean sameOriginDisabled() {
         return true;
