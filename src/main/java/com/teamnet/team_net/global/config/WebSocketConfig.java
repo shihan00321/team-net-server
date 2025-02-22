@@ -1,6 +1,8 @@
 package com.teamnet.team_net.global.config;
 
 import com.teamnet.team_net.global.config.auth.LoginMemberMessagingArgumentResolver;
+import com.teamnet.team_net.global.config.ws.AuthenticationInterceptor;
+import com.teamnet.team_net.global.config.ws.ChatWebSocketHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,9 +13,13 @@ import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
+import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
+import org.springframework.web.socket.config.annotation.WebSocketTransportRegistration;
+import org.springframework.web.socket.handler.WebSocketHandlerDecorator;
 import org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor;
 
 import java.util.List;
@@ -26,6 +32,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final LoginMemberMessagingArgumentResolver loginMemberArgumentResolver;
     private final AuthenticationInterceptor authenticationInterceptor;
+    private final ChatWebSocketHandler chatWebSocketHandler;
 
     @Bean
     public SessionRegistry sessionRegistry() {
@@ -40,6 +47,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
         // 메시지를 publish 하는 주소의 Prefix
         registry.setApplicationDestinationPrefixes("/publish");
+        registry.setUserDestinationPrefix("/user");
     }
 
     /**
@@ -62,5 +70,22 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
         registration.interceptors(authenticationInterceptor);
+    }
+
+    @Override
+    public void configureWebSocketTransport(WebSocketTransportRegistration registry) {
+        registry.addDecoratorFactory((webSocketHandler) -> new WebSocketHandlerDecorator(webSocketHandler) {
+            @Override
+            public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+                chatWebSocketHandler.afterConnectionEstablished(session);
+                super.afterConnectionEstablished(session);
+            }
+
+            @Override
+            public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
+                chatWebSocketHandler.afterConnectionClosed(session, closeStatus);
+                super.afterConnectionClosed(session, closeStatus);
+            }
+        });
     }
 }
