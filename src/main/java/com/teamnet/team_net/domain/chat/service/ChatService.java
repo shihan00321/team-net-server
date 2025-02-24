@@ -31,6 +31,6 @@ public class ChatService {
     public List<ChatResponse.ChatResponseDTO> getChatHistory(Long memberId, Long teamId) {
         entityChecker.findTeamMemberByMemberIdAndTeamId(memberId, teamId);
         List<ChatMessage> chatMessages = chatMessageRepository.findByTeamId(teamId);
-        return toChatListResponseDTO(chatMessages);
+        return toChatListResponseDTO(chatMessages, memberId);
     }
 }
