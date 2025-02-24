@@ -18,17 +18,23 @@ public abstract class ChatMessageMapper {
     }
 
     public static ChatResponse.ChatResponseDTO toChatResponseDTO(ChatMessage chatMessage) {
+        return createChatResponseDTO(chatMessage, null);
+    }
+
+    public static List<ChatResponse.ChatResponseDTO> toChatListResponseDTO(List<ChatMessage> chatMessages, Long memberId) {
+        return chatMessages.stream()
+                .map(chatMessage -> createChatResponseDTO(chatMessage, memberId))
+                .collect(Collectors.toList());
+    }
+
+    private static ChatResponse.ChatResponseDTO createChatResponseDTO(ChatMessage chatMessage, Long memberId) {
         return ChatResponse.ChatResponseDTO.builder()
                 .chatMessageId(chatMessage.getId())
                 .message(chatMessage.getMessage())
                 .senderNickName(chatMessage.getCreatedBy())
+                .senderId(chatMessage.getSender().getId())
+                .isMine(memberId != null && memberId.equals(chatMessage.getSender().getId()))
                 .createdAt(chatMessage.getCreatedAt())
                 .build();
-    }
-
-    public static List<ChatResponse.ChatResponseDTO> toChatListResponseDTO(List<ChatMessage> chatMessages) {
-        return chatMessages.stream()
-                .map(ChatMessageMapper::toChatResponseDTO)
-                .collect(Collectors.toList());
     }
 }
