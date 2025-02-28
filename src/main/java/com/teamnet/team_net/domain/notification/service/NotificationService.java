@@ -17,13 +17,13 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import java.io.IOException;
 import java.util.List;
 
-import static com.teamnet.team_net.domain.notification.mapper.NotificationMapper.toNotificationResponseDto;
-
 @Slf4j
 @RequiredArgsConstructor
 @Service
 @Transactional(readOnly = true)
 public class NotificationService {
+
+    private final NotificationMapper notificationMapper;
 
     private static final Long DEFAULT_TIMEOUT = 60L * 1000 * 60; // 1시간
     private static final String NOTIFICATION_NAME = "notification";
@@ -47,7 +47,7 @@ public class NotificationService {
         notificationRepository.save(notification);
 
         // 응답 DTO 변환
-        NotificationResponse.NotificationResponseDto response = toNotificationResponseDto(notification);
+        NotificationResponse.NotificationResponseDto response = notificationMapper.toNotificationResponseDto(notification);
 
         // 알림 전송
         emitterRepository.get(recipient.getId())
@@ -67,7 +67,7 @@ public class NotificationService {
 
     public NotificationResponse.NotificationListResponseDto findNotificationList(Long memberId) {
         List<Notification> notifications = notificationRepository.findNotifications(memberId);
-        return NotificationMapper.toNotificationResponseListDto(notifications);
+        return notificationMapper.toNotificationResponseListDto(notifications, "test");
     }
 
     private void sendConnectEvent(SseEmitter emitter, Long memberId) {
