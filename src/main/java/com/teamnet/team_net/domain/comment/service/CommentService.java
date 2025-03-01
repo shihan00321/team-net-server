@@ -1,6 +1,5 @@
 package com.teamnet.team_net.domain.comment.service;
 
-import com.teamnet.team_net.domain.comment.controller.CommentRequest;
 import com.teamnet.team_net.domain.comment.entity.Comment;
 import com.teamnet.team_net.domain.comment.mapper.CommentMapper;
 import com.teamnet.team_net.domain.comment.repository.CommentRepository;
@@ -22,8 +21,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.teamnet.team_net.domain.comment.service.dto.CommentResponse.CommentResponseDTO;
-import static com.teamnet.team_net.domain.comment.mapper.CommentMapper.toComment;
-import static com.teamnet.team_net.domain.comment.mapper.CommentMapper.toCommentResponseDTO;
 
 @RequiredArgsConstructor
 @Service
@@ -32,6 +29,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final EntityChecker entityChecker;
     private final AuthorizationFacade authorizationFacade;
+    private final CommentMapper commentMapper;
 
     @Transactional
     public CommentResponseDTO createComment(Long memberId, Long teamId, Long postId, CommentServiceDTO.CreateCommentServiceDto request) {
@@ -41,8 +39,8 @@ public class CommentService {
         Comment parent = entityChecker.findParentCommentIfExists(request.getParentId());
         Member member = entityChecker.findMemberById(memberId);
 
-        Comment comment = commentRepository.save(toComment(request, post, parent, member));
-        return toCommentResponseDTO(comment, null);
+        Comment comment = commentRepository.save(commentMapper.toComment(request, post, parent, member));
+        return commentMapper.toCommentResponseDTO(memberId, comment, null);
     }
 
     @Transactional
@@ -57,7 +55,7 @@ public class CommentService {
             children = commentRepository.findChildrenByParentId(commentId);
         }
 
-        return toCommentResponseDTO(comment, children);
+        return commentMapper.toCommentResponseDTO(memberId, comment, children);
     }
 
     @Transactional
@@ -81,7 +79,7 @@ public class CommentService {
         Map<Long, List<Comment>> childrenMap = getChildrenMap(parentIds);
 
         // 4. DTO 변환
-        return CommentMapper.toCommentListResponseDTO(memberId, parentCommentsPage, childrenMap);
+        return commentMapper.toCommentListResponseDTO(memberId, parentCommentsPage, childrenMap);
     }
 
     private Map<Long, List<Comment>> getChildrenMap(List<Long> parentIds) {
