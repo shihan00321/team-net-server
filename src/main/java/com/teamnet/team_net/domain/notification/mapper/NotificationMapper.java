@@ -3,27 +3,28 @@ package com.teamnet.team_net.domain.notification.mapper;
 import com.teamnet.team_net.domain.notification.entity.Notification;
 import com.teamnet.team_net.domain.notification.service.dto.NotificationResponse;
 import com.teamnet.team_net.domain.notification.service.dto.NotificationResponse.NotificationListResponseDto;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-public abstract class NotificationMapper {
-    public static NotificationResponse.NotificationResponseDto toNotificationResponseDto(Notification notification) {
-        return NotificationResponse.NotificationResponseDto
-                .builder()
-                .id(notification.getId())
-                .referenceId(notification.getReferenceId())
-                .title(notification.getTitle())
-                .message(notification.getMessage())
-                .type(notification.getType())
-                .isRead(notification.getIsRead())
-                .createdAt(notification.getCreatedAt())
-                .build();
-    }
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 
-    public static NotificationListResponseDto toNotificationResponseListDto(List<Notification> notifications) {
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Mapper(componentModel = "spring")
+public interface NotificationMapper {
+
+    NotificationResponse.NotificationResponseDto toNotificationResponseDto(Notification notification);
+
+    default NotificationListResponseDto toNotificationResponseListDto(List<Notification> notifications, String test) {
         return NotificationListResponseDto.builder()
-                .notifications(notifications.stream().map(NotificationMapper::toNotificationResponseDto)
+                .notifications(notifications.stream().map(this::toNotificationResponseDto)
                         .collect(Collectors.toList()))
                 .build();
     }

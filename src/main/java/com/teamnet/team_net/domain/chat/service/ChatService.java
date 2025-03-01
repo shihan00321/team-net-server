@@ -1,6 +1,7 @@
 package com.teamnet.team_net.domain.chat.service;
 
 import com.teamnet.team_net.domain.chat.entity.ChatMessage;
+import com.teamnet.team_net.domain.chat.mapper.ChatMessageMapper;
 import com.teamnet.team_net.domain.chat.repository.ChatMessageRepository;
 import com.teamnet.team_net.domain.chat.service.dto.ChatResponse;
 import com.teamnet.team_net.domain.teammember.entity.TeamMember;
@@ -20,17 +21,18 @@ public class ChatService {
 
     private final ChatMessageRepository chatMessageRepository;
     private final EntityChecker entityChecker;
+    private final ChatMessageMapper chatMessageMapper;
 
     @Transactional
     public ChatResponse.ChatResponseDTO createMessage(Long memberId, Long teamId, String message) {
         TeamMember teamMember = entityChecker.findTeamMemberByMemberIdAndTeamId(memberId, teamId);
-        ChatMessage chatMessage = chatMessageRepository.save(toChatMessage(message, teamMember.getMember(), teamMember.getTeam()));
-        return toChatResponseDTO(chatMessage);
+        ChatMessage chatMessage = chatMessageRepository.save(chatMessageMapper.toChatMessage(message, teamMember.getMember(), teamMember.getTeam()));
+        return chatMessageMapper.toChatResponseDTO(chatMessage, null);
     }
 
     public List<ChatResponse.ChatResponseDTO> getChatHistory(Long memberId, Long teamId) {
         entityChecker.findTeamMemberByMemberIdAndTeamId(memberId, teamId);
         List<ChatMessage> chatMessages = chatMessageRepository.findByTeamId(teamId);
-        return toChatListResponseDTO(chatMessages, memberId);
+        return chatMessageMapper.toChatListResponseDTO(chatMessages, memberId);
     }
 }

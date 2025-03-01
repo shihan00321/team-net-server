@@ -20,10 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
-
-import static com.teamnet.team_net.domain.team.mapper.TeamMapper.*;
 
 @RequiredArgsConstructor
 @Service
@@ -34,25 +31,26 @@ public class TeamService {
     private final TeamMemberRepository teamMemberRepository;
     private final NotificationService notificationService;
     private final EntityChecker entityChecker;
+    private final TeamMapper teamMapper;
 
     @Transactional
     public TeamResponse.TeamResponseDto createTeam(Long memberId, TeamServiceDTO.CreateTeamServiceDTO request) {
         Member member = entityChecker.findMemberById(memberId);
         entityChecker.findTeamByName(request.getName());
 
-        Team team = toTeam(request);
+        Team team = teamMapper.toTeam(request);
         teamRepository.save(team);
 
         TeamMember admin = TeamMember.createAdmin(team, member);
         teamMemberRepository.save(admin);
 
-        return toTeamResponseDto(team);
+        return teamMapper.toTeamResponseDto(team);
     }
 
     public TeamResponse.TeamListResponseDto findMyTeams(Long memberId, Pageable pageable) {
         entityChecker.findMemberById(memberId);
         Page<Team> myTeam = teamMemberRepository.findTeamsByMemberIdAndStatus(memberId, TeamActiveStatus.ACTIVE, pageable);
-        return toTeamListResponseDto(myTeam);
+        return teamMapper.toTeamListResponseDto(myTeam);
     }
 
     @Transactional
@@ -81,7 +79,7 @@ public class TeamService {
     public TeamResponse.TeamResponseDto searchTeam(TeamServiceDTO.TeamSearchServiceDTO searchServiceDTO) {
         Team team = Optional.ofNullable(teamRepository.findTeamByKeyword(searchServiceDTO.getKeyword(), searchServiceDTO.getType()))
                 .orElseThrow(() -> new TeamHandler(ErrorStatus.TEAM_NOT_FOUND));
-        return TeamMapper.toTeamResponseDto(team);
+        return teamMapper.toTeamResponseDto(team);
 
     }
 }

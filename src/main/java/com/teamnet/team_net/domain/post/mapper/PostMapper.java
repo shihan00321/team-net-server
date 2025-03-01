@@ -4,22 +4,20 @@ import com.teamnet.team_net.domain.post.entity.Post;
 import com.teamnet.team_net.domain.post.service.dto.PostResponse;
 import com.teamnet.team_net.domain.post.service.dto.PostServiceDTO;
 import com.teamnet.team_net.domain.teammember.entity.TeamMember;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
+import org.mapstruct.factory.Mappers;
 import org.springframework.data.domain.Page;
 import org.springframework.data.web.PagedModel;
 
-public abstract class PostMapper {
-    public static PostResponse.PostResponseDto toPostResponseDto(Post post) {
-        return PostResponse.PostResponseDto
-                .builder()
-                .id(post.getId())
-                .title(post.getTitle())
-                .content(post.getContent())
-                .createdAt(post.getCreatedAt())
-                .createdBy(post.getCreatedBy())
-                .build();
-    }
+@Mapper(componentModel = "spring") // MapStruct가 인터페이스에 대한 구현체를 컴파일 타임에 자동 생성.
+public interface PostMapper { // 인터페이스로 변경
 
-    public static PostResponse.PostListResponseDto toPostListResponseDto(Page<Post> posts, Long memberId) {
+    @Mapping(target = "isMine", ignore = true)
+    PostResponse.PostResponseDto toPostResponseDto(Post post);
+
+    default PostResponse.PostListResponseDto toPostListResponseDto(Page<Post> posts, Long memberId) {
         Page<PostResponse.PostResponseDto> pages = posts.map(post -> toPostResponseDtoWithIsMine(
                 post,
                 memberId.equals(post.getMember().getId())
@@ -30,24 +28,10 @@ public abstract class PostMapper {
                 .build();
     }
 
-    public static Post toPost(PostServiceDTO.PostSaveServiceDTO postSaveDto, TeamMember teamMember) {
-        return Post.builder()
-                .title(postSaveDto.getTitle())
-                .team(teamMember.getTeam())
-                .content(postSaveDto.getContent())
-                .member(teamMember.getMember())
-                .build();
-    }
+    @Mapping(source = "teamMember.team", target = "team")
+    @Mapping(source = "teamMember.member", target = "member")
+    @Mapping(target = "id", ignore = true)
+    Post toPost(PostServiceDTO.PostSaveServiceDTO postSaveDto, TeamMember teamMember);
 
-    private static PostResponse.PostResponseDto toPostResponseDtoWithIsMine(Post post, Boolean isMine) {
-        return PostResponse.PostResponseDto
-                .builder()
-                .id(post.getId())
-                .title(post.getTitle())
-                .content(post.getContent())
-                .createdAt(post.getCreatedAt())
-                .createdBy(post.getCreatedBy())
-                .isMine(isMine)
-                .build();
-    }
+    PostResponse.PostResponseDto toPostResponseDtoWithIsMine(Post post, Boolean isMine);
 }
