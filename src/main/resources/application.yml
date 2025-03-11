@@ -52,9 +52,3 @@ spring:
 
   kafka:
     bootstrap-servers: ${LOCAL_KAFKA_BOOTSTRAP_SERVERS}
-    consumer:
-      key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
-      properties:
-        spring.deserializer.key.delegate.class: org.apache.kafka.common.serialization.StringDeserializer
-        spring.deserializer.value.delegate.class: org.apache.kafka.common.serialization.LongDeserializer
