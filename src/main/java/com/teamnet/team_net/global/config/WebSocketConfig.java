@@ -13,11 +13,12 @@ import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.config.annotation.web.socket.EnableWebSocketSecurity;
 import org.springframework.security.messaging.access.intercept.MessageMatcherDelegatingAuthorizationManager;
+import org.springframework.session.Session;
+import org.springframework.session.web.socket.config.annotation.AbstractSessionWebSocketMessageBrokerConfigurer;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
-import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketTransportRegistration;
 import org.springframework.web.socket.handler.WebSocketHandlerDecorator;
 import org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor;
@@ -28,7 +29,7 @@ import java.util.List;
 @Configuration
 @EnableWebSocketSecurity
 @EnableWebSocketMessageBroker  // 메시지 브로커 : 메시지 전송을 중개하는 역할
-public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+public class WebSocketConfig extends AbstractSessionWebSocketMessageBrokerConfigurer<Session> {
 
     private final LoginMemberMessagingArgumentResolver loginMemberArgumentResolver;
     private final ChatWebSocketHandler chatWebSocketHandler;
@@ -49,7 +50,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
      * ws://localhost:8080/ws-connect // 만약 https를 사용한다면 wss
      */
     @Override
-    public void registerStompEndpoints(StompEndpointRegistry registry) {
+    public void configureStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws-connect")
                 .setAllowedOrigins("http://localhost:5173")
                 .addInterceptors(httpSessionHandshakeInterceptor());
