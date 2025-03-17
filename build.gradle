@@ -37,7 +37,9 @@ dependencies {
 
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
-	implementation 'org.springframework.session:spring-session-jdbc'
+//	implementation 'org.springframework.session:spring-session-jdbc'
+	implementation 'org.springframework.session:spring-session-data-redis'
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	testImplementation 'org.springframework.security:spring-security-test'
 
 	//Querydsl 추가

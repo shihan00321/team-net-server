@@ -10,6 +10,13 @@ services:
     ports:
       - "3306:3306"
 
+  redis:
+    image: redis:latest
+    container_name: redis
+    command: redis-server --requirepass ${LOCAL_REDIS_PASSWORD} --port 6379
+    ports:
+      - "6379:6379"
+
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
     environment:
