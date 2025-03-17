@@ -16,9 +16,15 @@ spring:
     show-sql: true
 
   session:
-    store-type: jdbc
-    jdbc:
-      initialize-schema: always
+    store-type: redis
+    redis:
+      namespace: ${SPRING_SESSION_NAMESPACE}
+
+  data:
+    redis:
+      host: localhost
+      password: ${LOCAL_REDIS_PASSWORD}
+      port: 6379
 
   security:
     oauth2:
@@ -49,3 +55,9 @@ spring:
   web:
     resources:
       add-mappings: false
+
+server:
+  servlet:
+    session:
+      cookie:
+        name: JSESSIONID
