@@ -5,6 +5,7 @@ import com.teamnet.team_net.global.config.ws.ChatWebSocketHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.messaging.simp.SimpMessageType;
@@ -15,8 +16,7 @@ import org.springframework.security.config.annotation.web.socket.EnableWebSocket
 import org.springframework.security.messaging.access.intercept.MessageMatcherDelegatingAuthorizationManager;
 import org.springframework.session.Session;
 import org.springframework.session.web.socket.config.annotation.AbstractSessionWebSocketMessageBrokerConfigurer;
-import org.springframework.web.socket.CloseStatus;
-import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketTransportRegistration;
@@ -32,7 +32,7 @@ import java.util.List;
 public class WebSocketConfig extends AbstractSessionWebSocketMessageBrokerConfigurer<Session> {
 
     private final LoginMemberMessagingArgumentResolver loginMemberArgumentResolver;
-    private final ChatWebSocketHandler chatWebSocketHandler;
+    private final RedisTemplate<String, String> redisTemplate;
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
@@ -63,19 +63,7 @@ public class WebSocketConfig extends AbstractSessionWebSocketMessageBrokerConfig
 
     @Override
     public void configureWebSocketTransport(WebSocketTransportRegistration registry) {
-        registry.addDecoratorFactory((webSocketHandler) -> new WebSocketHandlerDecorator(webSocketHandler) {
-            @Override
-            public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-                chatWebSocketHandler.afterConnectionEstablished(session);
-                super.afterConnectionEstablished(session);
-            }
-
-            @Override
-            public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
-                chatWebSocketHandler.afterConnectionClosed(session, closeStatus);
-                super.afterConnectionClosed(session, closeStatus);
-            }
-        });
+        registry.addDecoratorFactory(this::chatWebSocketHandler);
     }
 
     @Bean
@@ -98,5 +86,10 @@ public class WebSocketConfig extends AbstractSessionWebSocketMessageBrokerConfig
     public ChannelInterceptor csrfChannelInterceptor() {
         return new ChannelInterceptor() {
         };
+    }
+
+    @Bean
+    public WebSocketHandlerDecorator chatWebSocketHandler(WebSocketHandler chatWebSocketHandler) {
+        return new ChatWebSocketHandler(chatWebSocketHandler, redisTemplate);
     }
 }

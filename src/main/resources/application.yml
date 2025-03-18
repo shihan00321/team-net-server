@@ -56,6 +56,9 @@ spring:
     resources:
       add-mappings: false
 
+  kafka:
+    bootstrap-servers: ${LOCAL_KAFKA_BOOTSTRAP_SERVERS}
+
 server:
   servlet:
     session:
